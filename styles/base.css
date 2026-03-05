@@ -18,6 +18,9 @@
     --clr-info-dark: #7d8da1;
     --clr-info-light: #dce1eb;
     --clr-light: rgba(132, 139, 200, 0.18);
+
+    /* Performance: GPU-accelerated transitions */
+    --gpu-transition: transform, opacity;
     --clr-bg: #f6f6f9;
     --card-radius: 1.2rem;
     --radius-1: 0.4rem;

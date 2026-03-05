@@ -29,6 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 case 'payment':   targetPage = 'CheckPayments.html';    break;
                 case 'booking':   targetPage = 'GuestRoomBooking.html'; break;
                 case 'meal':      targetPage = 'MealManagement.html';   break;
+                case 'attend':    targetPage = 'Attendance.html';       break;
                 case 'complaint': targetPage = 'complainbox.html';      break;
                 case 'notices':   targetPage = 'Notices.html';          break;
                 default: return;
@@ -42,10 +43,14 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // Handle attendance card button (opens external tracker)
+    // Handle attendance card button - navigate to Attendance page
     if (attendanceCardBtn) {
         attendanceCardBtn.addEventListener('click', () => {
-            window.open('https://hall-attendance-tracker.vercel.app/', '_blank');
+            if (studentId) {
+                window.location.href = `Attendance.html?id=${studentId}`;
+            } else {
+                window.location.href = 'Attendance.html';
+            }
         });
     }
 

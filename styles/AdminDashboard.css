@@ -181,3 +181,27 @@
         flex: 1;
     }
 }
+
+@media (max-width: 480px) {
+    .sos-card-info h2 {
+        font-size: 0.88rem;
+        padding: 0.8rem 1rem;
+    }
+
+    .sos-alert-card {
+        padding: 0.5rem 0.8rem;
+    }
+
+    .sos-alert-info h4 {
+        font-size: 0.78rem;
+    }
+
+    .sos-alert-info p {
+        font-size: 0.7rem;
+    }
+
+    .sos-alert-actions button {
+        font-size: 0.68rem;
+        padding: 0.25rem 0.5rem;
+    }
+}

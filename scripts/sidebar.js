@@ -136,7 +136,7 @@
         if (!sid) { toast('User ID not found. Please log in again.', 'error'); return; }
 
         const h = new Date().getHours();
-        if (h < 8 || h >= 20) { toast('Attendance can only be recorded between 8 AM – 8 PM.', 'warning'); return; }
+        if (h < 19 || h >= 22) { toast('Attendance can only be recorded between 7 PM – 10 PM.', 'warning'); return; }
 
         if (!navigator.geolocation) { toast('Geolocation not supported by this browser.', 'error'); return; }
 
@@ -156,7 +156,24 @@
                 if (dist <= 0.1) {
                     const d  = new Date();
                     const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-                    saveAttendance(sid, ds, { latitude: pos.coords.latitude, longitude: pos.coords.longitude, timestamp: d.toISOString(), date: ds });
+                    const attData = { latitude: pos.coords.latitude, longitude: pos.coords.longitude, timestamp: d.toISOString(), date: ds };
+                    // Fetch student info then save
+                    const fetchAndSave = () => {
+                        if (window.firebase && typeof firebase.database === 'function') {
+                            firebase.database().ref('users/' + sid).once('value').then(snap => {
+                                if (snap.exists()) {
+                                    const u = snap.val();
+                                    attData.studentName = u.name || [u.firstName, u.lastName].filter(Boolean).join(' ') || '';
+                                    attData.room = u.room || '';
+                                    attData.dept = u.dept_name || u.department || '';
+                                }
+                                saveAttendance(sid, ds, attData);
+                            }).catch(() => saveAttendance(sid, ds, attData));
+                        } else {
+                            saveAttendance(sid, ds, attData);
+                        }
+                    };
+                    ensureFirebaseCompat(['database'], fetchAndSave);
                 } else {
                     toast(`You are ~${(dist * 1000).toFixed(0)} m away. Must be within 100 m of the hall.`, 'warning');
                 }
@@ -553,7 +570,10 @@
             firebase.database().ref(`users/${uid}/profile_image_url`).once('value')
                 .then(snap => {
                     const url = snap.val();
-                    if (url) imgEl.src = url;
+                    if (url) {
+                        imgEl.src = url;
+                        try { sessionStorage.setItem('profileImageUrl', url); } catch(e) {}
+                    }
                 })
                 .catch(() => {}); // silently fail, keep fallback
         });

@@ -6,6 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Attendance | Smart Hall</title>
 
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin />
+
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
     <link rel="shortcut icon" href="../../images/RSM_Logo.png" type="image/x-icon" />
     <link rel="stylesheet" href="../../styles/base.css" />
@@ -225,7 +229,7 @@
             <div class="attendance-hero">
                 <span class="material-icons hero-icon">fingerprint</span>
                 <h1>Mark Your Attendance</h1>
-                <p>Make sure you're within 100m of the hall. Available 8 AM – 8 PM.</p>
+                <p>Make sure you're within 100m of the hall. Available 7 PM – 10 PM.</p>
                 <button class="give-attendance-btn" id="giveAttendanceBtn">
                     <span class="material-icons">touch_app</span>
                     Give Attendance
@@ -272,6 +276,7 @@
     <!-- Firebase compat SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <script>
         // Initialize Firebase
@@ -288,8 +293,22 @@
         }
 
         const db = firebase.firestore();
+        const rtdb = firebase.database();
         const urlParams = new URLSearchParams(window.location.search);
         const studentId = urlParams.get('id');
+
+        // Fetch student info from RTDB for attendance records
+        let studentInfo = {};
+        if (studentId) {
+            rtdb.ref('users/' + studentId).once('value').then(snap => {
+                if (snap.exists()) {
+                    const d = snap.val();
+                    studentInfo.name = d.name || [d.firstName, d.lastName].filter(Boolean).join(' ') || '';
+                    studentInfo.room = d.room || '';
+                    studentInfo.dept = d.dept_name || d.department || '';
+                }
+            }).catch(() => {});
+        }
 
         // Give Attendance button
         document.getElementById('giveAttendanceBtn').addEventListener('click', () => {
@@ -300,8 +319,8 @@
             }
 
             const h = new Date().getHours();
-            if (h < 8 || h >= 20) {
-                showToast('Attendance can only be recorded between 8 AM – 8 PM.', 'warning');
+            if (h < 19 || h >= 22) {
+                showToast('Attendance can only be recorded between 7 PM – 10 PM.', 'warning');
                 return;
             }
 
@@ -335,7 +354,10 @@
                                 latitude: pos.coords.latitude,
                                 longitude: pos.coords.longitude,
                                 timestamp: d.toISOString(),
-                                date: ds
+                                date: ds,
+                                studentName: studentInfo.name || '',
+                                room: studentInfo.room || '',
+                                dept: studentInfo.dept || ''
                             })
                             .then(() => {
                                 showToast('Attendance recorded successfully!', 'success');

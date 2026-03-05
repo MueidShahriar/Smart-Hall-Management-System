@@ -6,6 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile | Smart Hall</title>
 
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin />
+
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
     <link rel="shortcut icon" href="../../images/RSM_Logo.png" type="image/x-icon" />
     <link rel="stylesheet" href="../../styles/base.css" />
@@ -112,6 +116,12 @@
         const urlParams = new URLSearchParams(window.location.search);
         const studentId = urlParams.get('id');
 
+        // Immediately show cached profile image to avoid flash of default avatar
+        const cachedImg = sessionStorage.getItem('profileImageUrl');
+        if (cachedImg) {
+            document.getElementById('profile-picture').src = cachedImg;
+        }
+
         if (!studentId) {
             showToast("Student ID not found in the URL.", "error");
         } else {
@@ -159,8 +169,9 @@
                     profile_image_url: downloadURL
                 });
 
-                // Update UI
+                // Update UI and cache
                 document.getElementById('profile-picture').src = downloadURL;
+                try { sessionStorage.setItem('profileImageUrl', downloadURL); } catch(e) {}
                 showToast('Profile photo updated!', 'success');
             } catch (err) {
                 console.error('Upload error:', err);
@@ -200,9 +211,12 @@
             document.getElementById("batch").textContent = userData.batch || "Batch not available";
             document.getElementById("roomNo").textContent = userData.room || "Room not available";
 
-            // Set profile picture
+            // Set profile picture and cache for instant display on next visit
             const profileUrl = userData.profile_image_url || "../../assets/img/profile-user.png";
             document.getElementById("profile-picture").src = profileUrl;
+            if (userData.profile_image_url) {
+                try { sessionStorage.setItem('profileImageUrl', userData.profile_image_url); } catch(e) {}
+            }
 
             // Display Contact Information
             document.getElementById("contactInfoGrid").innerHTML = `

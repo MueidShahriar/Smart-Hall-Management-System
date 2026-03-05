@@ -20,6 +20,41 @@
     color: var(--clr-dark);
 }
 
+.date-group {
+    display: flex;
+    gap: 1rem;
+}
+
+.date-field {
+    flex: 1;
+}
+
+.date-field label {
+    display: block;
+    font-weight: 500;
+    font-size: 0.82rem;
+    margin-bottom: 0.4rem;
+    color: var(--clr-dark);
+}
+
+.date-field input {
+    width: 100%;
+    padding: 0.6rem 0.8rem;
+    border: 1.5px solid var(--clr-info-light);
+    border-radius: var(--radius-1);
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.85rem;
+    color: var(--clr-dark);
+    background: var(--clr-white);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.date-field input:focus {
+    border-color: var(--clr-primary);
+    box-shadow: 0 0 0 3px rgba(115, 128, 236, 0.1);
+    outline: none;
+}
+
 button[type="submit"] {
     width: 100%;
     padding: 0.7rem;
@@ -53,6 +88,11 @@ button[type="submit"]:active {
 @media (max-width: 480px) {
     .room-booking-form {
         padding: 1rem;
+    }
+
+    .date-group {
+        flex-direction: column;
+        gap: 0;
     }
 
     button[type="submit"] {

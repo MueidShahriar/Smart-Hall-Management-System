@@ -6,6 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Check Payments | Smart Hall</title>
 
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin />
+
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
     <link rel="shortcut icon" href="../../images/RSM_Logo.png" type="image/x-icon" />
 
@@ -133,19 +137,106 @@
             margin-bottom: 0.5rem;
         }
 
+        /* Mobile card layout for tables */
+        .mobile-card {
+            display: none;
+        }
+
         @media (max-width: 768px) {
             .summary-cards {
                 grid-template-columns: 1fr;
             }
 
-            table {
-                font-size: 0.75rem;
-                min-width: 480px;
+            .summary-card {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                text-align: left;
+                padding: 1rem;
             }
 
-            thead th,
-            tbody td {
-                padding: 0.5rem 0.6rem;
+            .summary-card .material-icons {
+                font-size: 1.8rem;
+                margin-bottom: 0;
+            }
+
+            .summary-card h3 {
+                font-size: 1.2rem;
+            }
+
+            /* Hide desktop table, show mobile cards */
+            .payments-table-wrap table {
+                display: none;
+            }
+
+            .mobile-card {
+                display: block;
+                padding: 1rem 1.2rem;
+                border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            }
+
+            .mobile-card:last-child {
+                border-bottom: none;
+            }
+
+            .mobile-card .mobile-card-title {
+                font-weight: 600;
+                font-size: 0.88rem;
+                margin-bottom: 0.5rem;
+                color: var(--clr-dark);
+            }
+
+            .mobile-card .mobile-card-row {
+                display: flex;
+                justify-content: space-between;
+                padding: 0.2rem 0;
+                font-size: 0.8rem;
+            }
+
+            .mobile-card .mobile-card-row .label {
+                color: var(--clr-info-dark);
+            }
+
+            .mobile-card .mobile-card-row .value {
+                font-weight: 500;
+                color: var(--clr-dark);
+            }
+
+            .mobile-card-total {
+                background: var(--clr-bg);
+                font-weight: 600;
+                border-radius: 0 0 var(--radius-3) var(--radius-3);
+            }
+
+            .payments-table-wrap {
+                overflow-x: hidden;
+            }
+
+            .payments-table-wrap h2 {
+                padding: 0.8rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            .no-data {
+                padding: 2rem 1rem;
+            }
+
+            .no-data .material-icons {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .summary-card {
+                padding: 0.8rem;
+            }
+
+            .summary-card h3 {
+                font-size: 1rem;
+            }
+
+            .summary-card p {
+                font-size: 0.72rem;
             }
         }
     </style>
@@ -393,6 +484,29 @@
                             <td>৳${totalCost.toLocaleString()}</td>
                         </tr>
                     `;
+
+                    // Mobile cards for meal breakdown
+                    const mobileCards = sortedMonths.map(key => {
+                        const m = monthlyData[key];
+                        return `
+                            <div class="mobile-card">
+                                <div class="mobile-card-title">${m.name}</div>
+                                <div class="mobile-card-row"><span class="label">Breakfast</span><span class="value">${m.breakfast}</span></div>
+                                <div class="mobile-card-row"><span class="label">Lunch</span><span class="value">${m.lunch}</span></div>
+                                <div class="mobile-card-row"><span class="label">Dinner</span><span class="value">${m.dinner}</span></div>
+                                <div class="mobile-card-row"><span class="label">Total Meals</span><span class="value">${m.total}</span></div>
+                                <div class="mobile-card-row"><span class="label">Cost</span><span class="value">৳${m.cost.toLocaleString()}</span></div>
+                            </div>
+                        `;
+                    }).join('') + `
+                        <div class="mobile-card mobile-card-total">
+                            <div class="mobile-card-row"><span class="label">Grand Total</span><span class="value">${totalMeals} meals — ৳${totalCost.toLocaleString()}</span></div>
+                        </div>
+                    `;
+                    const container = document.getElementById('mealBreakdownContainer');
+                    const existingMobileCards = container.querySelectorAll('.mobile-card');
+                    existingMobileCards.forEach(c => c.remove());
+                    container.insertAdjacentHTML('beforeend', mobileCards);
                 }
 
                 hidePageLoader();
@@ -448,6 +562,26 @@
                         </tr>
                     `;
                 }).join('');
+
+                // Mobile cards for payment history
+                const paymentMobileCards = payments.map(p => {
+                    const date = p.date ? new Date(p.date).toLocaleDateString('en-US', { 
+                        year: 'numeric', month: 'short', day: 'numeric' 
+                    }) : '—';
+                    const statusClass = p.status === 'paid' ? 'paid' : (p.status === 'pending' ? 'pending' : 'overdue');
+                    return `
+                        <div class="mobile-card">
+                            <div class="mobile-card-title">${p.description || 'Payment'}</div>
+                            <div class="mobile-card-row"><span class="label">Date</span><span class="value">${date}</span></div>
+                            <div class="mobile-card-row"><span class="label">Amount</span><span class="value">৳${(p.amount || 0).toLocaleString()}</span></div>
+                            <div class="mobile-card-row"><span class="label">Status</span><span class="value"><span class="status-badge ${statusClass}">${p.status || 'pending'}</span></span></div>
+                        </div>
+                    `;
+                }).join('');
+                const payContainer = document.getElementById('paymentsContainer');
+                const existingPayCards = payContainer.querySelectorAll('.mobile-card');
+                existingPayCards.forEach(c => c.remove());
+                payContainer.insertAdjacentHTML('beforeend', paymentMobileCards);
             } catch (error) {
                 console.error('Error loading payments:', error);
             }

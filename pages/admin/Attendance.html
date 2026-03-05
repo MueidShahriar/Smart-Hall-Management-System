@@ -240,12 +240,15 @@
                     `;
                     
                     if (view === 'allstudent') {
-                        // Simple list of all students who marked attendance
+                        // Show all students who marked attendance
                         tableContent = `
                             <table>
                                 <thead>
                                     <tr>
                                         <th>Student ID</th>
+                                        <th>Name</th>
+                                        <th>Room</th>
+                                        <th>Department</th>
                                         <th>Time</th>
                                     </tr>
                                 </thead>
@@ -253,24 +256,61 @@
                                     ${attendanceData.map(record => `
                                         <tr>
                                             <td>${record.studentId}</td>
+                                            <td>${record.studentName || '-'}</td>
+                                            <td>${record.room || '-'}</td>
+                                            <td>${record.dept || '-'}</td>
                                             <td>${formatTime(record.timestamp)}</td>
                                         </tr>
                                     `).join('')}
                                 </tbody>
                             </table>
                         `;
-                    } else {
-                        // For roomwise or floorwise, show the total count only
+                    } else if (view === 'roomwise') {
+                        // Group attendance by room
+                        const byRoom = {};
+                        attendanceData.forEach(r => {
+                            const room = r.room || 'Unknown';
+                            if (!byRoom[room]) byRoom[room] = [];
+                            byRoom[room].push(r);
+                        });
+                        const rooms = Object.keys(byRoom).sort();
                         tableContent = `
-                            <div style="text-align: center; padding: 2rem; background: #f9f9f9; border-radius: var(--radius-2);">
-                                <p style="font-size: 1.2rem;">
-                                    Detailed ${view === 'roomwise' ? 'room' : 'floor'} information not available.
-                                </p>
-                                <p style="margin-top: 1rem; color: var(--clr-dark-variant);">
-                                    Student details are stored with their IDs. To view details by room or floor, 
-                                    additional student information needs to be linked with attendance records.
-                                </p>
-                            </div>
+                            <table>
+                                <thead><tr><th>Room</th><th>Present</th><th>Students</th></tr></thead>
+                                <tbody>
+                                    ${rooms.map(room => `
+                                        <tr>
+                                            <td>${room}</td>
+                                            <td>${byRoom[room].length}</td>
+                                            <td>${byRoom[room].map(s => s.studentName || s.studentId).join(', ')}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        `;
+                    } else {
+                        // Floorwise — derive floor from room number (first digit)
+                        const byFloor = {};
+                        attendanceData.forEach(r => {
+                            const room = r.room || '';
+                            const floor = room ? 'Floor ' + room.toString().charAt(0) : 'Unknown';
+                            if (!byFloor[floor]) byFloor[floor] = [];
+                            byFloor[floor].push(r);
+                        });
+                        const floors = Object.keys(byFloor).sort();
+                        tableContent = `
+                            <table>
+                                <thead><tr><th>Floor</th><th>Present</th><th>Students</th></tr></thead>
+                                <tbody>
+                                    ${floors.map(floor => `
+                                        <tr>
+                                            <td>${floor}</td>
+                                            <td>${byFloor[floor].length}</td>
+                                            <td>${byFloor[floor].map(s => s.studentName || s.studentId).join(', ')}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
                         `;
                     }
                     
@@ -353,14 +393,16 @@
                         fetchPromises.push(
                             getDoc(dateDocRef).then(dateDoc => {
                                 if (dateDoc.exists()) {
-                                    console.log(`✅ Success! Found record for student ${studentId} on date ${format}`);
                                     const data = dateDoc.data();
                                     attendanceData.push({
                                         studentId: studentId,
                                         timestamp: data.timestamp,
                                         latitude: data.latitude,
                                         longitude: data.longitude,
-                                        format: format // For debugging
+                                        studentName: data.studentName || '',
+                                        room: data.room || '',
+                                        dept: data.dept || '',
+                                        format: format
                                     });
                                 }
                             }).catch(err => {
