@@ -254,3 +254,30 @@ select:not(:invalid)~label {
     .form-title { font-size: 1.1rem; }
     input, select { font-size: 14px; }
 }
+
+/* Page preloader is handled by scripts/preloader.js */
+
+@keyframes loaderSpin {
+    100% { transform: rotate(1turn); }
+}
+
+.btn-loading {
+    position: relative;
+    pointer-events: none;
+    color: transparent !important;
+}
+
+.btn-loading::after {
+    content: "";
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    top: 50%;
+    left: 50%;
+    margin-left: -10px;
+    margin-top: -10px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: loaderSpin 0.8s linear infinite;
+}

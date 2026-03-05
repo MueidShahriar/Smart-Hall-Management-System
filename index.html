@@ -17,6 +17,8 @@
 </head>
 
 <body>
+  <script src="scripts/preloader.js"></script>
+
   <div class="container" id="signup" style="display: none;">
     <h1 class="form-title">Register</h1>
     <form id="signUpForm">
@@ -125,17 +127,18 @@
   </div>
 
   <script src="scripts/toast.js"></script>
-  <script type="module" src="scripts/index.js"></script>
   <script>
-    // Register Service Worker for offline support (PWA)
+    // Clear stale service worker caches
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-          .then((reg) => console.log('Service Worker registered:', reg.scope))
-          .catch((err) => console.log('SW registration failed:', err));
-      });
+      navigator.serviceWorker.getRegistrations().then(r => r.forEach(reg => reg.unregister()));
+      if ('caches' in window) caches.keys().then(k => k.forEach(n => caches.delete(n)));
     }
   </script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script src="scripts/index.js"></script>
 </body>
 
 </html>

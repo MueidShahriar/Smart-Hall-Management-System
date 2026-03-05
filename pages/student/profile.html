@@ -14,6 +14,8 @@
 </head>
 
 <body>
+    <script src="../../scripts/preloader.js"></script>
+
     <div class="container">
 
         <!-- Main Content -->
@@ -53,27 +55,29 @@
                     </div>
                 </div>
 
-                <!-- Tabs -->
-                <div class="profile-tabs">
-                    <div class="profile-tab-nav">
-                        <div class="profile-tab-item active" id="contact-tab" onclick="showContactInfo()">Contact</div>
-                        <div class="profile-tab-item" id="personal-tab" onclick="showPersonalInfo()">Personal</div>
+                <!-- Contact Information Section -->
+                <div class="profile-section" id="contactSection">
+                    <h3><span class="material-icons">contact_phone</span> Contact Information</h3>
+                    <div class="info-grid" id="contactInfoGrid">
+                        <!-- Loaded dynamically -->
                     </div>
+                </div>
 
-                    <div class="profile-tab-content" id="info-content">
-                        <!-- Tab content loaded dynamically -->
+                <!-- Personal Information Section -->
+                <div class="profile-section" id="personalSection">
+                    <h3><span class="material-icons">person</span> Personal Information</h3>
+                    <div class="info-grid" id="personalInfoGrid">
+                        <!-- Loaded dynamically -->
                     </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="profile-actions">
+                    <button class="btn btn-secondary" id="changePasswordBtn">
+                        <span class="material-icons">lock</span> Change Password
+                    </button>
                 </div>
             </div>
-
-            <footer>
-                <div class="footer-links">
-                    <a href="https://www.linkedin.com/in/raufirzaman/">Raufir Zaman Choudhury</a> |
-                    <a href="https://www.facebook.com/mueid016">Md Mueid Shahriar</a> |
-                    <a href="https://www.linkedin.com/in/syed-sharzil-ahmmed-71a192266/">Syed Sharzil Ahmmed</a>
-                </div>
-                <p><small>2025 ©RSM</small></p>
-            </footer>
         </main>
 
     </div>
@@ -200,64 +204,43 @@
             const profileUrl = userData.profile_image_url || "../../assets/img/profile-user.png";
             document.getElementById("profile-picture").src = profileUrl;
 
-            // Show contact information by default
-            showContactInfo();
+            // Display Contact Information
+            document.getElementById("contactInfoGrid").innerHTML = `
+                <div class="info-item">
+                    <div class="info-label">Mobile Number</div>
+                    <div class="info-value">${userData.phone || userData.phone_number || "Not available"}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Email Address</div>
+                    <div class="info-value">${userData.email || "Not available"}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Permanent Address</div>
+                    <div class="info-value">${userData.address || "Not available"}</div>
+                </div>
+            `;
+
+            // Display Personal Information
+            document.getElementById("personalInfoGrid").innerHTML = `
+                <div class="info-item">
+                    <div class="info-label">Father's Name</div>
+                    <div class="info-value">${userData.father_name || userData.father_Name || "Not available"}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Mother's Name</div>
+                    <div class="info-value">${userData.mother_name || userData.mother_Name || "Not available"}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Date of Birth</div>
+                    <div class="info-value">${userData.dob || "Not available"}</div>
+                </div>
+            `;
         }
 
-        // Tab switching functions
-        window.showContactInfo = function () {
-            if (!userData) return;
-
-            document.getElementById("info-content").innerHTML = `
-        <h3>Contact Information</h3>
-        <div class="info-grid">
-            <div class="info-item">
-                <div class="info-label">Mobile Number</div>
-                <div class="info-value">${userData.phone || userData.phone_number || "Not available"}</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Email Address</div>
-                <div class="info-value">${userData.email || "Not available"}</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Permanent Address</div>
-                <div class="info-value">${userData.address || "Not available"}</div>
-            </div>
-        </div>
-        <div style="text-align: center; margin-top: 2rem;">
-            <button class="btn btn-danger">Change Password</button>
-        </div>
-    `;
-            document.getElementById("contact-tab").classList.add("active");
-            document.getElementById("personal-tab").classList.remove("active");
-        };
-
-        window.showPersonalInfo = function () {
-            if (!userData) return;
-
-            document.getElementById("info-content").innerHTML = `
-        <h3>Personal Information</h3>
-        <div class="info-grid">
-            <div class="info-item">
-                <div class="info-label">Father's Name</div>
-                <div class="info-value">${userData.father_name || userData.father_Name || "Not available"}</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Mother's Name</div>
-                <div class="info-value">${userData.mother_name || userData.mother_Name || "Not available"}</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Date of Birth</div>
-                <div class="info-value">${userData.dob || "Not available"}</div>
-            </div>
-        </div>
-        <div style="text-align: center; margin-top: 2rem;">
-            <button class="btn btn-danger">Change Password</button>
-        </div>
-    `;
-            document.getElementById("contact-tab").classList.remove("active");
-            document.getElementById("personal-tab").classList.add("active");
-        };
+        // Change password handler
+        document.getElementById('changePasswordBtn').addEventListener('click', function() {
+            showToast('Password change functionality coming soon!', 'info');
+        });
 
         // Logout is handled by sidebar.js
 

@@ -72,8 +72,7 @@ document.addEventListener("DOMContentLoaded", function() {
         try {
             // Show loading state
             const uploadBtn = document.querySelector('.upload-btn');
-            const originalText = uploadBtn.textContent;
-            uploadBtn.textContent = 'Uploading...';
+            uploadBtn.classList.add('btn-loading');
             uploadBtn.disabled = true;
             
             // Step 1: Upload file to Firebase Storage
@@ -115,7 +114,7 @@ document.addEventListener("DOMContentLoaded", function() {
             loadDocuments();
             
             // Reset button state
-            uploadBtn.textContent = originalText;
+            uploadBtn.classList.remove('btn-loading');
             uploadBtn.disabled = false;
             
         } catch (error) {
@@ -124,7 +123,7 @@ document.addEventListener("DOMContentLoaded", function() {
             
             // Reset button state
             const uploadBtn = document.querySelector('.upload-btn');
-            uploadBtn.textContent = 'Upload Document';
+            uploadBtn.classList.remove('btn-loading');
             uploadBtn.disabled = false;
         }
     });

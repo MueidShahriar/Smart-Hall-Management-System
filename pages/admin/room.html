@@ -12,6 +12,8 @@
 </head>
 
 <body>
+    <script src="../../scripts/preloader.js"></script>
+
     <div class="container">
 
         <main>
@@ -1003,7 +1005,7 @@
             }
 
             // Show saving indicator
-            this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
+            this.classList.add('btn-loading');
             this.disabled = true;
 
             try {
@@ -1026,7 +1028,8 @@
                         };
                         if (!studentData.id) {
                             showToast(`Please enter ID for Seat ${seatNum}`, "warning");
-                            this.innerHTML = 'Submit';
+                            this.classList.remove('btn-loading');
+                            this.innerHTML = '<span class="material-icons">save</span> Submit';
                             this.disabled = false;
                             return;
                         }
@@ -1082,14 +1085,16 @@
                 roomData = null; // Force reload next time the info is viewed
 
                 // Reset button
-                this.innerHTML = 'Submit';
+                this.classList.remove('btn-loading');
+                this.innerHTML = '<span class="material-icons">save</span> Submit';
                 this.disabled = false;
             } catch (error) {
                 console.error("Error saving room data:", error);
                 showToast("Failed to save room data: " + error.message, "error");
 
                 // Reset button
-                this.innerHTML = 'Submit';
+                this.classList.remove('btn-loading');
+                this.innerHTML = '<span class="material-icons">save</span> Submit';
                 this.disabled = false;
             }
         });

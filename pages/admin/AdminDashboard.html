@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard | SMART Hall</title>
+    <title>Admin Dashboard | Smart Hall</title>
 
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="shortcut icon" href="../../images/RSM_Logo.png" type="image/x-icon">
@@ -14,6 +14,8 @@
 </head>
 
 <body>
+    <script src="../../scripts/preloader.js"></script>
+
     <div class="container">
 
         <main class="main-content">
@@ -23,26 +25,8 @@
             </div>
             <div class="dashboard">
 
-                <div class="card request">
-                    <span class="material-icons card-icon">payments</span>
-                    <div class="section-info">
-                        <h2>Check Request</h2>
-                        <p>Check and approve new student requests</p>
-                        <button class="action-btn">View</button>
-                    </div>
-                </div>
-
-                <div class="card attendance">
-                    <span class="material-icons card-icon">co_present</span>
-                    <div class="section-info">
-                        <h2>Check Attendance Report</h2>
-                        <p>Daily present and absent report</p>
-                        <button class="action-btn">Check</button>
-                    </div>
-                </div>
-
                 <div class="card allocation">
-                    <span class="material-icons card-icon">hotel</span>
+                    <span class="material-icons card-icon">meeting_room</span>
                     <div class="section-info">
                         <h2>Room Allocation System</h2>
                         <p>Roomwise allocation system</p>
@@ -50,8 +34,17 @@
                     </div>
                 </div>
 
+                <div class="card student_info">
+                    <span class="material-icons card-icon">school</span>
+                    <div class="section-info">
+                        <h2>Student Information</h2>
+                        <p>Search student info by ID, Department, or Batch</p>
+                        <button class="action-btn">Search</button>
+                    </div>
+                </div>
+
                 <div class="card meal">
-                    <span class="material-icons card-icon">restaurant_menu</span>
+                    <span class="material-icons card-icon">restaurant</span>
                     <div class="section-info">
                         <h2>Meal Report</h2>
                         <p>Check meal report and manage meals</p>
@@ -59,21 +52,30 @@
                     </div>
                 </div>
 
-                <div class="card student_info">
-                    <span class="material-icons card-icon">search</span>
+                <div class="card attendance">
+                    <span class="material-icons card-icon">co_present</span>
                     <div class="section-info">
-                        <h2>Search Student Information</h2>
-                        <p>Search student info by ID or name</p>
-                        <button class="action-btn">Search</button>
+                        <h2>Attendance Report</h2>
+                        <p>Daily present and absent report</p>
+                        <button class="action-btn">Check</button>
                     </div>
                 </div>
 
                 <div class="card complaint">
-                    <span class="material-icons card-icon">report</span>
+                    <span class="material-icons card-icon">report_problem</span>
                     <div class="section-info">
                         <h2>Check Complaints</h2>
                         <p>Check residential student complaints</p>
                         <button class="action-btn">Check</button>
+                    </div>
+                </div>
+
+                <div class="card request">
+                    <span class="material-icons card-icon">inbox</span>
+                    <div class="section-info">
+                        <h2>Requests</h2>
+                        <p>Check and approve student registrations & bookings</p>
+                        <button class="action-btn">View</button>
                     </div>
                 </div>
 

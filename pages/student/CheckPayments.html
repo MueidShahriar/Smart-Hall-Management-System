@@ -28,6 +28,12 @@
             padding: 1.2rem;
             box-shadow: var(--shadow);
             text-align: center;
+            transition: transform 0.25s, box-shadow 0.25s;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-hover);
         }
 
         .summary-card .material-icons {
@@ -94,9 +100,9 @@
 
         .status-badge {
             display: inline-block;
-            padding: 0.2rem 0.6rem;
+            padding: 0.25rem 0.7rem;
             border-radius: 50px;
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             font-weight: 600;
         }
 
@@ -146,41 +152,84 @@
 </head>
 
 <body>
+    <script src="../../scripts/preloader.js"></script>
+
     <div class="container">
 
         <main>
             <div class="page-header">
                 <h1>Check Payments</h1>
-                <p>View your payment history and outstanding dues.</p>
+                <p>View your payment history and meal costs calculation.</p>
             </div>
 
             <div class="payments-wrapper">
                 <div class="summary-cards">
                     <div class="summary-card total">
-                        <span class="material-icons">account_balance_wallet</span>
-                        <h3 id="totalAmount">৳0</h3>
-                        <p>Total Fees</p>
+                        <span class="material-icons">restaurant</span>
+                        <h3 id="totalMeals">0</h3>
+                        <p>Total Meals</p>
                     </div>
                     <div class="summary-card paid">
-                        <span class="material-icons">check_circle</span>
-                        <h3 id="paidAmount">৳0</h3>
-                        <p>Total Paid</p>
+                        <span class="material-icons">payments</span>
+                        <h3 id="totalCost">৳0</h3>
+                        <p>Total Meal Cost</p>
                     </div>
                     <div class="summary-card due">
                         <span class="material-icons">pending</span>
-                        <h3 id="dueAmount">৳0</h3>
-                        <p>Outstanding Due</p>
+                        <h3 id="currentMonthCost">৳0</h3>
+                        <p>This Month</p>
                     </div>
                 </div>
 
+                <!-- Meal Cost Breakdown -->
                 <div class="payments-table-wrap">
+                    <h2>Meal Cost Breakdown</h2>
+                    <div id="mealBreakdownContainer">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Month</th>
+                                    <th>Breakfast</th>
+                                    <th>Lunch</th>
+                                    <th>Dinner</th>
+                                    <th>Total Meals</th>
+                                    <th>Cost (৳)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="mealBreakdownBody">
+                                <tr>
+                                    <td colspan="6" class="no-data">
+                                        <span class="material-icons">restaurant_menu</span>
+                                        <p>Loading meal data...</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Payment History -->
+                <div class="payments-table-wrap" style="margin-top: 1.5rem;">
                     <h2>Payment History</h2>
                     <div id="paymentsContainer">
-                        <div class="no-data">
-                            <span class="material-icons">receipt_long</span>
-                            <h3>No payment records found</h3>
-                            <p>Your payment history will appear here once available.</p>
-                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Description</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="paymentsBody">
+                                <tr>
+                                    <td colspan="4" class="no-data">
+                                        <span class="material-icons">receipt_long</span>
+                                        <p>No payment records found</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -190,6 +239,225 @@
 
     <script src="../../scripts/sidebar.js"></script>
     <script>initSidebar('student', 'payments');</script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+        import { getFirestore, collection, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBF-nMMW5lG44JfHxx4HxCbf5N81geOiRs",
+            authDomain: "bauet-hms-63f5b.firebaseapp.com",
+            databaseURL: "https://bauet-hms-63f5b-default-rtdb.firebaseio.com",
+            projectId: "bauet-hms-63f5b",
+            storageBucket: "bauet-hms-63f5b.appspot.com",
+            messagingSenderId: "200038506273",
+            appId: "1:200038506273:web:2e141fc9ec36de049ae860"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const firestore = getFirestore(app);
+
+        // Meal prices
+        const MEAL_PRICES = {
+            breakfast: 40,
+            lunch: 60,
+            dinner: 60
+        };
+
+        // Get student ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const studentId = urlParams.get('id');
+
+        // Calculate meal costs
+        async function loadMealCosts() {
+            if (!studentId) {
+                hidePageLoader();
+                showToast('Student ID not found', 'error');
+                return;
+            }
+
+            try {
+                // Query meals collection for this student
+                const mealsQuery = query(
+                    collection(firestore, "meals"),
+                    where("studentId", "==", studentId)
+                );
+                
+                const snapshot = await getDocs(mealsQuery);
+                
+                if (snapshot.empty) {
+                    document.getElementById('mealBreakdownBody').innerHTML = `
+                        <tr>
+                            <td colspan="6" style="text-align:center;padding:2rem;color:var(--clr-info-dark);">
+                                <span class="material-icons" style="font-size:2rem;opacity:0.5;display:block;margin-bottom:0.5rem;">restaurant_menu</span>
+                                No meal records found
+                            </td>
+                        </tr>
+                    `;
+                    hidePageLoader();
+                    return;
+                }
+
+                // Process meals by month
+                const monthlyData = {};
+                let totalMeals = 0;
+                let totalCost = 0;
+
+                snapshot.forEach(doc => {
+                    const meal = doc.data();
+                    const date = meal.date ? new Date(meal.date) : new Date();
+                    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                    const monthName = date.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
+
+                    if (!monthlyData[monthKey]) {
+                        monthlyData[monthKey] = {
+                            name: monthName,
+                            breakfast: 0,
+                            lunch: 0,
+                            dinner: 0,
+                            total: 0,
+                            cost: 0
+                        };
+                    }
+
+                    // Count meals
+                    if (meal.breakfast) {
+                        monthlyData[monthKey].breakfast++;
+                        monthlyData[monthKey].total++;
+                        monthlyData[monthKey].cost += MEAL_PRICES.breakfast;
+                        totalMeals++;
+                        totalCost += MEAL_PRICES.breakfast;
+                    }
+                    if (meal.lunch) {
+                        monthlyData[monthKey].lunch++;
+                        monthlyData[monthKey].total++;
+                        monthlyData[monthKey].cost += MEAL_PRICES.lunch;
+                        totalMeals++;
+                        totalCost += MEAL_PRICES.lunch;
+                    }
+                    if (meal.dinner) {
+                        monthlyData[monthKey].dinner++;
+                        monthlyData[monthKey].total++;
+                        monthlyData[monthKey].cost += MEAL_PRICES.dinner;
+                        totalMeals++;
+                        totalCost += MEAL_PRICES.dinner;
+                    }
+                });
+
+                // Update summary cards
+                document.getElementById('totalMeals').textContent = totalMeals;
+                document.getElementById('totalCost').textContent = `৳${totalCost.toLocaleString()}`;
+
+                // Get current month cost
+                const now = new Date();
+                const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+                const currentMonthData = monthlyData[currentMonthKey];
+                document.getElementById('currentMonthCost').textContent = currentMonthData 
+                    ? `৳${currentMonthData.cost.toLocaleString()}` 
+                    : '৳0';
+
+                // Render monthly breakdown
+                const sortedMonths = Object.keys(monthlyData).sort().reverse();
+                const tbody = document.getElementById('mealBreakdownBody');
+                
+                if (sortedMonths.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="6" style="text-align:center;padding:2rem;color:var(--clr-info-dark);">
+                                No meal records found
+                            </td>
+                        </tr>
+                    `;
+                } else {
+                    tbody.innerHTML = sortedMonths.map(key => {
+                        const m = monthlyData[key];
+                        return `
+                            <tr>
+                                <td><strong>${m.name}</strong></td>
+                                <td>${m.breakfast}</td>
+                                <td>${m.lunch}</td>
+                                <td>${m.dinner}</td>
+                                <td><strong>${m.total}</strong></td>
+                                <td><strong>৳${m.cost.toLocaleString()}</strong></td>
+                            </tr>
+                        `;
+                    }).join('');
+
+                    // Add total row
+                    tbody.innerHTML += `
+                        <tr style="background:var(--clr-bg);font-weight:600;">
+                            <td>Total</td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td>${totalMeals}</td>
+                            <td>৳${totalCost.toLocaleString()}</td>
+                        </tr>
+                    `;
+                }
+
+                hidePageLoader();
+            } catch (error) {
+                console.error('Error loading meal costs:', error);
+                showToast('Failed to load meal data', 'error');
+                hidePageLoader();
+            }
+        }
+
+        // Load payment history
+        async function loadPaymentHistory() {
+            try {
+                const paymentsQuery = query(
+                    collection(firestore, "payments"),
+                    where("studentId", "==", studentId)
+                );
+                
+                const snapshot = await getDocs(paymentsQuery);
+                const tbody = document.getElementById('paymentsBody');
+                
+                if (snapshot.empty) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="4" style="text-align:center;padding:2rem;color:var(--clr-info-dark);">
+                                <span class="material-icons" style="font-size:2rem;opacity:0.5;display:block;margin-bottom:0.5rem;">receipt_long</span>
+                                No payment records found
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+
+                const payments = [];
+                snapshot.forEach(doc => {
+                    payments.push({ id: doc.id, ...doc.data() });
+                });
+
+                // Sort by date descending
+                payments.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                tbody.innerHTML = payments.map(p => {
+                    const date = p.date ? new Date(p.date).toLocaleDateString('en-US', { 
+                        year: 'numeric', month: 'short', day: 'numeric' 
+                    }) : '—';
+                    const statusClass = p.status === 'paid' ? 'paid' : (p.status === 'pending' ? 'pending' : 'overdue');
+                    return `
+                        <tr>
+                            <td>${date}</td>
+                            <td>${p.description || 'Payment'}</td>
+                            <td>৳${(p.amount || 0).toLocaleString()}</td>
+                            <td><span class="status-badge ${statusClass}">${p.status || 'pending'}</span></td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Error loading payments:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadMealCosts();
+            loadPaymentHistory();
+        });
+    </script>
     <script src="../../scripts/toast.js"></script>
 </body>
 

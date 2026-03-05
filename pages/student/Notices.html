@@ -15,6 +15,8 @@
 </head>
 
 <body>
+  <script src="../../scripts/preloader.js"></script>
+
   <div class="container">
 
     <main>
@@ -113,8 +115,7 @@
       appId: "1:200038506273:web:2e141fc9ec36de049ae860"
     };
     
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
   </script>
 
   <script src="../../scripts/toast.js"></script>

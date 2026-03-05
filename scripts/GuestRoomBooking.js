@@ -22,6 +22,9 @@ document.addEventListener("DOMContentLoaded", () => {
     guestForm.addEventListener("submit", async (event) => {
         event.preventDefault();
 
+        const submitBtn = guestForm.querySelector('button[type="submit"]');
+        if (submitBtn) { submitBtn.classList.add('btn-loading'); submitBtn.disabled = true; }
+
         const data = {
             nid: document.getElementById("nid").value.trim(),
             name: document.getElementById("name").value.trim(),
@@ -44,8 +47,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
             showToast("Guest room booking request sent to admin!", "success");
             guestForm.reset();
+            if (submitBtn) { submitBtn.classList.remove('btn-loading'); submitBtn.disabled = false; }
         } catch (error) {
             showToast("Failed to submit booking: " + error.message, "error");
+            if (submitBtn) { submitBtn.classList.remove('btn-loading'); submitBtn.disabled = false; }
         }
     });
 });

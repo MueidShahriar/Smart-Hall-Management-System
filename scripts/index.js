@@ -1,25 +1,6 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword
-} from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
-import {
-  getDatabase,
-  ref,
-  set,
-  get,
-  child
-} from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
-import {
-  getFirestore,
-  collection,
-  doc,
-  getDoc,
-  setDoc,
-  serverTimestamp
-} from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+/*  Smart Hall — Login & Registration  */
 
+// ─── Firebase Init ───────────────────────────────────────────
 const firebaseConfig = {
   apiKey: "AIzaSyBF-nMMW5lG44JfHxx4HxCbf5N81geOiRs",
   authDomain: "bauet-hms-63f5b.firebaseapp.com",
@@ -30,26 +11,30 @@ const firebaseConfig = {
   appId: "1:200038506273:web:2e141fc9ec36de049ae860"
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const database = getDatabase(app);
-const firestore = getFirestore(app);
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const database = firebase.database();
+const firestore = firebase.firestore();
 
+// ─── DOM Elements ────────────────────────────────────────────
 const signInButton = document.getElementById("signInButton");
 const signUpButton = document.getElementById("signUpButton");
 const signInContainer = document.getElementById("signIn");
 const signUpContainer = document.getElementById("signup");
+const signInForm = document.getElementById("signInForm");
+const signUpForm = document.getElementById("signUpForm");
 
+// ─── Toggle between Sign In / Sign Up ────────────────────────
 signInButton.addEventListener("click", () => {
   signInContainer.style.display = "block";
   signUpContainer.style.display = "none";
 });
-
 signUpButton.addEventListener("click", () => {
   signInContainer.style.display = "none";
   signUpContainer.style.display = "block";
 });
 
+// ─── Helper: room validation ────────────────────────────────
 function isValidRoomNumber(roomNumber) {
   const room = parseInt(roomNumber);
   return (
@@ -62,165 +47,257 @@ function isValidRoomNumber(roomNumber) {
   );
 }
 
+// ─── Helper: create room in Firestore ────────────────────────
 async function createNewRoom(roomNumber) {
-  const roomRef = doc(firestore, "room", roomNumber);
-
-  await setDoc(roomRef, {
-    created: serverTimestamp(),
+  const roomRef = firestore.collection("room").doc(roomNumber);
+  await roomRef.set({
+    created: firebase.firestore.FieldValue.serverTimestamp(),
     roomNumber: roomNumber
   });
-
-  const memberCollectionRef = collection(roomRef, "members");
-
+  const promises = [];
   for (let i = 1; i <= 6; i++) {
-    const seatRef = doc(memberCollectionRef, `seat${i}`);
-    await setDoc(seatRef, {
-      isEmpty: true,
-      lastUpdated: serverTimestamp()
-    });
+    promises.push(
+      roomRef.collection("members").doc("seat" + i).set({
+        isEmpty: true,
+        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+      })
+    );
   }
+  await Promise.all(promises);
 }
 
-const signUpForm = document.getElementById("signUpForm");
-signUpForm.addEventListener("submit", async (e) => {
+// ─── Helper: find an empty seat ──────────────────────────────
+async function findSeat(roomRef) {
+  const seatPromises = [];
+  for (let i = 1; i <= 6; i++) {
+    seatPromises.push(roomRef.collection("members").doc("seat" + i).get());
+  }
+  const snapshots = await Promise.all(seatPromises);
+  for (let i = 0; i < snapshots.length; i++) {
+    if (!snapshots[i].exists || snapshots[i].data().isEmpty === true) {
+      return "seat" + (i + 1);
+    }
+  }
+  return null;
+}
+
+// ─── Helper: button loading state ────────────────────────────
+function setBtn(btn, loading, text) {
+  btn.disabled = loading;
+  if (loading) {
+    btn.classList.add("btn-loading");
+  } else {
+    btn.classList.remove("btn-loading");
+  }
+  if (text) btn.value = text;
+}
+
+// ═════════════════════════════════════════════════════════════
+//  LOGIN
+// ═════════════════════════════════════════════════════════════
+signInForm.addEventListener("submit", async function (e) {
   e.preventDefault();
 
-  const studentID = document.getElementById("studentID").value;
-  const name = document.getElementById("name").value;
+  const btn = signInForm.querySelector('input[type="submit"]');
+  const studentId = document.getElementById("loginStudentId").value.trim();
+  const password = document.getElementById("loginPassword").value;
+
+  if (!studentId || !password) {
+    showToast("Please enter Student ID and Password.", "warning");
+    return;
+  }
+
+  setBtn(btn, true, "Signing in...");
+
+  try {
+    // 1) Look up user in Realtime Database
+    const snapshot = await database.ref("users/" + studentId).once("value");
+
+    if (!snapshot.exists()) {
+      // Not an approved user — check if pending
+      const pendingDoc = await firestore.collection("PendingStudents").doc(studentId).get();
+      if (pendingDoc.exists) {
+        showToast("Your registration is pending admin approval.", "warning");
+      } else {
+        showToast("Student ID not found. Please register first.", "error");
+      }
+      setBtn(btn, false, "Sign In");
+      return;
+    }
+
+    const userData = snapshot.val();
+
+    if (!userData.email) {
+      showToast("Account data incomplete. Contact admin.", "error");
+      setBtn(btn, false, "Sign In");
+      return;
+    }
+
+    // 2) Authenticate with Firebase Auth
+    await auth.signInWithEmailAndPassword(userData.email, password);
+
+    // 3) Set session and redirect
+    sessionStorage.clear();
+    sessionStorage.setItem("userId", studentId);
+
+    let targetUrl;
+    if (userData.role === "admin") {
+      targetUrl = "pages/admin/AdminDashboard.html?id=" + studentId;
+    } else {
+      targetUrl = "pages/student/StudentDashboard.html?id=" + studentId;
+    }
+
+    window.location.href = targetUrl;
+
+  } catch (err) {
+    console.error("Login error:", err);
+
+    let msg = "Login failed.";
+    if (err.code === "auth/wrong-password" || err.code === "auth/invalid-credential") {
+      msg = "Wrong password. Please try again.";
+    } else if (err.code === "auth/user-not-found") {
+      msg = "Auth account not found. Contact admin.";
+    } else if (err.code === "auth/too-many-requests") {
+      msg = "Too many failed attempts. Try again later.";
+    } else if (err.code === "auth/network-request-failed") {
+      msg = "Network error. Check your connection.";
+    } else if (err.message) {
+      msg = err.message;
+    }
+
+    showToast(msg, "error");
+    setBtn(btn, false, "Sign In");
+  }
+});
+
+// ═════════════════════════════════════════════════════════════
+//  REGISTRATION
+// ═════════════════════════════════════════════════════════════
+signUpForm.addEventListener("submit", async function (e) {
+  e.preventDefault();
+
+  const btn = signUpForm.querySelector('input[type="submit"]');
+  setBtn(btn, true, "Registering...");
+
+  const studentID = document.getElementById("studentID").value.trim();
+  const name = document.getElementById("name").value.trim();
   const password = document.getElementById("password").value;
   const confirmPassword = document.getElementById("cPassword").value;
-  const email = document.getElementById("email").value;
-  const address = document.getElementById("address").value;
-  const fatherName = document.getElementById("fatherName").value;
-  const motherName = document.getElementById("motherName").value;
-  const phone = document.getElementById("phone").value;
-  const department = document.getElementById("department").value;
-  const batch = document.getElementById("batch").value;
-  const room = document.getElementById("room").value;
+  const email = document.getElementById("email").value.trim();
+  const address = document.getElementById("address").value.trim();
+  const fatherName = document.getElementById("fatherName").value.trim();
+  const motherName = document.getElementById("motherName").value.trim();
+  const phone = document.getElementById("phone").value.trim();
+  const department = document.getElementById("department").value.trim();
+  const batch = document.getElementById("batch").value.trim();
+  const room = document.getElementById("room").value.trim();
   const dob = document.getElementById("dob").value;
 
   if (password !== confirmPassword) {
     showToast("Passwords do not match!", "error");
+    setBtn(btn, false, "Sign Up");
+    return;
+  }
+
+  if (password.length < 6) {
+    showToast("Password must be at least 6 characters.", "error");
+    setBtn(btn, false, "Sign Up");
     return;
   }
 
   try {
-    const roomRef = doc(firestore, "room", room);
-    const roomSnapshot = await getDoc(roomRef);
-
-    if (!roomSnapshot.exists()) {
-      if (!isValidRoomNumber(room)) {
-        showToast(`Room ${room} is not a valid room number. Please enter a valid room number.`, "error");
-        return;
-      }
-
-      await createNewRoom(room);
-    }
-
-    let seatAssigned = false;
-    let assignedSeat = "";
-
-    for (let i = 1; i <= 6; i++) {
-      const seatRef = doc(roomRef, `members/seat${i}`);
-      const seatSnapshot = await getDoc(seatRef);
-
-      if (!seatSnapshot.exists() || seatSnapshot.data().isEmpty === true) {
-        assignedSeat = `seat${i}`;
-
-        await setDoc(seatRef, {
-          id: studentID,
-          name: name,
-          batch: batch,
-          department: department,
-          isEmpty: false,
-          lastUpdated: serverTimestamp()
-        });
-
-        seatAssigned = true;
-        break;
-      }
-    }
-
-    if (!seatAssigned) {
-      showToast(`Room ${room} is full. Please select a different room.`, "warning");
+    // Check if student ID already approved
+    const existingUser = await database.ref("users/" + studentID).once("value");
+    if (existingUser.exists()) {
+      showToast("This Student ID is already registered. Please sign in.", "warning");
+      setBtn(btn, false, "Sign Up");
       return;
     }
 
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
+    // Check if already pending
+    const existingPending = await firestore.collection("PendingStudents").doc(studentID).get();
+    if (existingPending.exists) {
+      showToast("Registration already submitted. Wait for admin approval.", "warning");
+      setBtn(btn, false, "Sign Up");
+      return;
+    }
 
-    await set(ref(database, `users/${studentID}`), {
-      name: name,
-      email: email,
-      address: address,
+    // Validate room
+    if (!isValidRoomNumber(room)) {
+      showToast("Room " + room + " is not valid.", "error");
+      setBtn(btn, false, "Sign Up");
+      return;
+    }
+
+    // Ensure room exists
+    const roomRef = firestore.collection("room").doc(room);
+    const roomSnap = await roomRef.get();
+    if (!roomSnap.exists) {
+      await createNewRoom(room);
+    }
+
+    // Find empty seat
+    const assignedSeat = await findSeat(roomRef);
+    if (!assignedSeat) {
+      showToast("Room " + room + " is full. Choose another room.", "warning");
+      setBtn(btn, false, "Sign Up");
+      return;
+    }
+
+    // Create Firebase Auth account
+    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+
+    // Save to PendingStudents
+    await firestore.collection("PendingStudents").doc(studentID).set({
+      name,
+      email,
+      address,
       father_Name: fatherName,
       mother_Name: motherName,
-      phone: phone,
-      department: department,
-      batch: batch,
-      room: room,
+      phone,
+      department,
+      batch,
+      room,
+      dob,
       seat: assignedSeat,
-      dob: dob,
-      role: "member",
-      id: studentID
+      id: studentID,
+      uid: userCredential.user.uid,
+      status: "pending",
+      createdAt: new Date().toISOString()
     });
 
-    showToast(`Registered successfully! Welcome ${name}!`, "success");
+    // Sign out after registration (so they don't stay logged in as unverified user)
+    await auth.signOut();
+
+    showToast("Registration submitted! Wait for admin approval.", "success");
     signUpForm.reset();
     signInContainer.style.display = "block";
     signUpContainer.style.display = "none";
+    setBtn(btn, false, "Sign Up");
 
-  } catch (error) {
-    console.error("Registration error:", error);
-    showToast("Error during registration: " + error.message, "error");
+  } catch (err) {
+    console.error("Registration error:", err);
+    let msg = "Registration failed.";
+    if (err.code === "auth/email-already-in-use") {
+      msg = "This email is already registered.";
+    } else if (err.code === "auth/weak-password") {
+      msg = "Password is too weak. Use at least 6 characters.";
+    } else if (err.code === "auth/invalid-email") {
+      msg = "Invalid email address.";
+    } else if (err.message) {
+      msg = err.message;
+    }
+    showToast(msg, "error");
+    setBtn(btn, false, "Sign Up");
   }
 });
 
-const signInForm = document.getElementById("signInForm");
-signInForm.addEventListener("submit", function (e) {
-  e.preventDefault();
-
-  const studentId = document.getElementById('loginStudentId').value;
-  const password = document.getElementById('loginPassword').value;
-
-  const dbRef = ref(database);
-  get(child(dbRef, `users/${studentId}`))
-    .then((snapshot) => {
-      if (snapshot.exists()) {
-        const email = snapshot.val().email;
-        const role = snapshot.val().role;
-
-        signInWithEmailAndPassword(auth, email, password)
-          .then((userCredential) => {
-            sessionStorage.removeItem("loggedOut");
-            sessionStorage.setItem("userId", studentId);
-
-            if (role === 'admin') {
-              window.location.href = `pages/admin/AdminDashboard.html?id=${studentId}`;
-            } else {
-              window.location.href = `pages/student/StudentDashboard.html?id=${studentId}`;
-            }
-          })
-          .catch((error) => {
-            console.error("Authentication error:", error);
-            showToast("Authentication Error: " + error.message, "error");
-          });
-      } else {
-        showToast("Student ID not found in the database.", "error");
-      }
-    })
-    .catch((error) => {
-      console.error("Database error:", error);
-      showToast("Database Error: " + error.message, "error");
-    });
-});
-
-document.querySelectorAll('.toggle-password').forEach(toggle => {
-  toggle.addEventListener('click', function () {
-    const input = this.closest('.input-group').querySelector('input');
-    const type = input.type === 'password' ? 'text' : 'password';
-    input.type = type;
-    this.classList.toggle('fa-eye');
-    this.classList.toggle('fa-eye-slash');
+// ─── Toggle Password Visibility ──────────────────────────────
+document.querySelectorAll(".toggle-password").forEach(function (toggle) {
+  toggle.addEventListener("click", function () {
+    const input = this.closest(".input-group").querySelector("input");
+    input.type = input.type === "password" ? "text" : "password";
+    this.classList.toggle("fa-eye");
+    this.classList.toggle("fa-eye-slash");
   });
 });

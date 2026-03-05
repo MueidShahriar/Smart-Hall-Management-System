@@ -1,0 +1,123 @@
+<!-- Smart Hall — Preloader Component -->
+<div class="page-loader-overlay" id="pageLoader">
+    <div class="preloader-content">
+        <div class="loader"></div>
+        <p class="preloader-text">Loading<span class="dot-animation">...</span></p>
+    </div>
+</div>
+
+<style>
+    .page-loader-overlay {
+        position: fixed;
+        inset: 0;
+        background: linear-gradient(135deg, #f8f9ff 0%, #eef1ff 50%, #f0e6ff 100%);
+        z-index: 99999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        transition: opacity 2s cubic-bezier(0.4, 0, 0.2, 1), visibility 2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .page-loader-overlay.hidden {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+    }
+
+    .preloader-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .page-loader-overlay .loader {
+        width: 56px;
+        aspect-ratio: 1;
+        display: grid;
+        border: 4px solid #0000;
+        border-radius: 50%;
+        border-color: #e0e0e0 #0000;
+        animation: loaderSpin 7s infinite linear;
+    }
+
+    .page-loader-overlay .loader::before,
+    .page-loader-overlay .loader::after {
+        content: "";
+        grid-area: 1/1;
+        margin: 2px;
+        border: inherit;
+        border-radius: 50%;
+    }
+
+    .page-loader-overlay .loader::before {
+        border-color: #f03355 #0000;
+        animation: loaderSpin 2s infinite linear reverse;
+    }
+
+    .page-loader-overlay .loader::after {
+        margin: 8px;
+        border-color: #7380ec #0000;
+        animation: loaderSpin 0.75s infinite linear;
+    }
+
+    .preloader-text {
+        color: #444;
+        font-family: 'Poppins', sans-serif;
+        font-size: 0.95rem;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+    }
+
+    .dot-animation {
+        display: inline-block;
+        animation: dotPulse 1.4s infinite steps(4, end);
+        width: 1.5em;
+        text-align: left;
+        overflow: hidden;
+        vertical-align: bottom;
+    }
+
+    @keyframes loaderSpin {
+        100% { transform: rotate(1turn); }
+    }
+
+    @keyframes dotPulse {
+        0%   { content: ""; width: 0; }
+        25%  { width: 0.5em; }
+        50%  { width: 1em; }
+        75%  { width: 1.5em; }
+        100% { width: 0; }
+    }
+</style>
+
+<script>
+    (function() {
+        // Hide preloader when page is fully loaded
+        window.addEventListener('load', function() {
+            var loader = document.getElementById('pageLoader');
+            if (loader) {
+                // Small delay for smooth transition
+                setTimeout(function() {
+                    loader.classList.add('hidden');
+                    // Remove from DOM after animation
+                    setTimeout(function() {
+                        if (loader.parentNode) loader.parentNode.removeChild(loader);
+                    }, 600);
+                }, 200);
+            }
+        });
+
+        // Fallback: hide after 8 seconds max (in case load event already fired)
+        setTimeout(function() {
+            var loader = document.getElementById('pageLoader');
+            if (loader && !loader.classList.contains('hidden')) {
+                loader.classList.add('hidden');
+                setTimeout(function() {
+                    if (loader.parentNode) loader.parentNode.removeChild(loader);
+                }, 600);
+            }
+        }, 8000);
+    })();
+</script>

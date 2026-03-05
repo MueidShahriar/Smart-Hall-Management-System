@@ -92,83 +92,89 @@
 
         /* --- Results Summary --- */
         .results-summary {
-            font-size: 0.8rem;
+            font-size: 0.82rem;
             color: var(--clr-info-dark);
-            margin-bottom: 1rem;
+            margin-bottom: 1.2rem;
             display: none;
+            padding: 0.5rem 0.8rem;
+            background: rgba(115, 128, 236, 0.06);
+            border-radius: var(--radius-1);
+            border-left: 3px solid var(--clr-primary);
         }
-        .results-summary span { font-weight: 600; color: var(--clr-dark); }
+        .results-summary span { font-weight: 700; color: var(--clr-primary); }
 
         /* --- Student Cards Grid --- */
         .students-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1rem;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 1.2rem;
         }
 
         /* --- Student Card --- */
         .student-card {
             background: var(--clr-white);
-            border-radius: var(--radius-2);
-            padding: 1.2rem;
+            border-radius: var(--radius-3);
+            padding: 1.3rem 1.4rem;
             box-shadow: var(--shadow);
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             gap: 1rem;
-            transition: box-shadow 0.2s, transform 0.2s;
+            transition: box-shadow 0.25s, transform 0.25s;
             border-left: 4px solid var(--clr-primary);
             cursor: default;
+            position: relative;
         }
         .student-card:hover {
             box-shadow: var(--shadow-hover);
-            transform: translateY(-2px);
+            transform: translateY(-3px);
         }
         .student-card-avatar {
-            width: 56px;
-            height: 56px;
+            width: 52px;
+            height: 52px;
             border-radius: 50%;
             object-fit: cover;
-            border: 2px solid var(--clr-info-light);
+            border: 2.5px solid var(--clr-info-light);
             flex-shrink: 0;
             background: var(--clr-bg);
+            margin-top: 0.15rem;
         }
         .student-card-body {
             flex: 1;
             min-width: 0;
         }
         .student-card-name {
-            font-weight: 600;
-            font-size: 0.92rem;
+            font-weight: 700;
+            font-size: 0.95rem;
             color: var(--clr-dark);
-            margin-bottom: 0.15rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            margin-bottom: 0.35rem;
+            line-height: 1.35;
+            word-break: break-word;
         }
         .student-card-meta {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.3rem 0.8rem;
-            font-size: 0.73rem;
+            gap: 0.25rem 0.7rem;
+            font-size: 0.74rem;
             color: var(--clr-info-dark);
         }
         .student-card-meta span {
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: 0.2rem;
         }
         .student-card-meta .material-icons {
-            font-size: 0.85rem;
+            font-size: 0.82rem;
             color: var(--clr-primary);
         }
         .student-card-actions {
             flex-shrink: 0;
+            margin-top: 0.1rem;
         }
         .view-profile-btn {
             display: inline-flex;
             align-items: center;
-            gap: 0.3rem;
-            padding: 0.4rem 0.9rem;
+            gap: 0.35rem;
+            padding: 0.45rem 1rem;
             border: 1.5px solid var(--clr-primary);
             border-radius: 2rem;
             background: transparent;
@@ -182,8 +188,9 @@
         .view-profile-btn:hover {
             background: var(--clr-primary);
             color: #fff;
+            box-shadow: 0 4px 12px rgba(115, 128, 236, 0.25);
         }
-        .view-profile-btn .material-icons { font-size: 0.95rem; }
+        .view-profile-btn .material-icons { font-size: 0.92rem; }
 
         /* --- Empty State --- */
         .empty-state {
@@ -382,11 +389,14 @@
         }
 
         /* --- Responsive --- */
+        @media (max-width: 900px) {
+            .students-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+        }
         @media (max-width: 768px) {
             main { padding-top: 3.8rem; }
             .students-grid { grid-template-columns: 1fr; }
             .student-card { flex-wrap: wrap; }
-            .student-card-actions { width: 100%; margin-top: 0.3rem; }
+            .student-card-actions { width: 100%; margin-top: 0.5rem; }
             .view-profile-btn { width: 100%; justify-content: center; }
             .profile-modal { max-width: 100%; margin: 0.5rem; }
         }
@@ -398,6 +408,8 @@
 </head>
 
 <body>
+    <script src="../../scripts/preloader.js"></script>
+
     <div class="container">
         <main>
             <h1 class="page-title">Student Information</h1>
@@ -407,15 +419,23 @@
             <div class="search-section">
                 <div class="search-row">
                     <div class="search-input-wrap">
-                        <span class="material-icons">search</span>
-                        <input type="text" id="search-input" placeholder="Enter student ID or name..." autocomplete="off" />
+                        <span class="material-icons">badge</span>
+                        <input type="text" id="search-id" placeholder="Search by Student ID..." autocomplete="off" />
+                    </div>
+                    <div class="search-input-wrap">
+                        <span class="material-icons">engineering</span>
+                        <input type="text" id="search-dept" placeholder="Search by Department..." autocomplete="off" />
+                    </div>
+                    <div class="search-input-wrap">
+                        <span class="material-icons">school</span>
+                        <input type="text" id="search-batch" placeholder="Search by Batch..." autocomplete="off" />
                     </div>
                     <button class="search-btn" id="search-btn">
                         <span class="material-icons" style="font-size:1.1rem;">search</span>
                         Search
                     </button>
                 </div>
-                <div class="search-hint">Tip: Search by student ID, name, or department</div>
+                <div class="search-hint">Tip: You can search by ID, Department, or Batch separately or combine multiple filters</div>
             </div>
 
             <!-- Results Summary -->
@@ -476,7 +496,9 @@
         }
 
         // --- Search ---
-        const searchInput = document.getElementById('search-input');
+        const searchIdInput = document.getElementById('search-id');
+        const searchDeptInput = document.getElementById('search-dept');
+        const searchBatchInput = document.getElementById('search-batch');
         const searchBtn = document.getElementById('search-btn');
         const grid = document.getElementById('students-grid');
         const emptyState = document.getElementById('empty-state');
@@ -484,14 +506,22 @@
         const resultCount = document.getElementById('result-count');
 
         searchBtn.addEventListener('click', doSearch);
-        searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); doSearch(); } });
+        [searchIdInput, searchDeptInput, searchBatchInput].forEach(input => {
+            input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); doSearch(); } });
+        });
 
         async function doSearch() {
-            const query = searchInput.value.trim().toLowerCase();
-            if (!query) {
-                showToast('Please enter a student ID or name', 'warning');
+            const queryId = searchIdInput.value.trim().toLowerCase();
+            const queryDept = searchDeptInput.value.trim().toLowerCase();
+            const queryBatch = searchBatchInput.value.trim().toLowerCase();
+            
+            if (!queryId && !queryDept && !queryBatch) {
+                showToast('Please enter at least one search criteria', 'warning');
                 return;
             }
+
+            searchBtn.classList.add('btn-loading');
+            searchBtn.disabled = true;
 
             // Show loading
             grid.innerHTML = '<div class="loading-spinner"><span class="material-icons">sync</span><p>Searching...</p></div>';
@@ -510,27 +540,23 @@
                 for (const [uid, user] of Object.entries(allUsers)) {
                     if (user.role === 'admin') continue; // Skip admins
 
-                    const name = getFullName(user).toLowerCase();
                     const id = (user.id || '').toString().toLowerCase();
                     const uidLower = uid.toLowerCase();
-                    const firstName = (user.firstName || '').toLowerCase();
-                    const lastName = (user.lastName || '').toLowerCase();
                     const dept = (user.dept_name || user.department || '').toLowerCase();
+                    const batch = (user.batch || '').toString().toLowerCase();
 
-                    if (
-                        id.includes(query) ||
-                        uidLower.includes(query) ||
-                        name.includes(query) ||
-                        firstName.includes(query) ||
-                        lastName.includes(query) ||
-                        dept.includes(query)
-                    ) {
+                    // Check each filter - if provided, must match
+                    let idMatch = !queryId || id.includes(queryId) || uidLower.includes(queryId);
+                    let deptMatch = !queryDept || dept.includes(queryDept);
+                    let batchMatch = !queryBatch || batch.includes(queryBatch);
+
+                    if (idMatch && deptMatch && batchMatch) {
                         results.push({ ...user, _uid: uid, id: user.id || uid });
                     }
                 }
 
                 if (results.length === 0) {
-                    showEmpty('No students match your search');
+                    showEmpty('No students match your search criteria');
                     return;
                 }
 
@@ -542,6 +568,9 @@
                 console.error('Search error:', err);
                 showToast('Error searching students', 'error');
                 showEmpty('An error occurred while searching');
+            } finally {
+                searchBtn.classList.remove('btn-loading');
+                searchBtn.disabled = false;
             }
         }
 

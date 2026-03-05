@@ -175,19 +175,77 @@ main {
     font-weight: 600;
 }
 
-/* ── Tabs ────────────────────────────────── */
-.profile-tabs {
+/* ── Profile Sections (replace tabs) ─────── */
+.profile-section {
+    background: var(--clr-bg);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    margin-bottom: 1.2rem;
+    border: 1px solid var(--clr-info-light);
+    text-align: left;
+    transition: all 0.3s ease;
+}
+
+.profile-section:hover {
+    border-color: var(--clr-primary);
+    box-shadow: 0 4px 16px rgba(79, 70, 229, 0.08);
+}
+
+.profile-section h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--clr-primary-variant);
+    margin-bottom: 1rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 1px solid var(--clr-info-light);
+}
+
+.profile-section h3 .material-icons {
+    font-size: 1.2rem;
+    color: var(--clr-primary);
+}
+
+/* Profile Actions */
+.profile-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
     margin-top: 1.5rem;
 }
 
-.profile-tab-nav {
-    display: flex;
-    border-bottom: 2px solid var(--clr-info-light);
-    margin-bottom: 0;
+.profile-actions .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.profile-actions .btn .material-icons {
+    font-size: 1.1rem;
+}
+
+.btn-secondary {
     background: transparent;
-    box-shadow: none;
-    border-radius: 0;
-    overflow: visible;
+    color: var(--clr-dark);
+    border: 1.5px solid var(--clr-info-light);
+}
+
+.btn-secondary:hover {
+    background: var(--clr-bg);
+    border-color: var(--clr-primary);
+    color: var(--clr-primary);
+    box-shadow: 0 4px 16px rgba(79, 70, 229, 0.1);
+}
+
+/* Legacy tabs (hidden but kept for compatibility) */
+.profile-tabs {
+    display: none;
+}
+
+.profile-tab-nav {
+    display: none;
 }
 
 .profile-tab-item {
@@ -252,7 +310,7 @@ main {
 
 .info-label {
     color: var(--clr-info-dark);
-    font-size: 0.72rem;
+    font-size: 0.75rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -298,12 +356,9 @@ main {
     box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
 }
 
-/* ── Footer ───────────────────────────────── */
+/* ── Footer (removed per request) ───────── */
 footer {
-    text-align: center;
-    padding: 1.2rem 0;
-    margin-top: 0.5rem;
-    opacity: 0.7;
+    display: none;
 }
 
 footer a {
@@ -365,7 +420,15 @@ footer p { font-size: 0.7rem; }
 
     .profile-meta-item {
         padding: 0.4rem 0.7rem;
-        font-size: 0.72rem;
+        font-size: 0.75rem;
+    }
+
+    .profile-section {
+        padding: 1rem;
+    }
+
+    .profile-section h3 {
+        font-size: 0.85rem;
     }
 
     .profile-tab-item {
@@ -379,6 +442,11 @@ footer p { font-size: 0.7rem; }
     }
 
     .info-item { padding: 0.8rem 1rem; }
+
+    .profile-actions {
+        flex-direction: column;
+        align-items: center;
+    }
 }
 
 @media screen and (max-width: 480px) {
@@ -396,5 +464,5 @@ footer p { font-size: 0.7rem; }
     }
 
     .profile-info h1 { font-size: 1.05rem; }
-    .profile-meta-item { font-size: 0.7rem; }
+    .profile-meta-item { font-size: 0.73rem; }
 }

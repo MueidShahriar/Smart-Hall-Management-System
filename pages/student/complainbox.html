@@ -47,6 +47,14 @@
             transform: translateY(-1px);
         }
 
+        .other-sector-input {
+            display: none;
+            margin-top: 0.5rem;
+        }
+        .other-sector-input.visible {
+            display: block;
+        }
+
         @media (max-width: 480px) {
             .complaint-form {
                 padding: 1rem;
@@ -62,6 +70,8 @@
 </head>
 
 <body>
+    <script src="../../scripts/preloader.js"></script>
+
     <div class="container">
 
         <main>
@@ -86,17 +96,7 @@
                         <option value="Security">Security</option>
                         <option value="Other">Other</option>
                     </select>
-                </div>
-                <div class="form-group">
-                    <label for="houseTutor">Assigned House Tutor</label>
-                    <select id="houseTutor">
-                        <option value="">-- Select House Tutor --</option>
-                        <option value="House Tutor 1 (Block A)">House Tutor 1 (Block A)</option>
-                        <option value="House Tutor 2 (Block B)">House Tutor 2 (Block B)</option>
-                        <option value="House Tutor 3 (Block C)">House Tutor 3 (Block C)</option>
-                        <option value="House Tutor 4 (Block D)">House Tutor 4 (Block D)</option>
-                        <option value="Provost">Provost</option>
-                    </select>
+                    <input type="text" id="otherSector" class="other-sector-input" placeholder="Please specify your problem sector...">
                 </div>
                 <div class="form-group">
                     <label for="subject">Title</label>
@@ -164,23 +164,36 @@
     
         // Function to handle complaint submission
         async function submitComplaint() {
-            const sector = document.getElementById('sector').value;
-            const houseTutor = document.getElementById('houseTutor').value;
+            const sectorSelect = document.getElementById('sector');
+            const otherSectorInput = document.getElementById('otherSector');
+            let sector = sectorSelect.value;
+            
+            // If "Other" is selected, use the custom input value
+            if (sector === "Other") {
+                const otherValue = otherSectorInput.value.trim();
+                if (!otherValue) {
+                    showToast("Please specify your problem sector.", "warning");
+                    otherSectorInput.focus();
+                    return;
+                }
+                sector = `Other: ${otherValue}`;
+            }
+            
             const subject = document.getElementById('subject').value.trim();
             const description = document.getElementById('description').value.trim();
     
-            if (!sector) {
+            if (!sectorSelect.value) {
                 showToast("Please select a problem sector.", "warning");
-                return;
-            }
-            if (!houseTutor) {
-                showToast("Please select a house tutor.", "warning");
                 return;
             }
             if (!subject || !description) {
                 showToast("Please fill out both the subject and description.", "warning");
                 return;
             }
+
+            const submitBtn = document.getElementById('submitButton');
+            submitBtn.classList.add('btn-loading');
+            submitBtn.disabled = true;
     
             try {
                 // Fetch the room number from Realtime Database
@@ -191,12 +204,11 @@
     
                 // Create a document in the "Complaints" collection in Firestore
                 await setDoc(doc(firestore, "Complaints", documentId), {
-                    id: studentId,
+                    userId: studentId,
                     subject: subject,
                     description: description,
                     sector: sector,
-                    houseTutor: houseTutor,
-                    room: roomNumber,
+                    roomNumber: roomNumber,
                     timestamp: new Date().toISOString()
                 });
     
@@ -205,8 +217,22 @@
             } catch (error) {
                 console.error("Error submitting complaint:", error.message);
                 showToast("Failed to submit complaint. Please try again.", "error");
+                submitBtn.classList.remove('btn-loading');
+                submitBtn.disabled = false;
             }
         }
+
+        // Show/hide other sector input based on selection
+        document.getElementById('sector').addEventListener('change', function() {
+            const otherInput = document.getElementById('otherSector');
+            if (this.value === 'Other') {
+                otherInput.classList.add('visible');
+                otherInput.focus();
+            } else {
+                otherInput.classList.remove('visible');
+                otherInput.value = '';
+            }
+        });
     
         // Attach the submitComplaint function to the submit button
         document.getElementById('submitButton').addEventListener('click', submitComplaint);

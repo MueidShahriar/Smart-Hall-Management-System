@@ -264,6 +264,8 @@
 </head>
 
 <body>
+    <script src="../../scripts/preloader.js"></script>
+
     <div class="container">
 
         <main>
@@ -361,11 +363,11 @@
             authDomain: "bauet-hms-63f5b.firebaseapp.com",
             databaseURL: "https://bauet-hms-63f5b-default-rtdb.firebaseio.com",
             projectId: "bauet-hms-63f5b",
-            storageBucket: "bauet-hms-63f5b.firebasestorage.app",
-            messagingSenderId: "757aborede399",
-            appId: "1:757844399:web:4b2a46e252cd79deaf763b"
+            storageBucket: "bauet-hms-63f5b.appspot.com",
+            messagingSenderId: "200038506273",
+            appId: "1:200038506273:web:2e141fc9ec36de049ae860"
         };
-        firebase.initializeApp(firebaseConfig);
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
     </script>
 
@@ -394,6 +396,7 @@
 
         // Generate Report
         document.getElementById('generateBtn').addEventListener('click', async () => {
+            const genBtn = document.getElementById('generateBtn');
             const type = reportType.value;
             const content = document.getElementById('reportContent');
 
@@ -413,7 +416,9 @@
                 targetDate = monthVal;
             }
 
-            content.innerHTML = '<div class="empty-state"><p>Loading...</p></div>';
+            genBtn.classList.add('btn-loading');
+            genBtn.disabled = true;
+            content.innerHTML = '<div class="empty-state"><div class="loader"></div><p>Loading report...</p></div>';
 
             try {
                 const snapshot = await db.collection('meals').get();
@@ -501,14 +506,16 @@
                 tableHTML += '</tbody></table>';
                 content.innerHTML = tableHTML;
                 showToast('Report generated successfully', 'success');
+                genBtn.classList.remove('btn-loading');
+                genBtn.disabled = false;
 
             } catch (error) {
                 console.error('Error generating report:', error);
                 content.innerHTML = '<div class="empty-state"><span class="material-icons">error</span><p>Failed to load data. Please try again.</p></div>';
                 showToast('Error loading report data', 'error');
+                genBtn.classList.remove('btn-loading');
+                genBtn.disabled = false;
             }
         });
     </script>
 </body>
-
-</html>

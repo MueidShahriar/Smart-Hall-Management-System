@@ -38,6 +38,70 @@
             margin-bottom: 2rem;
         }
 
+        /* Tabs */
+        .tabs-container {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--clr-info-light);
+            padding-bottom: 0;
+        }
+
+        .tab-btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            background: transparent;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--clr-info-dark);
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .tab-btn:hover {
+            color: var(--clr-primary);
+        }
+
+        .tab-btn.active {
+            color: var(--clr-primary);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--clr-primary);
+            border-radius: 3px 3px 0 0;
+        }
+
+        .tab-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 6px;
+            border-radius: 10px;
+            background: #ef4444;
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 700;
+            margin-left: 6px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
         /* Filter */
         .filter-row {
             display: flex;
@@ -258,35 +322,63 @@
 </head>
 
 <body>
+    <script src="../../scripts/preloader.js"></script>
+
     <div class="container">
 
         <main>
-            <h1>Guest Room Requests</h1>
-            <p class="page-subtitle">Review and manage guest room booking requests from students</p>
+            <h1>Check Requests</h1>
+            <p class="page-subtitle">Review and manage student registrations and guest room bookings</p>
 
-            <!-- Filter -->
-            <div class="filter-row">
-                <select id="statusFilter">
-                    <option value="all">All Requests</option>
-                    <option value="pending" selected>Pending</option>
-                    <option value="approved">Approved</option>
-                    <option value="rejected">Rejected</option>
-                </select>
+            <!-- Tabs -->
+            <div class="tabs-container">
+                <button class="tab-btn active" data-tab="students" onclick="switchTab('students')">
+                    Student Registrations <span class="tab-badge" id="studentBadge" style="display:none">0</span>
+                </button>
+                <button class="tab-btn" data-tab="guests" onclick="switchTab('guests')">
+                    Guest Room Requests <span class="tab-badge" id="guestBadge" style="display:none">0</span>
+                </button>
             </div>
 
-            <!-- Summary -->
-            <div class="summary-strip">
-                <div class="summary-chip"><span class="dot all"></span> Total: <span id="countAll">0</span></div>
-                <div class="summary-chip"><span class="dot pending"></span> Pending: <span id="countPending">0</span></div>
-                <div class="summary-chip"><span class="dot approved"></span> Approved: <span id="countApproved">0</span></div>
-                <div class="summary-chip"><span class="dot rejected"></span> Rejected: <span id="countRejected">0</span></div>
+            <!-- Student Registrations Tab -->
+            <div class="tab-content active" id="students-tab">
+                <div class="summary-strip">
+                    <div class="summary-chip"><span class="dot pending"></span> Pending: <span id="studentCountPending">0</span></div>
+                </div>
+                <div class="requests-grid" id="studentsContainer">
+                    <div class="empty-state">
+                        <span class="material-icons">hourglass_empty</span>
+                        <p>Loading...</p>
+                    </div>
+                </div>
             </div>
 
-            <!-- Requests Grid -->
-            <div class="requests-grid" id="requestsContainer">
-                <div class="empty-state">
-                    <span class="material-icons">hourglass_empty</span>
-                    <p>Loading requests...</p>
+            <!-- Guest Room Requests Tab -->
+            <div class="tab-content" id="guests-tab">
+                <!-- Filter -->
+                <div class="filter-row">
+                    <select id="statusFilter">
+                        <option value="all">All Requests</option>
+                        <option value="pending" selected>Pending</option>
+                        <option value="approved">Approved</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
+                </div>
+
+                <!-- Summary -->
+                <div class="summary-strip">
+                    <div class="summary-chip"><span class="dot all"></span> Total: <span id="countAll">0</span></div>
+                    <div class="summary-chip"><span class="dot pending"></span> Pending: <span id="countPending">0</span></div>
+                    <div class="summary-chip"><span class="dot approved"></span> Approved: <span id="countApproved">0</span></div>
+                    <div class="summary-chip"><span class="dot rejected"></span> Rejected: <span id="countRejected">0</span></div>
+                </div>
+
+                <!-- Requests Grid -->
+                <div class="requests-grid" id="requestsContainer">
+                    <div class="empty-state">
+                        <span class="material-icons">hourglass_empty</span>
+                        <p>Loading requests...</p>
+                    </div>
                 </div>
             </div>
         </main>
@@ -296,6 +388,7 @@
 
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
     <script>
         const firebaseConfig = {
@@ -303,12 +396,13 @@
             authDomain: "bauet-hms-63f5b.firebaseapp.com",
             databaseURL: "https://bauet-hms-63f5b-default-rtdb.firebaseio.com",
             projectId: "bauet-hms-63f5b",
-            storageBucket: "bauet-hms-63f5b.firebasestorage.app",
-            messagingSenderId: "757aborede399",
-            appId: "1:757844399:web:4b2a46e252cd79deaf763b"
+            storageBucket: "bauet-hms-63f5b.appspot.com",
+            messagingSenderId: "200038506273",
+            appId: "1:200038506273:web:2e141fc9ec36de049ae860"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
+        const rtdb = firebase.database();
     </script>
 
     <script src="../../scripts/sidebar.js"></script>
@@ -316,6 +410,168 @@
     <script src="../../scripts/toast.js"></script>
 
     <script>
+        // Tab switching
+        window.switchTab = function(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+        };
+
+        // Student registrations
+        let pendingStudents = [];
+
+        async function loadStudentRegistrations() {
+            const container = document.getElementById('studentsContainer');
+            try {
+                const snapshot = await db.collection('PendingStudents').orderBy('createdAt', 'desc').get();
+                pendingStudents = [];
+                
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    data._id = doc.id;
+                    pendingStudents.push(data);
+                });
+
+                const pendingCount = pendingStudents.length;
+                document.getElementById('studentCountPending').textContent = pendingCount;
+                
+                const badge = document.getElementById('studentBadge');
+                if (pendingCount > 0) {
+                    badge.textContent = pendingCount;
+                    badge.style.display = 'inline-flex';
+                } else {
+                    badge.style.display = 'none';
+                }
+
+                if (pendingStudents.length === 0) {
+                    container.innerHTML = '<div class="empty-state"><span class="material-icons">check_circle</span><p>No pending student registrations</p></div>';
+                    return;
+                }
+
+                container.innerHTML = pendingStudents.map(student => `
+                    <div class="request-card" id="student-card-${student._id}">
+                        <div class="request-header">
+                            <h3>${student.name || 'Unknown'}</h3>
+                            <span class="status-badge pending">Pending</span>
+                        </div>
+                        <div class="request-details">
+                            <div class="detail-item">
+                                <span class="label">Student ID</span>
+                                <span class="value">${student.id || '—'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Email</span>
+                                <span class="value">${student.email || '—'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Department</span>
+                                <span class="value">${student.department || '—'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Batch</span>
+                                <span class="value">${student.batch || '—'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Room</span>
+                                <span class="value">${student.room || '—'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Phone</span>
+                                <span class="value">${student.phone || '—'}</span>
+                            </div>
+                        </div>
+                        <div class="request-actions">
+                            <button class="btn-approve" onclick="approveStudent('${student._id}')">
+                                <span class="material-icons">check_circle</span> Approve
+                            </button>
+                            <button class="btn-reject" onclick="rejectStudent('${student._id}')">
+                                <span class="material-icons">cancel</span> Reject
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading student registrations:', error);
+                container.innerHTML = '<div class="empty-state"><span class="material-icons">error</span><p>Failed to load registrations</p></div>';
+            }
+        }
+
+        // Approve student registration
+        window.approveStudent = async function(studentId) {
+            const btn = event.target.closest('.btn-approve');
+            btn.classList.add('btn-loading');
+            btn.disabled = true;
+
+            try {
+                const student = pendingStudents.find(s => s._id === studentId);
+                if (!student) throw new Error('Student not found');
+
+                // Add to RTDB users
+                await rtdb.ref(`users/${student.id}`).set({
+                    name: student.name,
+                    email: student.email,
+                    address: student.address,
+                    father_Name: student.father_Name,
+                    mother_Name: student.mother_Name,
+                    phone: student.phone,
+                    department: student.department,
+                    batch: student.batch,
+                    room: student.room,
+                    seat: student.seat,
+                    dob: student.dob,
+                    role: "member",
+                    id: student.id
+                });
+
+                // Update room seat in Firestore
+                const seatRef = db.collection('room').doc(student.room).collection('members').doc(student.seat);
+                await seatRef.set({
+                    id: student.id,
+                    name: student.name,
+                    batch: student.batch,
+                    department: student.department,
+                    isEmpty: false,
+                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                // Delete from pending
+                await db.collection('PendingStudents').doc(studentId).delete();
+
+                // Send approval email notification (using EmailJS or similar service)
+                // For now, just show success
+                showToast(`Student ${student.name} approved successfully! They can now login.`, 'success');
+
+                // Refresh list
+                loadStudentRegistrations();
+            } catch (error) {
+                console.error('Error approving student:', error);
+                showToast('Failed to approve student: ' + error.message, 'error');
+                btn.classList.remove('btn-loading');
+                btn.disabled = false;
+            }
+        };
+
+        // Reject student registration
+        window.rejectStudent = async function(studentId) {
+            if (!confirm('Are you sure you want to reject this registration?')) return;
+            
+            const btn = event.target.closest('.btn-reject');
+            btn.classList.add('btn-loading');
+            btn.disabled = true;
+
+            try {
+                await db.collection('PendingStudents').doc(studentId).delete();
+                showToast('Registration rejected', 'info');
+                loadStudentRegistrations();
+            } catch (error) {
+                console.error('Error rejecting student:', error);
+                showToast('Failed to reject: ' + error.message, 'error');
+                btn.classList.remove('btn-loading');
+                btn.disabled = false;
+            }
+        };
+
         // All requests data
         let allRequests = [];
 
@@ -341,6 +597,14 @@
                 document.getElementById('countPending').textContent = pending;
                 document.getElementById('countApproved').textContent = approved;
                 document.getElementById('countRejected').textContent = rejected;
+
+                const badge = document.getElementById('guestBadge');
+                if (pending > 0) {
+                    badge.textContent = pending;
+                    badge.style.display = 'inline-flex';
+                } else {
+                    badge.style.display = 'none';
+                }
 
                 renderRequests();
             } catch (error) {
@@ -417,6 +681,10 @@
 
         // Update request status
         window.updateStatus = async function (requestId, newStatus) {
+            const btn = event.target.closest(newStatus === 'approved' ? '.btn-approve' : '.btn-reject');
+            btn.classList.add('btn-loading');
+            btn.disabled = true;
+
             try {
                 await db.collection('GuestRoomRequests').doc(requestId).update({
                     status: newStatus
@@ -438,11 +706,21 @@
                 document.getElementById('countApproved').textContent = approved;
                 document.getElementById('countRejected').textContent = rejected;
 
+                const badge = document.getElementById('guestBadge');
+                if (pending > 0) {
+                    badge.textContent = pending;
+                    badge.style.display = 'inline-flex';
+                } else {
+                    badge.style.display = 'none';
+                }
+
                 renderRequests();
                 showToast(`Request ${newStatus} successfully`, 'success');
             } catch (error) {
                 console.error('Error updating request:', error);
                 showToast('Failed to update request status', 'error');
+                btn.classList.remove('btn-loading');
+                btn.disabled = false;
             }
         };
 
@@ -450,7 +728,10 @@
         document.getElementById('statusFilter').addEventListener('change', renderRequests);
 
         // Init
-        document.addEventListener('DOMContentLoaded', loadRequests);
+        document.addEventListener('DOMContentLoaded', async function() {
+            await Promise.all([loadStudentRegistrations(), loadRequests()]);
+            hidePageLoader();
+        });
     </script>
 </body>
 

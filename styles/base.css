@@ -10,7 +10,7 @@
     --clr-primary: #7380ec;
     --clr-primary-variant: #111e88;
     --clr-success: #41f1b6;
-    --clr-danger: #000;
+    --clr-danger: #dc2626;
     --clr-warning: #d40c0c;
     --clr-white: #fff;
     --clr-dark: #000209;
@@ -68,7 +68,7 @@ h1 { font-size: 1.6rem; font-weight: 700; }
 h2 { font-size: 1.05rem; }
 h3 { font-size: 0.87rem; }
 h4 { font-size: 0.8rem; }
-h5 { font-size: 0.77rem; }
+h5 { font-size: 0.8rem; }
 
 p, small { color: var(--clr-dark-variant); }
 b { color: var(--clr-dark); }
@@ -149,13 +149,13 @@ b { color: var(--clr-dark); }
 
 /* Sidebar label */
 .sidebar-label {
-    font-size: 0.6rem;
+    font-size: 0.65rem;
     font-weight: 700;
-    letter-spacing: 2px;
+    letter-spacing: 1.5px;
     text-transform: uppercase;
     color: var(--clr-info-dark);
     padding: 1rem 1.2rem 0.4rem;
-    opacity: 0.6;
+    opacity: 0.65;
 }
 
 .sidebar {
@@ -656,14 +656,12 @@ main .dashboard {
     font-size: 0.8rem;
     font-weight: 600;
     color: var(--clr-dark);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    line-height: 1.3;
 }
 .notif-sub {
-    font-size: 0.72rem;
+    font-size: 0.74rem;
     color: var(--clr-info-dark);
-    margin-top: 1px;
+    margin-top: 2px;
 }
 
 #menu_bar {
@@ -890,3 +888,112 @@ main .dashboard {
         z-index: -1;
     }
 }
+
+/* ===========================
+   LOADER STYLES - Professional Spinner
+   (Page preloader is handled by scripts/preloader.js)
+   =========================== */
+
+/* Standalone Loader (for inline use) */
+.loader {
+    width: 50px;
+    aspect-ratio: 1;
+    display: grid;
+    border: 4px solid #0000;
+    border-radius: 50%;
+    border-color: #ccc #0000;
+    animation: loaderSpin 1s infinite linear;
+}
+
+.loader::before,
+.loader::after {    
+    content: "";
+    grid-area: 1/1;
+    margin: 2px;
+    border: inherit;
+    border-radius: 50%;
+}
+
+.loader::before {
+    border-color: #f03355 #0000;
+    animation: loaderSpin 0.5s infinite linear reverse;
+}
+
+.loader::after {
+    margin: 8px;
+}
+
+.loader.loader-sm {
+    width: 24px;
+    border-width: 2px;
+}
+
+.loader.loader-sm::before {
+    margin: 1px;
+}
+
+.loader.loader-sm::after {
+    margin: 4px;
+}
+
+@keyframes loaderSpin { 
+    100% { transform: rotate(1turn); }
+}
+
+/* Button Loader State */
+.btn-loading {
+    position: relative;
+    pointer-events: none;
+    color: transparent !important;
+}
+
+.btn-loading::after {
+    content: "";
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    top: 50%;
+    left: 50%;
+    margin-left: -10px;
+    margin-top: -10px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: loaderSpin 0.8s linear infinite;
+}
+
+.btn-loading.btn-light::after,
+.btn-loading.btn-outline::after {
+    border-color: rgba(115, 128, 236, 0.3);
+    border-top-color: #7380ec;
+}
+
+/* Logout button in topbar */
+.topbar-logout-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    background: rgba(225, 29, 72, 0.08) !important;
+    border: 1.5px solid rgba(225, 29, 72, 0.2) !important;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s ease;
+    padding: 0 !important;
+    flex-shrink: 0;
+}
+
+.topbar-logout-btn:hover {
+    background: rgba(225, 29, 72, 0.15) !important;
+    border-color: rgba(225, 29, 72, 0.3) !important;
+}
+
+.topbar-logout-btn img {
+    width: 18px;
+    height: 18px;
+}
+
+/* Notification solved badge */
+.notif-solved .notif-icon { background: #e8f5e9; color: #2e7d32; }

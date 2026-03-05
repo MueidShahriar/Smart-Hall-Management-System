@@ -1,4 +1,4 @@
-const CACHE_NAME = 'smart-hall-v1';
+const CACHE_NAME = 'smart-hall-v3';
 const OFFLINE_URL = '/index.html';
 
 const ASSETS_TO_CACHE = [
@@ -42,6 +42,7 @@ const ASSETS_TO_CACHE = [
   '/styles/Notices.css',
 
   // Scripts
+  '/scripts/preloader.js',
   '/scripts/sidebar.js',
   '/scripts/toast.js',
   '/scripts/StudentDashboard.js',

@@ -111,12 +111,16 @@
             logoutBtn.addEventListener('click', e => { e.preventDefault(); doLogout(); });
         }
 
-        // Student: attendance button (no longer needed - navigates to page)
-        // Keep compatibility - if on attendance page, don't intercept clicks
+        // Topbar logout button
+        const topbarLogoutBtn = document.getElementById('topbarLogoutBtn');
+        if (topbarLogoutBtn) {
+            topbarLogoutBtn.addEventListener('click', e => { e.preventDefault(); doLogout(); });
+        }
 
-        // Admin: session guard
-        if (role === 'admin' && !sessionStorage.getItem('userId')) {
+        // Session guard — redirect to login if not authenticated
+        if (!sessionStorage.getItem('userId')) {
             window.location.replace('../../index.html');
+            return;
         }
     }
 
@@ -227,6 +231,9 @@
                     <button class="profile-btn topbar-btn" title="Profile" type="button">
                         <img class="profile-btn-img" src="../../assets/img/profile-user.png" alt="Profile" />
                     </button>` : ''}
+                    <button class="topbar-logout-btn" title="Logout" type="button" id="topbarLogoutBtn">
+                        <img src="../../images/power-switch.png" alt="Logout" />
+                    </button>
                 </div>
             </div>
             <!-- Notification dropdown (hidden by default) -->
@@ -336,13 +343,14 @@
     }
 
     function startAdminNotifs(db, badge, body) {
-        const allNotifs = { sos: [], complaints: [], requests: [] };
+        const allNotifs = { sos: [], complaints: [], requests: [], students: [] };
 
         function render() {
             const items = [
                 ...allNotifs.sos.map(n => ({ ...n, type: 'sos' })),
                 ...allNotifs.complaints.map(n => ({ ...n, type: 'complaint' })),
-                ...allNotifs.requests.map(n => ({ ...n, type: 'request' }))
+                ...allNotifs.requests.map(n => ({ ...n, type: 'request' })),
+                ...allNotifs.students.map(n => ({ ...n, type: 'student' }))
             ];
             items.sort((a, b) => (b.time || 0) - (a.time || 0));
 
@@ -354,9 +362,10 @@
                 return;
             }
             body.innerHTML = items.slice(0, 30).map(n => {
-                const icon = n.type === 'sos' ? 'emergency' : n.type === 'complaint' ? 'report_problem' : 'meeting_room';
-                const cls  = n.type === 'sos' ? 'notif-sos' : n.type === 'complaint' ? 'notif-complaint' : 'notif-request';
-                return `<div class="notif-item ${cls}">
+                const icon = n.type === 'sos' ? 'emergency' : n.type === 'complaint' ? 'report_problem' : n.type === 'student' ? 'person_add' : 'meeting_room';
+                const cls  = n.type === 'sos' ? 'notif-sos' : n.type === 'complaint' ? 'notif-complaint' : n.type === 'student' ? 'notif-request' : 'notif-request';
+                const link = n.link || '#';
+                return `<div class="notif-item ${cls}" data-link="${link}" style="cursor:pointer" onclick="if(this.dataset.link !== '#') window.location.href=this.dataset.link">
                     <span class="material-icons notif-icon">${icon}</span>
                     <div class="notif-text">
                         <p class="notif-title">${escapeHTMLStr(n.title)}</p>
@@ -376,7 +385,8 @@
                     allNotifs.sos.push({
                         title: `SOS: ${d.studentName || 'Unknown'}`,
                         sub: `Room ${d.roomNumber || 'N/A'} · ${timeAgo(d.timestamp)}`,
-                        time: d.timestamp ? new Date(d.timestamp).getTime() : 0
+                        time: d.timestamp ? new Date(d.timestamp).getTime() : 0,
+                        link: 'AdminDashboard.html'
                     });
                 });
                 render();
@@ -394,7 +404,8 @@
                     allNotifs.complaints.push({
                         title: `Complaint: ${d.subject || 'No subject'}`,
                         sub: `${d.sector || ''} · ${timeAgo(d.timestamp)}`,
-                        time: d.timestamp ? new Date(d.timestamp).getTime() : 0
+                        time: d.timestamp ? new Date(d.timestamp).getTime() : 0,
+                        link: 'complaints.html'
                     });
                 });
                 render();
@@ -411,7 +422,26 @@
                     allNotifs.requests.push({
                         title: `Room Request: ${d.name || 'Guest'}`,
                         sub: `Check-in ${d.checkin || 'N/A'} · ${timeAgo(d.createdAt)}`,
-                        time: d.createdAt ? new Date(d.createdAt).getTime() : 0
+                        time: d.createdAt ? new Date(d.createdAt).getTime() : 0,
+                        link: 'requests.html'
+                    });
+                });
+                render();
+            }, () => {})
+        );
+
+        // Pending student registrations
+        notifUnsubs.push(
+            db.collection('PendingStudents')
+              .onSnapshot(snap => {
+                allNotifs.students = [];
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    allNotifs.students.push({
+                        title: `New Registration: ${d.name || 'Student'}`,
+                        sub: `${d.department || ''} · ${timeAgo(d.createdAt)}`,
+                        time: d.createdAt ? new Date(d.createdAt).getTime() : 0,
+                        link: 'requests.html'
                     });
                 });
                 render();
@@ -421,10 +451,13 @@
 
     function startStudentNotifs(db, badge, body) {
         const sid = getStudentId();
-        const allNotifs = { docs: [] };
+        const allNotifs = { docs: [], solved: [] };
 
         function render() {
-            const items = allNotifs.docs.map(n => ({ ...n, type: 'doc' }));
+            const items = [
+                ...allNotifs.docs.map(n => ({ ...n, type: 'doc' })),
+                ...allNotifs.solved.map(n => ({ ...n, type: 'solved' }))
+            ];
             items.sort((a, b) => (b.time || 0) - (a.time || 0));
 
             badge.textContent = items.length;
@@ -435,9 +468,10 @@
                 return;
             }
             body.innerHTML = items.slice(0, 20).map(n => {
-                const icon = 'description';
-                const cls  = 'notif-doc';
-                return `<div class="notif-item ${cls}">
+                const icon = n.type === 'solved' ? 'check_circle' : 'description';
+                const cls  = n.type === 'solved' ? 'notif-solved' : 'notif-doc';
+                const link = n.link || '#';
+                return `<div class="notif-item ${cls}" data-link="${link}" style="cursor:pointer" onclick="if(this.dataset.link !== '#') window.location.href=this.dataset.link">
                     <span class="material-icons notif-icon">${icon}</span>
                     <div class="notif-text">
                         <p class="notif-title">${escapeHTMLStr(n.title)}</p>
@@ -460,13 +494,38 @@
                         allNotifs.docs.push({
                             title: d.title || 'New Document',
                             sub: `${d.category || 'Notice'} · ${timeAgo(d.uploadDate)}`,
-                            time: d.uploadDate ? new Date(d.uploadDate).getTime() : 0
+                            time: d.uploadDate ? new Date(d.uploadDate).getTime() : 0,
+                            link: `Notices.html?id=${sid}`
                         });
                     }
                 });
                 render();
             }, () => {})
         );
+
+        // Solved complaints notifications (last 7 days)
+        if (sid) {
+            notifUnsubs.push(
+                db.collection('SolvedComplaints').where('userId', '==', sid)
+                  .onSnapshot(snap => {
+                    allNotifs.solved = [];
+                    snap.forEach(doc => {
+                        const d = doc.data();
+                        const solvedTime = d.solvedAt || d.timestamp;
+                        const weekAgoTime = Date.now() - 7 * 86400000;
+                        if (solvedTime && new Date(solvedTime).getTime() > weekAgoTime) {
+                            allNotifs.solved.push({
+                                title: `Complaint Resolved: ${d.subject || 'Your complaint'}`,
+                                sub: `${d.sector || ''} · Solved ${timeAgo(solvedTime)}`,
+                                time: solvedTime ? new Date(solvedTime).getTime() : 0,
+                                link: `StudentDashboard.html?id=${sid}`
+                            });
+                        }
+                    });
+                    render();
+                }, () => {})
+            );
+        }
     }
 
     /* ── Profile Photo Loader ────────────────────── */

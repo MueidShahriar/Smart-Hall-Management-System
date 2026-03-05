@@ -215,6 +215,9 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    submitBtn.classList.add('btn-loading');
+    submitBtn.disabled = true;
+
     try {
       const mealDocRef = db.collection('meals').doc(studentId);
       
@@ -265,9 +268,13 @@ document.addEventListener("DOMContentLoaded", () => {
       await mealDocRef.set(updatedData, { merge: true });
       
       showToast("Meal plan submitted successfully!", "success");
+      submitBtn.classList.remove('btn-loading');
+      submitBtn.disabled = false;
     } catch (error) {
       console.error("Error submitting meal plan:", error);
       showToast("There was an error submitting the meal plan: " + error.message, "error");
+      submitBtn.classList.remove('btn-loading');
+      submitBtn.disabled = false;
     }
   });
 

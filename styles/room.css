@@ -420,7 +420,7 @@ main {
 }
 
 .stat-info p {
-    font-size: 0.75rem;
+    font-size: 0.78rem;
     color: var(--clr-info-dark);
     margin-top: 0.15rem;
 }
@@ -484,9 +484,9 @@ main {
 }
 
 .room-badge {
-    font-size: 0.68rem;
+    font-size: 0.72rem;
     font-weight: 600;
-    padding: 0.15rem 0.5rem;
+    padding: 0.18rem 0.55rem;
     border-radius: 12px;
     text-transform: uppercase;
     letter-spacing: 0.3px;

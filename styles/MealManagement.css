@@ -213,9 +213,9 @@
         padding: 0.3rem;
     }
 
-    .day-number { font-size: 0.72rem; }
-    .meal-toggle { font-size: 0.65rem; }
-    .day-cost { font-size: 0.65rem; }
+    .day-number { font-size: 0.75rem; }
+    .meal-toggle { font-size: 0.7rem; }
+    .day-cost { font-size: 0.7rem; }
 
     #totalCost { font-size: 1.3rem; }
     .total-cost-card h2 { font-size: 0.95rem; }
