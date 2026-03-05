@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Requests | SMART Hall</title>
+
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="shortcut icon" href="../../images/RSM_Logo.png" type="image/x-icon">
+    <link rel="stylesheet" href="../../styles/base.css">
+
+    <style>
+        /* Page Header */
+        main h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--clr-dark);
+            margin-bottom: 0.5rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        main h1::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 60%;
+            height: 3px;
+            background: var(--clr-primary);
+            border-radius: 2px;
+        }
+
+        .page-subtitle {
+            color: var(--clr-info-dark);
+            font-size: 0.88rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Filter */
+        .filter-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-row select {
+            padding: 0.5rem 1rem;
+            border: 1.5px solid var(--clr-info-light);
+            border-radius: var(--radius-1);
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.85rem;
+            background: var(--clr-white);
+            transition: border-color 0.2s;
+        }
+
+        .filter-row select:focus {
+            outline: none;
+            border-color: var(--clr-primary);
+        }
+
+        /* Summary */
+        .summary-strip {
+            display: flex;
+            gap: 1.2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .summary-chip {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--clr-white);
+            padding: 0.6rem 1.2rem;
+            border-radius: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .summary-chip .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .dot.pending { background: #fdcb6e; }
+        .dot.approved { background: #00b894; }
+        .dot.rejected { background: #d63031; }
+        .dot.all { background: var(--clr-primary); }
+
+        /* Request Cards */
+        .requests-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(min(340px, 100%), 1fr));
+            gap: 1.2rem;
+        }
+
+        .request-card {
+            background: var(--clr-white);
+            border-radius: var(--radius-2);
+            padding: 1.5rem;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .request-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        .request-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .request-header h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--clr-dark);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.2rem 0.7rem;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-badge.pending {
+            background: rgba(253, 203, 110, 0.2);
+            color: #e17055;
+        }
+
+        .status-badge.approved {
+            background: rgba(0, 184, 148, 0.12);
+            color: #00b894;
+        }
+
+        .status-badge.rejected {
+            background: rgba(214, 48, 49, 0.1);
+            color: #d63031;
+        }
+
+        .request-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.4rem 1rem;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-item .label {
+            font-size: 0.72rem;
+            color: var(--clr-info-dark);
+            font-weight: 500;
+        }
+
+        .detail-item .value {
+            font-size: 0.85rem;
+            color: var(--clr-dark);
+            font-weight: 500;
+        }
+
+        .request-actions {
+            display: flex;
+            gap: 0.6rem;
+            margin-top: 0.5rem;
+            padding-top: 0.8rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        .btn-approve,
+        .btn-reject {
+            flex: 1;
+            padding: 0.5rem;
+            border: none;
+            border-radius: var(--radius-1);
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.3rem;
+        }
+
+        .btn-approve {
+            background: rgba(0, 184, 148, 0.12);
+            color: #00b894;
+        }
+
+        .btn-approve:hover {
+            background: rgba(0, 184, 148, 0.25);
+            transform: translateY(-1px);
+        }
+
+        .btn-reject {
+            background: rgba(214, 48, 49, 0.08);
+            color: #d63031;
+        }
+
+        .btn-reject:hover {
+            background: rgba(214, 48, 49, 0.18);
+            transform: translateY(-1px);
+        }
+
+        .btn-approve .material-icons,
+        .btn-reject .material-icons {
+            font-size: 1rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--clr-info-dark);
+            grid-column: 1 / -1;
+        }
+
+        .empty-state .material-icons {
+            font-size: 3rem;
+            opacity: 0.4;
+            margin-bottom: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .requests-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .summary-strip { gap: 0.6rem; }
+            .summary-chip { padding: 0.4rem 0.8rem; font-size: 0.78rem; }
+            .request-card { padding: 1rem; }
+            .request-details { grid-template-columns: 1fr; }
+            .request-actions { flex-direction: column; }
+            .empty-state { padding: 2rem 1rem; }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <main>
+            <h1>Guest Room Requests</h1>
+            <p class="page-subtitle">Review and manage guest room booking requests from students</p>
+
+            <!-- Filter -->
+            <div class="filter-row">
+                <select id="statusFilter">
+                    <option value="all">All Requests</option>
+                    <option value="pending" selected>Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                </select>
+            </div>
+
+            <!-- Summary -->
+            <div class="summary-strip">
+                <div class="summary-chip"><span class="dot all"></span> Total: <span id="countAll">0</span></div>
+                <div class="summary-chip"><span class="dot pending"></span> Pending: <span id="countPending">0</span></div>
+                <div class="summary-chip"><span class="dot approved"></span> Approved: <span id="countApproved">0</span></div>
+                <div class="summary-chip"><span class="dot rejected"></span> Rejected: <span id="countRejected">0</span></div>
+            </div>
+
+            <!-- Requests Grid -->
+            <div class="requests-grid" id="requestsContainer">
+                <div class="empty-state">
+                    <span class="material-icons">hourglass_empty</span>
+                    <p>Loading requests...</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Right Panel -->
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBF-nMMW5lG44JfHxx4HxCbf5N81geOiRs",
+            authDomain: "bauet-hms-63f5b.firebaseapp.com",
+            databaseURL: "https://bauet-hms-63f5b-default-rtdb.firebaseio.com",
+            projectId: "bauet-hms-63f5b",
+            storageBucket: "bauet-hms-63f5b.firebasestorage.app",
+            messagingSenderId: "757aborede399",
+            appId: "1:757844399:web:4b2a46e252cd79deaf763b"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+    </script>
+
+    <script src="../../scripts/sidebar.js"></script>
+    <script>initSidebar('admin', 'requests');</script>
+    <script src="../../scripts/toast.js"></script>
+
+    <script>
+        // All requests data
+        let allRequests = [];
+
+        // Load requests
+        async function loadRequests() {
+            const container = document.getElementById('requestsContainer');
+            try {
+                const snapshot = await db.collection('GuestRoomRequests').orderBy('createdAt', 'desc').get();
+                allRequests = [];
+                let pending = 0, approved = 0, rejected = 0;
+
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    data._id = doc.id;
+                    allRequests.push(data);
+                    const status = (data.status || 'pending').toLowerCase();
+                    if (status === 'pending') pending++;
+                    else if (status === 'approved') approved++;
+                    else if (status === 'rejected') rejected++;
+                });
+
+                document.getElementById('countAll').textContent = allRequests.length;
+                document.getElementById('countPending').textContent = pending;
+                document.getElementById('countApproved').textContent = approved;
+                document.getElementById('countRejected').textContent = rejected;
+
+                renderRequests();
+            } catch (error) {
+                console.error('Error loading requests:', error);
+                container.innerHTML = '<div class="empty-state"><span class="material-icons">error</span><p>Failed to load requests</p></div>';
+                showToast('Error loading requests', 'error');
+            }
+        }
+
+        function renderRequests() {
+            const container = document.getElementById('requestsContainer');
+            const filter = document.getElementById('statusFilter').value;
+
+            const filtered = filter === 'all'
+                ? allRequests
+                : allRequests.filter(r => (r.status || 'pending').toLowerCase() === filter);
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="empty-state"><span class="material-icons">inbox</span><p>No requests found</p></div>';
+                return;
+            }
+
+            container.innerHTML = filtered.map(req => {
+                const status = (req.status || 'pending').toLowerCase();
+                const checkin = req.checkin || '—';
+                const checkout = req.checkout || '—';
+                const isPending = status === 'pending';
+
+                return `
+                    <div class="request-card" id="card-${req._id}">
+                        <div class="request-header">
+                            <h3>${req.name || 'Unknown'}</h3>
+                            <span class="status-badge ${status}">${status}</span>
+                        </div>
+                        <div class="request-details">
+                            <div class="detail-item">
+                                <span class="label">NID</span>
+                                <span class="value">${req.nid || '—'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Phone</span>
+                                <span class="value">${req.phone || '—'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Email</span>
+                                <span class="value">${req.email || '—'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Relationship</span>
+                                <span class="value">${req.relationship || '—'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Check-in</span>
+                                <span class="value">${checkin}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Check-out</span>
+                                <span class="value">${checkout}</span>
+                            </div>
+                        </div>
+                        ${isPending ? `
+                        <div class="request-actions">
+                            <button class="btn-approve" onclick="updateStatus('${req._id}', 'approved')">
+                                <span class="material-icons">check_circle</span> Approve
+                            </button>
+                            <button class="btn-reject" onclick="updateStatus('${req._id}', 'rejected')">
+                                <span class="material-icons">cancel</span> Reject
+                            </button>
+                        </div>` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Update request status
+        window.updateStatus = async function (requestId, newStatus) {
+            try {
+                await db.collection('GuestRoomRequests').doc(requestId).update({
+                    status: newStatus
+                });
+
+                // Update local data
+                const req = allRequests.find(r => r._id === requestId);
+                if (req) req.status = newStatus;
+
+                // Recount
+                let pending = 0, approved = 0, rejected = 0;
+                allRequests.forEach(r => {
+                    const s = (r.status || 'pending').toLowerCase();
+                    if (s === 'pending') pending++;
+                    else if (s === 'approved') approved++;
+                    else if (s === 'rejected') rejected++;
+                });
+                document.getElementById('countPending').textContent = pending;
+                document.getElementById('countApproved').textContent = approved;
+                document.getElementById('countRejected').textContent = rejected;
+
+                renderRequests();
+                showToast(`Request ${newStatus} successfully`, 'success');
+            } catch (error) {
+                console.error('Error updating request:', error);
+                showToast('Failed to update request status', 'error');
+            }
+        };
+
+        // Filter change
+        document.getElementById('statusFilter').addEventListener('change', renderRequests);
+
+        // Init
+        document.addEventListener('DOMContentLoaded', loadRequests);
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Check Payments | Smart Hall</title>
+
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <link rel="shortcut icon" href="../../images/RSM_Logo.png" type="image/x-icon" />
+
+    <link rel="stylesheet" href="../../styles/base.css" />
+    <style>
+        .payments-wrapper {
+            max-width: 900px;
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .summary-card {
+            background: var(--clr-white);
+            border-radius: var(--radius-3);
+            padding: 1.2rem;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .summary-card .material-icons {
+            font-size: 2rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .summary-card h3 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin: 0.3rem 0;
+        }
+
+        .summary-card p {
+            font-size: 0.78rem;
+        }
+
+        .summary-card.total .material-icons { color: var(--clr-primary); }
+        .summary-card.paid .material-icons { color: #16a34a; }
+        .summary-card.paid h3 { color: #16a34a; }
+        .summary-card.due .material-icons { color: #dc2626; }
+        .summary-card.due h3 { color: #dc2626; }
+
+        .payments-table-wrap {
+            background: var(--clr-white);
+            border-radius: var(--radius-3);
+            box-shadow: var(--shadow);
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .payments-table-wrap h2 {
+            padding: 1rem 1.2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-bottom: 1px solid var(--clr-info-light);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead th {
+            background: var(--clr-bg);
+            padding: 0.7rem 1rem;
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-align: left;
+            color: var(--clr-dark-variant);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        tbody td {
+            padding: 0.7rem 1rem;
+            font-size: 0.82rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+        }
+
+        tbody tr:hover {
+            background: rgba(115, 128, 236, 0.04);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 50px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .status-badge.paid {
+            background: rgba(22, 163, 106, 0.12);
+            color: #16a34a;
+        }
+
+        .status-badge.pending {
+            background: rgba(245, 158, 11, 0.12);
+            color: #d97706;
+        }
+
+        .status-badge.overdue {
+            background: rgba(220, 38, 38, 0.12);
+            color: #dc2626;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--clr-dark-variant);
+        }
+
+        .no-data .material-icons {
+            font-size: 3rem;
+            opacity: 0.4;
+            margin-bottom: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .summary-cards {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 0.75rem;
+                min-width: 480px;
+            }
+
+            thead th,
+            tbody td {
+                padding: 0.5rem 0.6rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <main>
+            <div class="page-header">
+                <h1>Check Payments</h1>
+                <p>View your payment history and outstanding dues.</p>
+            </div>
+
+            <div class="payments-wrapper">
+                <div class="summary-cards">
+                    <div class="summary-card total">
+                        <span class="material-icons">account_balance_wallet</span>
+                        <h3 id="totalAmount">৳0</h3>
+                        <p>Total Fees</p>
+                    </div>
+                    <div class="summary-card paid">
+                        <span class="material-icons">check_circle</span>
+                        <h3 id="paidAmount">৳0</h3>
+                        <p>Total Paid</p>
+                    </div>
+                    <div class="summary-card due">
+                        <span class="material-icons">pending</span>
+                        <h3 id="dueAmount">৳0</h3>
+                        <p>Outstanding Due</p>
+                    </div>
+                </div>
+
+                <div class="payments-table-wrap">
+                    <h2>Payment History</h2>
+                    <div id="paymentsContainer">
+                        <div class="no-data">
+                            <span class="material-icons">receipt_long</span>
+                            <h3>No payment records found</h3>
+                            <p>Your payment history will appear here once available.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+    </div>
+
+    <script src="../../scripts/sidebar.js"></script>
+    <script>initSidebar('student', 'payments');</script>
+    <script src="../../scripts/toast.js"></script>
+</body>
+
+</html>

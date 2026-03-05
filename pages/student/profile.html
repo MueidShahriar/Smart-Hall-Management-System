@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html data-bs-theme="light" lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile | Smart Hall</title>
+
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <link rel="shortcut icon" href="../../images/RSM_Logo.png" type="image/x-icon" />
+    <link rel="stylesheet" href="../../styles/base.css" />
+    <link rel="stylesheet" href="../../styles/profile.css" />
+
+</head>
+
+<body>
+    <div class="container">
+
+        <!-- Main Content -->
+        <main>
+            <!-- Profile Header (gradient banner) -->
+            <div class="profile-header">
+                <div class="profile-photo-container" id="profilePhotoContainer">
+                    <img src="../../assets/img/profile-user.png" alt="Profile Picture" class="profile-avatar"
+                        id="profile-picture">
+                    <div class="photo-upload-overlay" id="photoUploadOverlay" title="Change Profile Photo">
+                        <span class="material-icons">camera_alt</span>
+                    </div>
+                    <input type="file" id="profileImageInput" accept="image/*" style="display:none">
+                </div>
+            </div>
+
+            <!-- Profile Body (white card) -->
+            <div class="profile-info">
+                <h1 id="name">Loading...</h1>
+
+                <div class="profile-meta">
+                    <div class="profile-meta-item">
+                        <span class="material-icons">badge</span>
+                        <b>ID:</b> <span id="id">...</span>
+                    </div>
+                    <div class="profile-meta-item">
+                        <span class="material-icons">engineering</span>
+                        <b>Dept:</b> <span id="department">...</span>
+                    </div>
+                    <div class="profile-meta-item">
+                        <span class="material-icons">school</span>
+                        <b>Batch:</b> <span id="batch">...</span>
+                    </div>
+                    <div class="profile-meta-item">
+                        <span class="material-icons">door_front</span>
+                        <b>Room:</b> <span id="roomNo">...</span>
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <div class="profile-tabs">
+                    <div class="profile-tab-nav">
+                        <div class="profile-tab-item active" id="contact-tab" onclick="showContactInfo()">Contact</div>
+                        <div class="profile-tab-item" id="personal-tab" onclick="showPersonalInfo()">Personal</div>
+                    </div>
+
+                    <div class="profile-tab-content" id="info-content">
+                        <!-- Tab content loaded dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <footer>
+                <div class="footer-links">
+                    <a href="https://www.linkedin.com/in/raufirzaman/">Raufir Zaman Choudhury</a> |
+                    <a href="https://www.facebook.com/mueid016">Md Mueid Shahriar</a> |
+                    <a href="https://www.linkedin.com/in/syed-sharzil-ahmmed-71a192266/">Syed Sharzil Ahmmed</a>
+                </div>
+                <p><small>2025 ©RSM</small></p>
+            </footer>
+        </main>
+
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+        import { getDatabase, ref, get, child, update } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
+        import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+        import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-storage.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBF-nMMW5lG44JfHxx4HxCbf5N81geOiRs",
+            authDomain: "bauet-hms-63f5b.firebaseapp.com",
+            databaseURL: "https://bauet-hms-63f5b-default-rtdb.firebaseio.com",
+            projectId: "bauet-hms-63f5b",
+            storageBucket: "bauet-hms-63f5b.appspot.com",
+            messagingSenderId: "200038506273",
+            appId: "1:200038506273:web:2e141fc9ec36de049ae860"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const auth = getAuth(app);
+        const storage = getStorage(app);
+
+        // Global variable to store user data
+        let userData = null;
+
+        // Retrieve studentId from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const studentId = urlParams.get('id');
+
+        if (!studentId) {
+            showToast("Student ID not found in the URL.", "error");
+        } else {
+            fetchUserData(studentId);
+        }
+
+        // Profile image upload
+        const photoContainer = document.getElementById('profilePhotoContainer');
+        const photoOverlay = document.getElementById('photoUploadOverlay');
+        const fileInput = document.getElementById('profileImageInput');
+
+        photoOverlay.addEventListener('click', (e) => {
+            e.stopPropagation();
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // Validate file
+            if (!file.type.startsWith('image/')) {
+                showToast('Please select an image file.', 'error');
+                return;
+            }
+            if (file.size > 5 * 1024 * 1024) {
+                showToast('Image must be under 5MB.', 'warning');
+                return;
+            }
+
+            // Show upload progress
+            const progress = document.createElement('div');
+            progress.className = 'upload-progress';
+            progress.innerHTML = '<span class="material-icons">sync</span>';
+            photoContainer.appendChild(progress);
+
+            try {
+                const ext = file.name.split('.').pop();
+                const imgRef = storageRef(storage, `profile_images/${studentId}.${ext}`);
+                await uploadBytes(imgRef, file);
+                const downloadURL = await getDownloadURL(imgRef);
+
+                // Save URL to RTDB
+                await update(ref(database, `users/${studentId}`), {
+                    profile_image_url: downloadURL
+                });
+
+                // Update UI
+                document.getElementById('profile-picture').src = downloadURL;
+                showToast('Profile photo updated!', 'success');
+            } catch (err) {
+                console.error('Upload error:', err);
+                showToast('Failed to upload photo. Please try again.', 'error');
+            } finally {
+                progress.remove();
+                fileInput.value = '';
+            }
+        });
+
+        // Fetch user data from Firebase
+        function fetchUserData(studentId) {
+            const dbRef = ref(database);
+            get(child(dbRef, `users/${studentId}`))
+                .then((snapshot) => {
+                    if (snapshot.exists()) {
+                        userData = snapshot.val(); // Store user data in the global variable
+                        displayUserData(userData);
+                    } else {
+                        showToast("User not found in the database.", "error");
+                    }
+                })
+                .catch((error) => {
+                    console.error("Database Error:", error.message);
+                });
+        }
+
+        // Display user data on the page
+        function displayUserData(userData) {
+            // Handle both "name" (single) and "firstName"/"lastName" (camelCase) fields
+            const fullName = userData.name
+                || [userData.firstName, userData.lastName].filter(Boolean).join(' ')
+                || "Name not available";
+            document.getElementById("name").textContent = fullName;
+            document.getElementById("id").textContent = userData.id || "ID not available";
+            document.getElementById("department").textContent = userData.dept_name || userData.department || "Dept not available";
+            document.getElementById("batch").textContent = userData.batch || "Batch not available";
+            document.getElementById("roomNo").textContent = userData.room || "Room not available";
+
+            // Set profile picture
+            const profileUrl = userData.profile_image_url || "../../assets/img/profile-user.png";
+            document.getElementById("profile-picture").src = profileUrl;
+
+            // Show contact information by default
+            showContactInfo();
+        }
+
+        // Tab switching functions
+        window.showContactInfo = function () {
+            if (!userData) return;
+
+            document.getElementById("info-content").innerHTML = `
+        <h3>Contact Information</h3>
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-label">Mobile Number</div>
+                <div class="info-value">${userData.phone || userData.phone_number || "Not available"}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Email Address</div>
+                <div class="info-value">${userData.email || "Not available"}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Permanent Address</div>
+                <div class="info-value">${userData.address || "Not available"}</div>
+            </div>
+        </div>
+        <div style="text-align: center; margin-top: 2rem;">
+            <button class="btn btn-danger">Change Password</button>
+        </div>
+    `;
+            document.getElementById("contact-tab").classList.add("active");
+            document.getElementById("personal-tab").classList.remove("active");
+        };
+
+        window.showPersonalInfo = function () {
+            if (!userData) return;
+
+            document.getElementById("info-content").innerHTML = `
+        <h3>Personal Information</h3>
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-label">Father's Name</div>
+                <div class="info-value">${userData.father_name || userData.father_Name || "Not available"}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Mother's Name</div>
+                <div class="info-value">${userData.mother_name || userData.mother_Name || "Not available"}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Date of Birth</div>
+                <div class="info-value">${userData.dob || "Not available"}</div>
+            </div>
+        </div>
+        <div style="text-align: center; margin-top: 2rem;">
+            <button class="btn btn-danger">Change Password</button>
+        </div>
+    `;
+            document.getElementById("contact-tab").classList.remove("active");
+            document.getElementById("personal-tab").classList.add("active");
+        };
+
+        // Logout is handled by sidebar.js
+
+        window.onload = function () {
+            if (performance.navigation.type === 2) {
+                sessionStorage.clear();
+                window.location.href = "../../index.html";
+            }
+        };
+
+        document.addEventListener("DOMContentLoaded", function () {
+            // Sidebar is handled by sidebar.js
+        });
+    </script>
+    <script src="../../scripts/sidebar.js"></script>
+    <script>initSidebar('student', 'profile');</script>
+    <script src="../../scripts/toast.js"></script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Meal Management | Smart Hall</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <link rel="shortcut icon" href="../../images/RSM_Logo.png" type="image/x-icon" />
+  <link rel="stylesheet" href="../../styles/base.css" />
+  <link rel="stylesheet" href="../../styles/MealManagement.css" />
+</head>
+
+<body>
+  <div class="container">
+
+    <main>
+      <div class="page-header">
+        <h1>Meal Management</h1>
+        <p>Toggle your meals on/off for each day and track your monthly cost.</p>
+      </div>
+      <div class="meal-wrapper">
+        <div class="calendar-header">
+          <button id="prevMonth"><span class="material-icons" style="font-size:1rem;vertical-align:middle;">chevron_left</span> Previous</button>
+          <h2 id="monthLabel"></h2>
+          <button id="nextMonth">Next <span class="material-icons" style="font-size:1rem;vertical-align:middle;">chevron_right</span></button>
+        </div>
+        <div id="calendar"></div>
+        <button id="submitMeals" class="submitMeals">Submit Meals</button>
+        <div class="total-cost-card">
+          <h2>Total Monthly Meal Cost</h2>
+          <p id="totalCost">৳0</p>
+        </div>
+      </div>
+    </main>
+
+  </div>
+
+  <script src="../../scripts/sidebar.js"></script>
+  <script>initSidebar('student', 'meal');</script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBF-nMMW5lG44JfHxx4HxCbf5N81geOiRs",
+      authDomain: "bauet-hms-63f5b.firebaseapp.com",
+      databaseURL: "https://bauet-hms-63f5b-default-rtdb.firebaseio.com",
+      projectId: "bauet-hms-63f5b",
+      storageBucket: "bauet-hms-63f5b.appspot.com",
+      messagingSenderId: "200038506273",
+      appId: "1:200038506273:web:2e141fc9ec36de049ae860"
+    };
+    firebase.initializeApp(firebaseConfig);
+  </script>
+
+  <script src="../../scripts/toast.js"></script>
+  <script src="../../scripts/MealManagement.js"></script>
+</body>
+
+</html>

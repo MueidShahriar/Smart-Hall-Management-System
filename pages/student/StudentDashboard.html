@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Dashboard | Smart Hall</title>
+
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <link rel="shortcut icon" href="../../images/RSM_Logo.png" type="image/x-icon" />
+  
+  <link rel="stylesheet" href="../../styles/base.css" />
+  <link rel="stylesheet" href="../../styles/StudentDashboard.css" />
+</head>
+
+<body>
+  <div class="container">
+
+    <main>
+      <div class="page-header">
+        <h1>Student Dashboard</h1>
+        <p>Welcome back! Manage your hall activities from here.</p>
+      </div>
+      <div class="dashboard">
+
+        <div class="card payment">
+          <span class="material-icons card-icon">payments</span>
+          <div class="section-info">
+            <h2>Check Payments</h2>
+            <p>Check your payment status and history</p>
+            <button class="action-btn">View</button>
+          </div>
+        </div>
+
+        <div class="card booking">
+          <span class="material-icons card-icon">hotel</span>
+          <div class="section-info">
+            <h2>Guest Room Booking</h2>
+            <p>Book a room for your guests easily</p>
+            <button class="action-btn">Book Now</button>
+          </div>
+        </div>
+
+        <div class="card meal">
+          <span class="material-icons card-icon">restaurant_menu</span>
+          <div class="section-info">
+            <h2>Meal Management</h2>
+            <p>Manage your daily meal preferences</p>
+            <button class="action-btn">Manage</button>
+          </div>
+        </div>
+
+        <div class="card complaint">
+          <span class="material-icons card-icon">report</span>
+          <div class="section-info">
+            <h2>Complaints</h2>
+            <p>Submit and track your complaints easily</p>
+            <button class="action-btn" id="complainButton">Submit</button>
+          </div>
+        </div>
+
+        <div class="card notices">
+          <span class="material-icons card-icon">description</span>
+          <div class="section-info">
+            <h2>Notices & Documents</h2>
+            <p>View important announcements and files</p>
+            <button class="action-btn">View</button>
+          </div>
+        </div>
+
+        <div class="card attend">
+          <span class="material-icons card-icon">touch_app</span>
+          <div class="section-info">
+            <h2>Give Attendance</h2>
+            <p>Mark your daily hall attendance</p>
+            <button class="action-btn" id="attendanceCardBtn">Attend</button>
+          </div>
+        </div>
+
+        <div class="card blood">
+          <span class="material-icons card-icon">bloodtype</span>
+          <div class="section-info">
+            <h2>Need Emergency Blood?</h2>
+            <p>Find and connect with blood donors instantly</p>
+            <button class="sos-btn" id="bloodDonationBtn">Find Donors</button>
+          </div>
+        </div>
+
+        <div class="card sos">
+          <span class="material-icons card-icon">warning</span>
+          <div class="sos-info">
+            <h2>SOS Emergency</h2>
+            <p>Tap to request emergency help instantly</p>
+            <button class="sos-btn">Send SOS</button>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+  </div>
+
+<script src="../../scripts/sidebar.js"></script>
+<script>initSidebar('student', 'dashboard');</script>
+<script src="../../scripts/toast.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyBF-nMMW5lG44JfHxx4HxCbf5N81geOiRs",
+        authDomain: "bauet-hms-63f5b.firebaseapp.com",
+        databaseURL: "https://bauet-hms-63f5b-default-rtdb.firebaseio.com",
+        projectId: "bauet-hms-63f5b",
+        storageBucket: "bauet-hms-63f5b.appspot.com",
+        messagingSenderId: "200038506273",
+        appId: "1:200038506273:web:2e141fc9ec36de049ae860"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+</script>
+<script src="../../scripts/StudentDashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Complaints | Smart Hall</title>
+
+    <!-- Google Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <link rel="shortcut icon" href="../../images/RSM_Logo.png" type="image/x-icon" />
+    <link rel="stylesheet" href="../../styles/base.css" />
+
+    <style>
+        /* Page Header */
+        .page-header h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--clr-dark);
+            position: relative;
+            display: inline-block;
+        }
+
+        .page-header h1::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 60%;
+            height: 3px;
+            background: var(--clr-primary);
+            border-radius: 2px;
+        }
+
+        .complaint-card h5 {
+            color: var(--clr-primary-variant);
+            font-weight: 700;
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+            letter-spacing: 0.5px;
+        }
+
+        .complaint-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin: 0 auto;
+            width: 100%;
+            max-width: 1200px;
+            /* Set a max width for better readability */
+        }
+
+        /* === Animation for expanded cards === */
+        .complaint-card {
+            background: var(--clr-white);
+            border-radius: var(--radius-2);
+            padding: 1.25rem;
+            box-shadow: 0 4px 24px 0 rgba(115, 128, 236, 0.08);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .solved-btn {
+            background: rgb(2, 81, 2);
+            color: white;
+            border: none;
+            border-radius: var(--radius-1);
+            padding: 0.5rem 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .solved-btn:hover {
+            background: var(--clr-primary-variant);
+            transform: translateY(-2px);
+        }
+
+        .complaint-card h5 {
+            color: var(--clr-primary-variant);
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .complaint-card p {
+            margin-bottom: 0.5rem;
+        }
+
+        .complaint-description {
+            transition: opacity 0.3s ease;
+        }
+
+        /* === Complaint Grid === */
+        .complaint-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 992px) {
+            .complaint-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .complaint-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .complaint-card {
+                padding: 1rem;
+                min-height: auto;
+            }
+            .complaint-card h5 {
+                font-size: 1rem;
+            }
+            .page-header h1 {
+                font-size: 1.2rem;
+            }
+        }
+
+        /* Utility classes (replacing Tailwind) */
+        .hidden { display: none; }
+        .opacity-0 { opacity: 0; }
+        .mt-4 { margin-top: 1rem; }
+        .pt-2 { padding-top: 0.5rem; }
+        .border-t { border-top: 1px solid var(--clr-info-light); }
+        .mt-auto { margin-top: auto; }
+        .pt-3 { padding-top: 0.75rem; }
+        .text-right { text-align: right; }
+        .shadow-card-expanded { box-shadow: 0 12px 36px 0 rgba(115, 128, 236, 0.22); }
+        .scale-103 { transform: scale(1.03); }
+
+        .complaint-description {
+            transition: opacity 0.3s ease;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <!-- Main Content -->
+        <main>
+            <div class="page-header">
+                <h1>Complaints</h1>
+                <p>View and manage student complaints.</p>
+            </div>
+            <div class="complaint-grid" id="complaints-container">
+            </div>
+        </main>
+    </div>
+
+    <script src="../../scripts/sidebar.js"></script>
+    <script>initSidebar('admin', 'complaints');</script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+        import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs, deleteDoc, doc, query, orderBy, limit, startAfter } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBF-nMMW5lG44JfHxx4HxCbf5N81geOiRs",
+            authDomain: "bauet-hms-63f5b.firebaseapp.com",
+            databaseURL: "https://bauet-hms-63f5b-default-rtdb.firebaseio.com",
+            projectId: "bauet-hms-63f5b",
+            storageBucket: "bauet-hms-63f5b.appspot.com",
+            messagingSenderId: "200038506273",
+            appId: "1:200038506273:web:2e141fc9ec36de049ae860"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const firestore = getFirestore(app);
+
+        // Pagination state
+        const PAGE_SIZE = 10;
+        let lastVisible = null;
+        let hasMore = true;
+
+        // Function to load complaints from Firestore
+        async function loadComplaints(append = false) {
+            const container = document.getElementById("complaints-container");
+            if (!append) {
+                container.innerHTML = "";
+                lastVisible = null;
+                hasMore = true;
+            }
+
+            // Remove existing load more button
+            const oldBtn = document.getElementById('loadMoreComplaintsBtn');
+            if (oldBtn) oldBtn.remove();
+
+            try {
+                let q;
+                if (lastVisible) {
+                    q = query(collection(firestore, "Complaints"), orderBy("subject"), startAfter(lastVisible), limit(PAGE_SIZE));
+                } else {
+                    q = query(collection(firestore, "Complaints"), orderBy("subject"), limit(PAGE_SIZE));
+                }
+
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty && !append) {
+                    container.innerHTML = '<p style="text-align:center;color:var(--clr-info-dark);padding:2rem;">No complaints found.</p>';
+                    return;
+                }
+
+                if (querySnapshot.size < PAGE_SIZE) {
+                    hasMore = false;
+                }
+
+                querySnapshot.forEach((docSnap) => {
+                    const complaint = docSnap.data();
+                    lastVisible = docSnap;
+
+                    const subject = complaint.subject || "No Subject";
+                    const description = complaint.description || "No Description";
+                    const room = complaint.roomNumber || "No Room";
+                    const id = complaint.userId || "No ID";
+
+                    const card = document.createElement("div");
+                    card.className = "complaint-card";
+                    card.id = `card-${docSnap.id}`;
+
+                    card.innerHTML = `
+                <h5>${subject}</h5>
+                <p><b>Room:</b> ${room}</p>
+                <p><b>ID:</b> ${id}</p>
+                <div class="complaint-description hidden opacity-0 mt-4 pt-2 border-t border-light" id="description-${docSnap.id}">
+                    ${description}
+                </div>
+                <div class="mt-auto pt-3 text-right">
+                    <button class="solved-btn" onclick="markAsSolved('${docSnap.id}', event)">Solved</button>
+                </div>
+            `;
+
+                    card.onclick = function (e) {
+                        if (!e.target.classList.contains('solved-btn')) {
+                            toggleComplaint(docSnap.id);
+                        }
+                    };
+
+                    container.appendChild(card);
+                });
+
+                // Show Load More button if more data exists
+                if (hasMore) {
+                    const btn = document.createElement('button');
+                    btn.id = 'loadMoreComplaintsBtn';
+                    btn.className = 'load-more-btn';
+                    btn.textContent = 'Load More';
+                    btn.addEventListener('click', () => loadComplaints(true));
+                    container.parentElement.appendChild(btn);
+                }
+            } catch (error) {
+                console.error("Error loading complaints:", error.message);
+                showToast("Failed to load complaints. Please try again.", "error");
+            }
+        }
+
+        // 3. Add the markAsSolved function to the window object
+        window.markAsSolved = async function (id, event) {
+            // Stop the click event from propagating to the card
+            if (event) {
+                event.stopPropagation();
+            }
+
+            try {
+                // Reference to the specific complaint document
+                const complaintRef = doc(firestore, "Complaints", id);
+
+                // Delete the document from Firestore
+                await deleteDoc(complaintRef);
+
+                // Remove the card from the UI with animation
+                const card = document.getElementById(`card-${id}`);
+                if (card) {
+                    card.style.opacity = '0';
+                    card.style.transform = 'scale(0.8)';
+
+                    // After animation completes, remove the card
+                    setTimeout(() => {
+                        card.remove();
+                    }, 300);
+                }
+
+                // Show success message
+                showToast("Complaint marked as solved and removed!", "success");
+            } catch (error) {
+                console.error("Error removing complaint:", error);
+                showToast("Failed to mark complaint as solved. Please try again.", "error");
+            }
+        };
+       
+        window.toggleComplaint = function (id) {
+            document.querySelectorAll('.complaint-description').forEach(desc => {
+                const parentCard = desc.closest('.complaint-card');
+                if (!desc.classList.contains('hidden') && desc.id !== `description-${id}`) {
+                    desc.classList.add('opacity-0');
+                    setTimeout(() => {
+                        desc.classList.add('hidden');
+                        if (parentCard) parentCard.classList.remove('shadow-card-expanded', 'scale-103');
+                    }, 300);
+                }
+            });
+            const description = document.getElementById(`description-${id}`);
+            const card = description.closest(".complaint-card");
+
+            if (description.classList.contains("hidden")) {
+                description.classList.remove("hidden");
+                setTimeout(() => {
+                    description.classList.remove("opacity-0");
+                    card.classList.add("shadow-card-expanded", "scale-103");
+                }, 10);
+            } else {
+                description.classList.add("opacity-0");
+                setTimeout(() => {
+                    description.classList.add("hidden");
+                    card.classList.remove("shadow-card-expanded", "scale-103");
+                }, 300);
+            }
+        };
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const studentId = urlParams.get('id');
+        document.querySelector("[title='Profile']").onclick = function () {
+            window.location.href = `../student/profile.html?id=${studentId}`;
+        };
+
+        document.addEventListener("DOMContentLoaded", function () {
+            loadComplaints();
+        });
+    </script>
+    <script src="../../scripts/toast.js"></script>
+</body>
+
+</html>

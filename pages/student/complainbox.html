@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complain Box | Smart Hall</title>
+    
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="shortcut icon" href="../../images/RSM_Logo.png" type="image/x-icon">
+    <link rel="stylesheet" href="../../styles/base.css">
+    <link rel="stylesheet" href="../../styles/StudentDashboard.css">
+    <style>
+        .complaint-form {
+            background: var(--clr-white);
+            padding: var(--card-padding);
+            border-radius: var(--radius-3);
+            box-shadow: var(--shadow);
+            max-width: 650px;
+        }
+        
+        .complaint-form h2 {
+            margin-bottom: 1.2rem;
+            font-size: 1.1rem;
+            color: var(--clr-primary-variant);
+        }
+        
+        .form-group textarea {
+            min-height: 150px;
+        }
+        
+        .submit-btn {
+            background: var(--clr-primary);
+            color: white;
+            padding: 0.6rem 1.5rem;
+            border: none;
+            border-radius: var(--radius-1);
+            cursor: pointer;
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.85rem;
+            transition: background 0.3s, transform 0.15s;
+        }
+        
+        .submit-btn:hover {
+            background: var(--clr-primary-variant);
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 480px) {
+            .complaint-form {
+                padding: 1rem;
+            }
+            .complaint-form h2 {
+                font-size: 0.95rem;
+            }
+            .form-group textarea {
+                min-height: 100px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <main>
+            <div class="page-header">
+                <h1>Complain Box</h1>
+                <p>Submit your complaint and we'll resolve it as soon as possible.</p>
+            </div>
+            <div class="complaint-form">
+                <h2>Submit Your Complaint</h2>
+                <div class="form-group">
+                    <label for="sector">Problem Sector</label>
+                    <select id="sector">
+                        <option value="">-- Select Sector --</option>
+                        <option value="Electrical">Electrical</option>
+                        <option value="Plumbing">Plumbing</option>
+                        <option value="Cleanliness">Cleanliness</option>
+                        <option value="Room Furniture">Room Furniture</option>
+                        <option value="Washroom">Washroom</option>
+                        <option value="Internet/WiFi">Internet / WiFi</option>
+                        <option value="Water Supply">Water Supply</option>
+                        <option value="Food/Meal">Food / Meal</option>
+                        <option value="Security">Security</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="houseTutor">Assigned House Tutor</label>
+                    <select id="houseTutor">
+                        <option value="">-- Select House Tutor --</option>
+                        <option value="House Tutor 1 (Block A)">House Tutor 1 (Block A)</option>
+                        <option value="House Tutor 2 (Block B)">House Tutor 2 (Block B)</option>
+                        <option value="House Tutor 3 (Block C)">House Tutor 3 (Block C)</option>
+                        <option value="House Tutor 4 (Block D)">House Tutor 4 (Block D)</option>
+                        <option value="Provost">Provost</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="subject">Title</label>
+                    <input type="text" id="subject" placeholder="Enter your complaint subject in 2-3 words">
+                </div>
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea id="description" placeholder="Describe your complaint. If you have a solution, include it too."></textarea>
+                </div>
+                <button class="submit-btn" id="submitButton">Submit Complaint</button>
+            </div>
+        </main>
+        
+    </div>
+
+    <script src="../../scripts/sidebar.js"></script>
+    <script>initSidebar('student', 'complaints');</script>
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+        import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
+        import { getFirestore, collection, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+    
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBF-nMMW5lG44JfHxx4HxCbf5N81geOiRs",
+            authDomain: "bauet-hms-63f5b.firebaseapp.com",
+            databaseURL: "https://bauet-hms-63f5b-default-rtdb.firebaseio.com",
+            projectId: "bauet-hms-63f5b",
+            storageBucket: "bauet-hms-63f5b.appspot.com",
+            messagingSenderId: "200038506273",
+            appId: "1:200038506273:web:2e141fc9ec36de049ae860"
+        };
+    
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const firestore = getFirestore(app);
+    
+        // Retrieve studentId from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const studentId = urlParams.get('id');
+        
+        // Add the ID parameter to all navigation links in the sidebar
+        // Sidebar links are handled by sidebar.js
+    
+        // Function to fetch room number from Realtime Database
+        async function fetchRoomNumber(studentId) {
+            const dbRef = ref(database);
+            try {
+                const snapshot = await get(child(dbRef, `users/${studentId}`));
+                if (snapshot.exists()) {
+                    const userData = snapshot.val();
+                    // Check if room exists, return "Not assigned" if it doesn't
+                    return userData.room || "Not assigned";
+                } else {
+                    console.log("User not found in the database");
+                    return "Unknown";
+                }
+            } catch (error) {
+                console.error("Error fetching room number:", error);
+                return "Error fetching";
+            }
+        }
+    
+        // Function to handle complaint submission
+        async function submitComplaint() {
+            const sector = document.getElementById('sector').value;
+            const houseTutor = document.getElementById('houseTutor').value;
+            const subject = document.getElementById('subject').value.trim();
+            const description = document.getElementById('description').value.trim();
+    
+            if (!sector) {
+                showToast("Please select a problem sector.", "warning");
+                return;
+            }
+            if (!houseTutor) {
+                showToast("Please select a house tutor.", "warning");
+                return;
+            }
+            if (!subject || !description) {
+                showToast("Please fill out both the subject and description.", "warning");
+                return;
+            }
+    
+            try {
+                // Fetch the room number from Realtime Database
+                const roomNumber = await fetchRoomNumber(studentId);
+    
+                // Create a document ID using the student ID and subject
+                const documentId = `${studentId}_${subject.replace(/\s+/g, '_')}`;
+    
+                // Create a document in the "Complaints" collection in Firestore
+                await setDoc(doc(firestore, "Complaints", documentId), {
+                    id: studentId,
+                    subject: subject,
+                    description: description,
+                    sector: sector,
+                    houseTutor: houseTutor,
+                    room: roomNumber,
+                    timestamp: new Date().toISOString()
+                });
+    
+                showToast("Complaint submitted successfully!", "success");
+                window.location.href = "StudentDashboard.html?id=" + studentId;
+            } catch (error) {
+                console.error("Error submitting complaint:", error.message);
+                showToast("Failed to submit complaint. Please try again.", "error");
+            }
+        }
+    
+        // Attach the submitComplaint function to the submit button
+        document.getElementById('submitButton').addEventListener('click', submitComplaint);
+    </script>
+    <script src="../../scripts/toast.js"></script>
+</body>
+
+</html>
