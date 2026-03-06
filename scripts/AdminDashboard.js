@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // Action button handlers for dashboard cards
+
     const actionButtons = document.querySelectorAll('.action-btn');
 
     actionButtons.forEach(button => {
@@ -25,7 +25,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // ── SOS Alerts Real-time Listener ──
     const sosSection = document.getElementById('sosAlertsSection');
     const sosAlertsList = document.getElementById('sosAlertsList');
     const sosBadge = document.getElementById('sosBadge');
@@ -33,7 +32,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (typeof firebase !== 'undefined' && firebase.firestore) {
         const db = firebase.firestore();
 
-        // Listen for pending SOS alerts in real-time
         db.collection('sos_alerts')
             .where('status', '==', 'pending')
             .onSnapshot((snapshot) => {
@@ -42,7 +40,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     alerts.push({ id: doc.id, ...doc.data() });
                 });
 
-                // Sort by timestamp descending (client-side to avoid composite index)
                 alerts.sort((a, b) => {
                     const ta = a.timestamp ? new Date(a.timestamp).getTime() : 0;
                     const tb = b.timestamp ? new Date(b.timestamp).getTime() : 0;
@@ -82,7 +79,6 @@ document.addEventListener("DOMContentLoaded", () => {
             });
     }
 
-    // Acknowledge an SOS alert
     window.acknowledgeAlert = async function(alertId) {
         try {
             const db = firebase.firestore();
@@ -94,7 +90,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 acknowledgedAt: new Date().toISOString()
             });
 
-            // Send notification to the student
             if (alertData.studentId) {
                 await db.collection('notifications').add({
                     studentId: alertData.studentId,
@@ -113,7 +108,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    // Dismiss an SOS alert
     window.dismissAlert = async function(alertId) {
         try {
             await firebase.firestore().collection('sos_alerts').doc(alertId).update({
@@ -127,7 +121,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    // Helper: format time ago
     function formatTimeAgo(timestamp) {
         if (!timestamp) return '';
         const now = new Date();
@@ -143,14 +136,12 @@ document.addEventListener("DOMContentLoaded", () => {
         return `${diffDay} day${diffDay > 1 ? 's' : ''} ago`;
     }
 
-    // Helper: escape HTML to prevent XSS
     function escapeHtml(str) {
         const div = document.createElement('div');
         div.textContent = str;
         return div.innerHTML;
     }
 
-    // ── Meal Summary for Dashboard ──
     if (typeof firebase !== 'undefined' && firebase.firestore) {
         const db = firebase.firestore();
         const todayStr = new Date().toISOString().split('T')[0];
@@ -173,12 +164,50 @@ document.addEventListener("DOMContentLoaded", () => {
             const totalCost = onCount * costPerMeal;
             const summaryEl = document.getElementById('mealSummaryText');
             if (summaryEl) {
-                summaryEl.innerHTML = `Today: <strong>${onCount}</strong> ON · <strong>${offCount}</strong> OFF · Total Cost: <strong>৳${totalCost}</strong>`;
+                const dateDisplay = new Date(todayStr).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+                summaryEl.innerHTML = `${dateDisplay}: <strong>${onCount}</strong> ON · <strong>${offCount}</strong> OFF · Cost: <strong>৳${totalCost}</strong>`;
             }
         }).catch(err => {
             console.error('Meal summary error:', err);
             const summaryEl = document.getElementById('mealSummaryText');
             if (summaryEl) summaryEl.textContent = 'Check meal report and manage meals';
+        });
+
+        db.collection('attendance').get().then(async attSnapshot => {
+            const attEl = document.getElementById('attendanceSummaryText');
+            if (!attEl) return;
+
+            let presentCount = 0;
+            const presentStudents = [];
+
+            const promises = [];
+            attSnapshot.forEach(studentDoc => {
+                promises.push(
+                    studentDoc.ref.collection('attendance_by_date').doc(todayStr).get().then(dateDoc => {
+                        if (dateDoc.exists) {
+                            presentCount++;
+                            const d = dateDoc.data();
+                            presentStudents.push({
+                                id: studentDoc.id,
+                                name: d.studentName || studentDoc.id,
+                                room: d.room || '—'
+                            });
+                        }
+                    })
+                );
+            });
+
+            await Promise.all(promises);
+
+            if (presentCount > 0) {
+                attEl.innerHTML = `Today: <strong>${presentCount}</strong> student${presentCount > 1 ? 's' : ''} present`;
+            } else {
+                attEl.textContent = 'No attendance recorded today';
+            }
+        }).catch(err => {
+            console.error('Attendance summary error:', err);
+            const attEl = document.getElementById('attendanceSummaryText');
+            if (attEl) attEl.textContent = 'Daily present and absent report';
         });
     }
 });

@@ -1,4 +1,4 @@
-<!-- Smart Hall — Preloader Component -->
+
 <div class="page-loader-overlay" id="pageLoader">
     <div class="preloader-content">
         <div class="loader"></div>
@@ -94,14 +94,14 @@
 
 <script>
     (function() {
-        // Hide preloader when page is fully loaded
+
         window.addEventListener('load', function() {
             var loader = document.getElementById('pageLoader');
             if (loader) {
-                // Small delay for smooth transition
+
                 setTimeout(function() {
                     loader.classList.add('hidden');
-                    // Remove from DOM after animation
+
                     setTimeout(function() {
                         if (loader.parentNode) loader.parentNode.removeChild(loader);
                     }, 600);
@@ -109,7 +109,6 @@
             }
         });
 
-        // Fallback: hide after 8 seconds max (in case load event already fired)
         setTimeout(function() {
             var loader = document.getElementById('pageLoader');
             if (loader && !loader.classList.contains('hidden')) {

@@ -10,7 +10,6 @@
   <link rel="stylesheet" href="../../styles/base.css" />
   <link rel="stylesheet" href="../../styles/DocumentManagement.css" />
 
-  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
@@ -22,7 +21,6 @@
 
   <div class="container">
 
-    <!-- Main Content -->
     <main>
       <div class="top-section">
         <h1>Document Management</h1>
@@ -30,7 +28,7 @@
       </div>
 
       <div class="document-management">
-        <!-- Upload Section -->
+
         <div class="card upload-section">
           <span class="material-icons card-icon">upload_file</span>
           <div class="section-info">
@@ -76,7 +74,6 @@
           </div>
         </div>
 
-        <!-- Document List Section -->
         <div class="documents-list-container">
           <div class="documents-header">
             <h2>Uploaded Documents</h2>
@@ -93,17 +90,15 @@
             </div>
           </div>
           <div class="documents-list" id="documentsList">
-            <!-- Documents will be listed here by JavaScript -->
+
             <div class="document-loading">Loading documents...</div>
           </div>
         </div>
       </div>
     </main>
 
-    <!-- Right Section -->
   </div>
 
-  <!-- Notification for upload status -->
   <div class="upload-notification" id="uploadNotification">
     <div class="notification-content">
       <span class="material-icons notification-icon">check_circle</span>

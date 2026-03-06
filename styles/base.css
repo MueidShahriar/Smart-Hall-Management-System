@@ -1,11 +1,6 @@
-/* ===========================
-   BASE STYLES - Shared Foundation
-   Used by all pages
-   =========================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
-/* --- Design Tokens --- */
 :root {
     --clr-primary: #7380ec;
     --clr-primary-variant: #111e88;
@@ -19,7 +14,6 @@
     --clr-info-light: #dce1eb;
     --clr-light: rgba(132, 139, 200, 0.18);
 
-    /* Performance: GPU-accelerated transitions */
     --gpu-transition: transform, opacity;
     --clr-bg: #f6f6f9;
     --card-radius: 1.2rem;
@@ -33,7 +27,6 @@
     --transition-speed: 0.3s;
 }
 
-/* --- Global Reset --- */
 * {
     margin: 0;
     padding: 0;
@@ -44,7 +37,6 @@
 
 html { scroll-behavior: smooth; }
 
-/* --- Animations --- */
 @keyframes fadeInUp {
     from { opacity: 0; transform: translateY(12px); }
     to   { opacity: 1; transform: translateY(0); }
@@ -66,7 +58,6 @@ body {
     animation: fadeInUp 0.35s ease-out;
 }
 
-/* --- Typography --- */
 h1 { font-size: 1.6rem; font-weight: 700; }
 h2 { font-size: 1.05rem; }
 h3 { font-size: 0.87rem; }
@@ -82,7 +73,6 @@ b { color: var(--clr-dark); }
 .danger     { color: var(--clr-danger); font-size: 2rem; }
 .warning    { color: var(--clr-warning); }
 
-/* --- Layout: 2-Column Grid --- */
 .container {
     display: grid;
     grid-template-columns: 14rem 1fr;
@@ -93,7 +83,6 @@ b { color: var(--clr-dark); }
     min-height: 100vh;
 }
 
-/* --- Sidebar --- */
 .aside {
     grid-area: sidebar;
     height: 100vh;
@@ -150,7 +139,6 @@ b { color: var(--clr-dark); }
     color: var(--clr-warning);
 }
 
-/* Sidebar label */
 .sidebar-label {
     font-size: 0.65rem;
     font-weight: 700;
@@ -232,7 +220,6 @@ b { color: var(--clr-dark); }
     transition: opacity 0.2s;
 }
 
-/* Sidebar logout */
 .sidebar .sidebar-divider {
     height: 1px;
     background: #e8ecf3;
@@ -267,7 +254,6 @@ b { color: var(--clr-dark); }
     text-align: center;
 }
 
-/* --- Main Content --- */
 main {
     grid-area: main;
     padding: 1.8rem 2rem;
@@ -279,7 +265,6 @@ main h1 {
     margin-bottom: 0.3rem;
 }
 
-/* --- Page Header --- */
 .page-header {
     margin-bottom: 1.8rem;
 }
@@ -309,7 +294,6 @@ main h1 {
     margin-top: 0.5rem;
 }
 
-/* --- Dashboard Card Grid --- */
 main .dashboard {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -317,7 +301,6 @@ main .dashboard {
     margin-top: 1.5rem;
 }
 
-/* --- Dashboard Cards --- */
 .card {
     background: var(--clr-white);
     padding: var(--card-padding);
@@ -379,7 +362,6 @@ main .dashboard {
     line-height: 1.4;
 }
 
-/* Card color variants */
 .card.payment::before  { background: #8b5cf6; }
 .card.payment .card-icon { color: #8b5cf6; background: rgba(139, 92, 246, 0.1); }
 
@@ -420,7 +402,6 @@ main .dashboard {
 .card.attend::before   { background: #0ea5e9; }
 .card.attend .card-icon { color: #0ea5e9; background: rgba(14, 165, 233, 0.1); }
 
-/* Action buttons */
 .action-btn {
     margin-top: 0.6rem;
     padding: 0.4rem 1.1rem;
@@ -462,7 +443,6 @@ main .dashboard {
 .sos-info h2 { font-size: 0.95rem; font-weight: 600; color: var(--clr-dark); margin-bottom: 0.2rem; }
 .sos-info p  { font-size: 0.78rem; line-height: 1.4; }
 
-/* --- Right Panel (top bar) --- */
 .right {
     position: fixed;
     top: 0;
@@ -501,7 +481,6 @@ main .dashboard {
     color: var(--clr-primary);
 }
 
-/* ── Top bar action buttons (equal size) ── */
 .topbar-actions {
     display: flex;
     align-items: center;
@@ -539,7 +518,6 @@ main .dashboard {
     color: var(--clr-primary);
 }
 
-/* Notification badge */
 .notif-badge {
     position: absolute;
     top: -4px;
@@ -560,7 +538,6 @@ main .dashboard {
     pointer-events: none;
 }
 
-/* Profile button image */
 .profile-btn {
     overflow: hidden;
 }
@@ -572,7 +549,6 @@ main .dashboard {
     display: block;
 }
 
-/* ── Notification Dropdown ── */
 .notif-dropdown {
     position: absolute;
     top: calc(100% + 6px);
@@ -686,7 +662,6 @@ main .dashboard {
     color: var(--clr-primary);
 }
 
-/* --- Form elements (shared) --- */
 .form-group {
     margin-bottom: 1rem;
 }
@@ -726,7 +701,6 @@ main .dashboard {
     min-height: 100px;
 }
 
-/* --- Load More Button --- */
 .load-more-btn {
     display: block;
     margin: 1.5rem auto 0;
@@ -749,9 +723,6 @@ main .dashboard {
     box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
 }
 
-/* --- Responsive --- */
-
-/* Tablet: collapse sidebar labels */
 @media screen and (max-width: 1200px) {
     .container {
         grid-template-columns: 4.5rem 1fr;
@@ -767,7 +738,6 @@ main .dashboard {
     main .dashboard { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
 }
 
-/* Mobile: sidebar overlay, top bar fixed */
 @media screen and (max-width: 768px) {
     .container {
         grid-template-columns: 1fr;
@@ -867,7 +837,6 @@ main .dashboard {
     .card.sos-card { gap: 0; }
 }
 
-/* Small mobile: extra-tight spacing */
 @media screen and (max-width: 480px) {
     main {
         padding: 0.8rem 0.5rem;
@@ -884,7 +853,6 @@ main .dashboard {
     main .dashboard { gap: 0.8rem; }
 }
 
-/* Mobile overlay backdrop */
 @media screen and (max-width: 768px) {
     .aside.show::before {
         content: '';
@@ -897,12 +865,6 @@ main .dashboard {
     }
 }
 
-/* ===========================
-   LOADER STYLES - Professional Spinner
-   (Page preloader is handled by scripts/preloader.js)
-   =========================== */
-
-/* Standalone Loader (for inline use) */
 .loader {
     width: 50px;
     aspect-ratio: 1;
@@ -914,7 +876,7 @@ main .dashboard {
 }
 
 .loader::before,
-.loader::after {    
+.loader::after {
     content: "";
     grid-area: 1/1;
     margin: 2px;
@@ -944,11 +906,10 @@ main .dashboard {
     margin: 4px;
 }
 
-@keyframes loaderSpin { 
+@keyframes loaderSpin {
     100% { transform: rotate(1turn); }
 }
 
-/* Button Loader State */
 .btn-loading {
     position: relative;
     pointer-events: none;
@@ -976,7 +937,6 @@ main .dashboard {
     border-top-color: #7380ec;
 }
 
-/* Logout button in topbar */
 .topbar-logout-btn {
     width: 38px;
     height: 38px;
@@ -1003,5 +963,4 @@ main .dashboard {
     height: 18px;
 }
 
-/* Notification solved badge */
 .notif-solved .notif-icon { background: #e8f5e9; color: #2e7d32; }

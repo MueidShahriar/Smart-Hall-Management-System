@@ -14,7 +14,7 @@
     <link rel="shortcut icon" href="../../images/RSM_Logo.png" type="image/x-icon" />
     <link rel="stylesheet" href="../../styles/base.css" />
     <style>
-        /* Attendance page specific styles */
+
         .attendance-hero {
             text-align: center;
             padding: 2.5rem 1.5rem;
@@ -112,7 +112,6 @@
         .info-card.streak-card .material-icons { color: #f59e0b; }
         .info-card.streak-card h3 { color: #f59e0b; }
 
-        /* Recent attendance history */
         .history-section {
             background: var(--clr-white);
             border-radius: var(--card-radius);
@@ -225,7 +224,6 @@
                 <p>Track your hall attendance records</p>
             </div>
 
-            <!-- Hero section with Give Attendance button -->
             <div class="attendance-hero">
                 <span class="material-icons hero-icon">fingerprint</span>
                 <h1>Mark Your Attendance</h1>
@@ -236,7 +234,6 @@
                 </button>
             </div>
 
-            <!-- Info cards -->
             <div class="attendance-info">
                 <div class="info-card time-card">
                     <span class="material-icons">schedule</span>
@@ -255,7 +252,6 @@
                 </div>
             </div>
 
-            <!-- Attendance history -->
             <div class="history-section">
                 <h2><span class="material-icons">history</span> Recent Attendance</h2>
                 <div class="history-list" id="historyList">
@@ -273,13 +269,12 @@
     <script>initSidebar('student', 'attendance');</script>
     <script src="../../scripts/toast.js"></script>
 
-    <!-- Firebase compat SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <script>
-        // Initialize Firebase
+
         if (!firebase.apps.length) {
             firebase.initializeApp({
                 apiKey: "AIzaSyBF-nMMW5lG44JfHxx4HxCbf5N81geOiRs",
@@ -297,7 +292,6 @@
         const urlParams = new URLSearchParams(window.location.search);
         const studentId = urlParams.get('id');
 
-        // Fetch student info from RTDB for attendance records
         let studentInfo = {};
         if (studentId) {
             rtdb.ref('users/' + studentId).once('value').then(snap => {
@@ -310,7 +304,6 @@
             }).catch(() => {});
         }
 
-        // Give Attendance button
         document.getElementById('giveAttendanceBtn').addEventListener('click', () => {
             const attendBtn = document.getElementById('giveAttendanceBtn');
             if (!studentId) {
@@ -332,7 +325,6 @@
             attendBtn.classList.add('btn-loading');
             attendBtn.disabled = true;
 
-            // Loading overlay
             const ov = document.createElement('div');
             ov.id = 'attendance-overlay';
             ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;display:flex;align-items:center;justify-content:center';
@@ -389,7 +381,6 @@
             return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         }
 
-        // Load attendance history
         function loadAttendanceHistory() {
             if (!studentId) return;
 
@@ -412,13 +403,10 @@
                         records.push(doc.data());
                     });
 
-                    // Sort by date descending
                     records.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-                    // Update total days
                     totalDays.textContent = records.length;
 
-                    // Today's check-in
                     const today = new Date();
                     const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
                     const todayRecord = records.find(r => r.date === todayStr);
@@ -429,7 +417,6 @@
                         attendanceTime.textContent = 'Not yet';
                     }
 
-                    // Calculate streak
                     let streak = 0;
                     const check = new Date(today);
                     for (let i = 0; i < records.length; i++) {
@@ -443,7 +430,6 @@
                     }
                     streakEl.textContent = streak;
 
-                    // Render history (last 20)
                     historyList.innerHTML = '';
                     records.slice(0, 20).forEach(record => {
                         const d = new Date(record.date + 'T00:00:00');
@@ -465,7 +451,7 @@
                 });
         }
 
-        // Load history on page load
         loadAttendanceHistory();
-    </script>
+</script>
 </body>
+</html>

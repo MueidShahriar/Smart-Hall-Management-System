@@ -1,5 +1,3 @@
-/* About – Page-Specific Styles
-   Base styles come from base.css */
 
 .about-container {
     background: var(--clr-white);
@@ -90,4 +88,11 @@
     .about-features {
         grid-template-columns: 1fr;
     }
+}
+
+@media (max-width: 480px) {
+    .about-card { padding: 1rem; }
+    .about-card h2 { font-size: 1rem; }
+    .feature-item h4 { font-size: 0.78rem; }
+    .feature-item p { font-size: 0.72rem; }
 }

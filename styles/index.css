@@ -230,7 +230,16 @@ select:not(:invalid)~label {
     color: black;
 }
 
-/* --- Responsive --- */
+@media screen and (max-width: 768px) {
+    .container {
+        padding: 2rem;
+        margin: 20px auto;
+        max-width: 95%;
+    }
+    .title { font-size: 3rem; }
+    .form-title { font-size: 1.3rem; }
+}
+
 @media screen and (max-width: 480px) {
     .container {
         padding: 1.8rem 1.5rem;
@@ -254,8 +263,6 @@ select:not(:invalid)~label {
     .form-title { font-size: 1.1rem; }
     input, select { font-size: 14px; }
 }
-
-/* Page preloader is handled by scripts/preloader.js */
 
 @keyframes loaderSpin {
     100% { transform: rotate(1turn); }

@@ -1,14 +1,8 @@
-/* ===========================
-   PROFILE PAGE — Refined Design
-   Base styles inherited from base.css
-   =========================== */
 
-/* Override container layout */
 .container {
     grid-template-columns: 14rem auto;
 }
 
-/* ── Main Content ─────────────────────────── */
 main {
     position: relative;
     justify-self: center;
@@ -20,7 +14,6 @@ main {
     min-height: 80vh;
 }
 
-/* ── Profile Card ─────────────────────────── */
 .profile-header {
     background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #a78bfa 100%);
     padding: 3rem 2rem 4.5rem;
@@ -67,7 +60,6 @@ main {
     box-shadow: 0 12px 35px rgba(79, 70, 229, 0.35);
 }
 
-/* Camera upload button */
 .photo-upload-overlay {
     position: absolute;
     bottom: 2px;
@@ -96,7 +88,6 @@ main {
     font-size: 1rem;
 }
 
-/* Upload spinner */
 .upload-progress {
     position: absolute;
     inset: 0;
@@ -114,7 +105,6 @@ main {
     animation: spin 1.2s linear infinite;
 }
 
-/* ── Profile Body (white card below header) ── */
 .profile-info {
     background: var(--clr-white);
     border-radius: 0 0 1.2rem 1.2rem;
@@ -137,7 +127,6 @@ main {
     margin-bottom: 1.2rem;
 }
 
-/* ── Meta Pills ─────────────────────────── */
 .profile-meta {
     display: flex;
     justify-content: center;
@@ -175,7 +164,6 @@ main {
     font-weight: 600;
 }
 
-/* ── Profile Sections (replace tabs) ─────── */
 .profile-section {
     background: var(--clr-bg);
     border-radius: 1rem;
@@ -208,7 +196,6 @@ main {
     color: var(--clr-primary);
 }
 
-/* Profile Actions */
 .profile-actions {
     display: flex;
     justify-content: center;
@@ -239,7 +226,6 @@ main {
     box-shadow: 0 4px 16px rgba(79, 70, 229, 0.1);
 }
 
-/* Legacy tabs (hidden but kept for compatibility) */
 .profile-tabs {
     display: none;
 }
@@ -284,10 +270,9 @@ main {
 }
 
 .profile-tab-content h3 {
-    display: none; /* category already in tab label */
+    display: none;
 }
 
-/* ── Info Grid ────────────────────────────── */
 .info-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -324,7 +309,6 @@ main {
     word-break: break-word;
 }
 
-/* ── Change Password Button ────────────── */
 .btn {
     display: inline-flex;
     align-items: center;
@@ -356,7 +340,6 @@ main {
     box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
 }
 
-/* ── Footer (removed per request) ───────── */
 footer {
     display: none;
 }
@@ -374,7 +357,6 @@ footer a:hover {
 
 footer p { font-size: 0.7rem; }
 
-/* ── Responsive ───────────────────────────── */
 @media screen and (max-width: 1200px) {
     .container {
         grid-template-columns: 4.5rem auto;

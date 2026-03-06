@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="../../styles/base.css">
 
     <style>
-        /* Page Header */
+
         main h1 {
             font-size: 1.6rem;
             font-weight: 700;
@@ -42,7 +42,6 @@
             margin-bottom: 2rem;
         }
 
-        /* Tabs */
         .tabs-container {
             display: flex;
             gap: 0.5rem;
@@ -106,7 +105,6 @@
             display: block;
         }
 
-        /* Filter */
         .filter-row {
             display: flex;
             gap: 1rem;
@@ -130,7 +128,6 @@
             border-color: var(--clr-primary);
         }
 
-        /* Summary */
         .summary-strip {
             display: flex;
             gap: 1.2rem;
@@ -161,7 +158,6 @@
         .dot.rejected { background: #d63031; }
         .dot.all { background: var(--clr-primary); }
 
-        /* Request Cards */
         .requests-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(min(340px, 100%), 1fr));
@@ -307,7 +303,6 @@
             margin-bottom: 1rem;
         }
 
-        /* Responsive */
         @media (max-width: 992px) {
             .requests-grid {
                 grid-template-columns: 1fr;
@@ -322,6 +317,17 @@
             .request-actions { flex-direction: column; }
             .empty-state { padding: 2rem 1rem; }
         }
+
+        @media (max-width: 480px) {
+            .tabs-container { gap: 0.2rem; }
+            .tab-btn { padding: 0.6rem 0.8rem; font-size: 0.78rem; }
+            .filter-row select { font-size: 0.78rem; width: 100%; }
+            .summary-chip { font-size: 0.72rem; padding: 0.3rem 0.6rem; }
+            .request-card { padding: 0.8rem; }
+            .request-header h3 { font-size: 0.88rem; }
+            .detail-item .label { font-size: 0.68rem; }
+            .detail-item .value { font-size: 0.78rem; }
+        }
     </style>
 </head>
 
@@ -334,7 +340,6 @@
             <h1>Check Requests</h1>
             <p class="page-subtitle">Review and manage student registrations and guest room bookings</p>
 
-            <!-- Tabs -->
             <div class="tabs-container">
                 <button class="tab-btn active" data-tab="students" onclick="switchTab('students')">
                     Student Registrations <span class="tab-badge" id="studentBadge" style="display:none">0</span>
@@ -344,10 +349,20 @@
                 </button>
             </div>
 
-            <!-- Student Registrations Tab -->
             <div class="tab-content active" id="students-tab">
+                <div class="filter-row">
+                    <select id="studentStatusFilter">
+                        <option value="all">All Registrations</option>
+                        <option value="pending" selected>Pending</option>
+                        <option value="approved">Approved</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
+                </div>
                 <div class="summary-strip">
-                    <div class="summary-chip"><span class="dot pending"></span> Pending: <span id="studentCountPending">0</span></div>
+                    <div class="summary-chip" style="cursor:pointer" onclick="document.getElementById('studentStatusFilter').value='all';filterStudentRegistrations()"><span class="dot all"></span> Total: <span id="studentCountAll">0</span></div>
+                    <div class="summary-chip" style="cursor:pointer" onclick="document.getElementById('studentStatusFilter').value='pending';filterStudentRegistrations()"><span class="dot pending"></span> Pending: <span id="studentCountPending">0</span></div>
+                    <div class="summary-chip" style="cursor:pointer" onclick="document.getElementById('studentStatusFilter').value='approved';filterStudentRegistrations()"><span class="dot approved"></span> Approved: <span id="studentCountApproved">0</span></div>
+                    <div class="summary-chip" style="cursor:pointer" onclick="document.getElementById('studentStatusFilter').value='rejected';filterStudentRegistrations()"><span class="dot rejected"></span> Rejected: <span id="studentCountRejected">0</span></div>
                 </div>
                 <div class="requests-grid" id="studentsContainer">
                     <div class="empty-state">
@@ -357,9 +372,8 @@
                 </div>
             </div>
 
-            <!-- Guest Room Requests Tab -->
             <div class="tab-content" id="guests-tab">
-                <!-- Filter -->
+
                 <div class="filter-row">
                     <select id="statusFilter">
                         <option value="all">All Requests</option>
@@ -369,15 +383,13 @@
                     </select>
                 </div>
 
-                <!-- Summary -->
                 <div class="summary-strip">
-                    <div class="summary-chip"><span class="dot all"></span> Total: <span id="countAll">0</span></div>
-                    <div class="summary-chip"><span class="dot pending"></span> Pending: <span id="countPending">0</span></div>
-                    <div class="summary-chip"><span class="dot approved"></span> Approved: <span id="countApproved">0</span></div>
-                    <div class="summary-chip"><span class="dot rejected"></span> Rejected: <span id="countRejected">0</span></div>
+                    <div class="summary-chip" style="cursor:pointer" onclick="document.getElementById('statusFilter').value='all';renderRequests()"><span class="dot all"></span> Total: <span id="countAll">0</span></div>
+                    <div class="summary-chip" style="cursor:pointer" onclick="document.getElementById('statusFilter').value='pending';renderRequests()"><span class="dot pending"></span> Pending: <span id="countPending">0</span></div>
+                    <div class="summary-chip" style="cursor:pointer" onclick="document.getElementById('statusFilter').value='approved';renderRequests()"><span class="dot approved"></span> Approved: <span id="countApproved">0</span></div>
+                    <div class="summary-chip" style="cursor:pointer" onclick="document.getElementById('statusFilter').value='rejected';renderRequests()"><span class="dot rejected"></span> Rejected: <span id="countRejected">0</span></div>
                 </div>
 
-                <!-- Requests Grid -->
                 <div class="requests-grid" id="requestsContainer">
                     <div class="empty-state">
                         <span class="material-icons">hourglass_empty</span>
@@ -387,7 +399,6 @@
             </div>
         </main>
 
-        <!-- Right Panel -->
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -407,14 +418,14 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const rtdb = firebase.database();
-    </script>
+</script>
 
     <script src="../../scripts/sidebar.js"></script>
     <script>initSidebar('admin', 'requests');</script>
     <script src="../../scripts/toast.js"></script>
 
     <script>
-        // Tab switching
+
         window.switchTab = function(tabName) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
@@ -422,31 +433,50 @@
             document.getElementById(`${tabName}-tab`).classList.add('active');
         };
 
-        // Student registrations
         let pendingStudents = [];
+        let allStudentRegistrations = [];
+        let currentStudentFilter = 'pending';
 
         async function loadStudentRegistrations() {
             const container = document.getElementById('studentsContainer');
             try {
-                const snapshot = await db.collection('PendingStudents').get();
+                const [pendingSnap, historySnap] = await Promise.all([
+                    db.collection('PendingStudents').get(),
+                    db.collection('RegistrationHistory').get()
+                ]);
+
+                allStudentRegistrations = [];
                 pendingStudents = [];
-                
-                snapshot.forEach(doc => {
+
+                pendingSnap.forEach(doc => {
                     const data = doc.data();
                     data._id = doc.id;
+                    data._status = 'pending';
                     pendingStudents.push(data);
+                    allStudentRegistrations.push(data);
                 });
 
-                // Sort by createdAt descending
-                pendingStudents.sort((a, b) => {
+                historySnap.forEach(doc => {
+                    const data = doc.data();
+                    data._id = doc.id;
+                    allStudentRegistrations.push(data);
+                });
+
+                allStudentRegistrations.sort((a, b) => {
                     const timeA = a.createdAt ? (a.createdAt.toDate ? a.createdAt.toDate().getTime() : new Date(a.createdAt).getTime()) : 0;
                     const timeB = b.createdAt ? (b.createdAt.toDate ? b.createdAt.toDate().getTime() : new Date(b.createdAt).getTime()) : 0;
                     return timeB - timeA;
                 });
 
-                const pendingCount = pendingStudents.length;
+                const pendingCount = allStudentRegistrations.filter(s => (s._status || 'pending') === 'pending').length;
+                const approvedCount = allStudentRegistrations.filter(s => s._status === 'approved').length;
+                const rejectedCount = allStudentRegistrations.filter(s => s._status === 'rejected').length;
+
+                document.getElementById('studentCountAll').textContent = allStudentRegistrations.length;
                 document.getElementById('studentCountPending').textContent = pendingCount;
-                
+                document.getElementById('studentCountApproved').textContent = approvedCount;
+                document.getElementById('studentCountRejected').textContent = rejectedCount;
+
                 const badge = document.getElementById('studentBadge');
                 if (pendingCount > 0) {
                     badge.textContent = pendingCount;
@@ -455,16 +485,35 @@
                     badge.style.display = 'none';
                 }
 
-                if (pendingStudents.length === 0) {
-                    container.innerHTML = '<div class="empty-state"><span class="material-icons">check_circle</span><p>No pending student registrations</p></div>';
-                    return;
-                }
+                filterStudentRegistrations();
+            } catch (error) {
+                console.error('Error loading student registrations:', error);
+                container.innerHTML = '<div class="empty-state"><span class="material-icons">error</span><p>Failed to load registrations</p></div>';
+            }
+        }
 
-                container.innerHTML = pendingStudents.map(student => `
+        window.filterStudentRegistrations = function() {
+            const container = document.getElementById('studentsContainer');
+            const filter = document.getElementById('studentStatusFilter').value;
+            currentStudentFilter = filter;
+
+            const filtered = filter === 'all'
+                ? allStudentRegistrations
+                : allStudentRegistrations.filter(s => (s._status || 'pending') === filter);
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="empty-state"><span class="material-icons">check_circle</span><p>No ' + (filter === 'all' ? '' : filter + ' ') + 'student registrations</p></div>';
+                return;
+            }
+
+            container.innerHTML = filtered.map(student => {
+                const status = student._status || 'pending';
+                const isPending = status === 'pending';
+                return `
                     <div class="request-card" id="student-card-${student._id}">
                         <div class="request-header">
                             <h3>${student.name || 'Unknown'}</h3>
-                            <span class="status-badge pending">Pending</span>
+                            <span class="status-badge ${status}">${status}</span>
                         </div>
                         <div class="request-details">
                             <div class="detail-item">
@@ -492,6 +541,7 @@
                                 <span class="value">${student.phone || '—'}</span>
                             </div>
                         </div>
+                        ${isPending ? `
                         <div class="request-actions">
                             <button class="btn-approve" onclick="approveStudent('${student._id}')">
                                 <span class="material-icons">check_circle</span> Approve
@@ -499,16 +549,19 @@
                             <button class="btn-reject" onclick="rejectStudent('${student._id}')">
                                 <span class="material-icons">cancel</span> Reject
                             </button>
-                        </div>
+                        </div>` : ''}
                     </div>
-                `).join('');
+                `;
+            }).join('');
+        };
+
+        document.getElementById('studentStatusFilter').addEventListener('change', filterStudentRegistrations);
             } catch (error) {
                 console.error('Error loading student registrations:', error);
                 container.innerHTML = '<div class="empty-state"><span class="material-icons">error</span><p>Failed to load registrations</p></div>';
             }
         }
 
-        // Approve student registration
         window.approveStudent = async function(studentId) {
             const btn = event.target.closest('.btn-approve');
             btn.classList.add('btn-loading');
@@ -518,7 +571,6 @@
                 const student = pendingStudents.find(s => s._id === studentId);
                 if (!student) throw new Error('Student not found');
 
-                // Add to RTDB users
                 await rtdb.ref(`users/${student.id}`).set({
                     name: student.name,
                     email: student.email,
@@ -535,7 +587,6 @@
                     id: student.id
                 });
 
-                // Update room seat in Firestore
                 const seatRef = db.collection('room').doc(student.room).collection('members').doc(student.seat);
                 await seatRef.set({
                     id: student.id,
@@ -546,14 +597,23 @@
                     lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
-                // Delete from pending
                 await db.collection('PendingStudents').doc(studentId).delete();
 
-                // Send approval email notification (using EmailJS or similar service)
-                // For now, just show success
+                await db.collection('RegistrationHistory').add({
+                    name: student.name,
+                    email: student.email,
+                    id: student.id,
+                    department: student.department,
+                    batch: student.batch,
+                    room: student.room,
+                    phone: student.phone,
+                    _status: 'approved',
+                    createdAt: student.createdAt || new Date().toISOString(),
+                    processedAt: new Date().toISOString()
+                });
+
                 showToast(`Student ${student.name} approved successfully! They can now login.`, 'success');
 
-                // Refresh list
                 loadStudentRegistrations();
             } catch (error) {
                 console.error('Error approving student:', error);
@@ -563,16 +623,30 @@
             }
         };
 
-        // Reject student registration
         window.rejectStudent = async function(studentId) {
             if (!confirm('Are you sure you want to reject this registration?')) return;
-            
+
             const btn = event.target.closest('.btn-reject');
             btn.classList.add('btn-loading');
             btn.disabled = true;
 
             try {
+                const student = pendingStudents.find(s => s._id === studentId);
                 await db.collection('PendingStudents').doc(studentId).delete();
+                if (student) {
+                    await db.collection('RegistrationHistory').add({
+                        name: student.name || '',
+                        email: student.email || '',
+                        id: student.id || '',
+                        department: student.department || '',
+                        batch: student.batch || '',
+                        room: student.room || '',
+                        phone: student.phone || '',
+                        _status: 'rejected',
+                        createdAt: student.createdAt || new Date().toISOString(),
+                        processedAt: new Date().toISOString()
+                    });
+                }
                 showToast('Registration rejected', 'info');
                 loadStudentRegistrations();
             } catch (error) {
@@ -583,11 +657,9 @@
             }
         };
 
-        // All requests data
         let allRequests = [];
         let studentInfoCache = {};
 
-        // Fetch student info from RTDB
         async function getStudentInfo(studentId) {
             if (!studentId || studentId === 'unknown') return null;
             if (studentInfoCache[studentId]) return studentInfoCache[studentId];
@@ -601,7 +673,6 @@
             return null;
         }
 
-        // Load requests
         async function loadRequests() {
             const container = document.getElementById('requestsContainer');
             try {
@@ -619,7 +690,6 @@
                     else if (status === 'rejected') rejected++;
                 });
 
-                // Sort by createdAt descending (handle both Timestamp and string)
                 allRequests.sort((a, b) => {
                     const timeA = a.createdAt ? (a.createdAt.toDate ? a.createdAt.toDate().getTime() : new Date(a.createdAt).getTime()) : 0;
                     const timeB = b.createdAt ? (b.createdAt.toDate ? b.createdAt.toDate().getTime() : new Date(b.createdAt).getTime()) : 0;
@@ -660,7 +730,6 @@
                 return;
             }
 
-            // Fetch student info for all requests, then render
             const fetchPromises = filtered.map(req => req.studentId ? getStudentInfo(req.studentId) : Promise.resolve(null));
             Promise.all(fetchPromises).then(studentInfos => {
                 container.innerHTML = filtered.map((req, idx) => {
@@ -748,7 +817,6 @@
             });
         }
 
-        // Update request status
         window.updateStatus = async function (requestId, newStatus) {
             const btn = event.target.closest(newStatus === 'approved' ? '.btn-approve' : '.btn-reject');
             btn.classList.add('btn-loading');
@@ -759,11 +827,9 @@
                     status: newStatus
                 });
 
-                // Update local data
                 const req = allRequests.find(r => r._id === requestId);
                 if (req) req.status = newStatus;
 
-                // Recount
                 let pending = 0, approved = 0, rejected = 0;
                 allRequests.forEach(r => {
                     const s = (r.status || 'pending').toLowerCase();
@@ -793,15 +859,13 @@
             }
         };
 
-        // Filter change
         document.getElementById('statusFilter').addEventListener('change', renderRequests);
 
-        // Init
         document.addEventListener('DOMContentLoaded', async function() {
             await Promise.all([loadStudentRegistrations(), loadRequests()]);
             hidePageLoader();
         });
-    </script>
+</script>
 </body>
 
 </html>

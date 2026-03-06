@@ -1,6 +1,4 @@
-/*  Smart Hall — Login & Registration  */
 
-// ─── Firebase Init ───────────────────────────────────────────
 const firebaseConfig = {
   apiKey: "AIzaSyBF-nMMW5lG44JfHxx4HxCbf5N81geOiRs",
   authDomain: "bauet-hms-63f5b.firebaseapp.com",
@@ -16,7 +14,6 @@ const auth = firebase.auth();
 const database = firebase.database();
 const firestore = firebase.firestore();
 
-// ─── DOM Elements ────────────────────────────────────────────
 const signInButton = document.getElementById("signInButton");
 const signUpButton = document.getElementById("signUpButton");
 const signInContainer = document.getElementById("signIn");
@@ -24,7 +21,6 @@ const signUpContainer = document.getElementById("signup");
 const signInForm = document.getElementById("signInForm");
 const signUpForm = document.getElementById("signUpForm");
 
-// ─── Toggle between Sign In / Sign Up ────────────────────────
 signInButton.addEventListener("click", () => {
   signInContainer.style.display = "block";
   signUpContainer.style.display = "none";
@@ -34,7 +30,6 @@ signUpButton.addEventListener("click", () => {
   signUpContainer.style.display = "block";
 });
 
-// ─── Helper: room validation ────────────────────────────────
 function isValidRoomNumber(roomNumber) {
   const room = parseInt(roomNumber);
   return (
@@ -47,7 +42,6 @@ function isValidRoomNumber(roomNumber) {
   );
 }
 
-// ─── Helper: create room in Firestore ────────────────────────
 async function createNewRoom(roomNumber) {
   const roomRef = firestore.collection("room").doc(roomNumber);
   await roomRef.set({
@@ -66,7 +60,6 @@ async function createNewRoom(roomNumber) {
   await Promise.all(promises);
 }
 
-// ─── Helper: find an empty seat ──────────────────────────────
 async function findSeat(roomRef) {
   const seatPromises = [];
   for (let i = 1; i <= 6; i++) {
@@ -81,7 +74,6 @@ async function findSeat(roomRef) {
   return null;
 }
 
-// ─── Helper: button loading state ────────────────────────────
 function setBtn(btn, loading, text) {
   btn.disabled = loading;
   if (loading) {
@@ -92,9 +84,6 @@ function setBtn(btn, loading, text) {
   if (text) btn.value = text;
 }
 
-// ═════════════════════════════════════════════════════════════
-//  LOGIN
-// ═════════════════════════════════════════════════════════════
 signInForm.addEventListener("submit", async function (e) {
   e.preventDefault();
 
@@ -110,11 +99,11 @@ signInForm.addEventListener("submit", async function (e) {
   setBtn(btn, true, "Signing in...");
 
   try {
-    // 1) Look up user in Realtime Database
+
     const snapshot = await database.ref("users/" + studentId).once("value");
 
     if (!snapshot.exists()) {
-      // Not an approved user — check if pending
+
       const pendingDoc = await firestore.collection("PendingStudents").doc(studentId).get();
       if (pendingDoc.exists) {
         showToast("Your registration is pending admin approval.", "warning");
@@ -133,10 +122,8 @@ signInForm.addEventListener("submit", async function (e) {
       return;
     }
 
-    // 2) Authenticate with Firebase Auth
     await auth.signInWithEmailAndPassword(userData.email, password);
 
-    // 3) Set session and redirect
     sessionStorage.clear();
     sessionStorage.setItem("userId", studentId);
 
@@ -170,9 +157,6 @@ signInForm.addEventListener("submit", async function (e) {
   }
 });
 
-// ═════════════════════════════════════════════════════════════
-//  REGISTRATION
-// ═════════════════════════════════════════════════════════════
 signUpForm.addEventListener("submit", async function (e) {
   e.preventDefault();
 
@@ -206,7 +190,7 @@ signUpForm.addEventListener("submit", async function (e) {
   }
 
   try {
-    // Check if student ID already approved
+
     const existingUser = await database.ref("users/" + studentID).once("value");
     if (existingUser.exists()) {
       showToast("This Student ID is already registered. Please sign in.", "warning");
@@ -214,7 +198,6 @@ signUpForm.addEventListener("submit", async function (e) {
       return;
     }
 
-    // Check if already pending
     const existingPending = await firestore.collection("PendingStudents").doc(studentID).get();
     if (existingPending.exists) {
       showToast("Registration already submitted. Wait for admin approval.", "warning");
@@ -222,21 +205,18 @@ signUpForm.addEventListener("submit", async function (e) {
       return;
     }
 
-    // Validate room
     if (!isValidRoomNumber(room)) {
       showToast("Room " + room + " is not valid.", "error");
       setBtn(btn, false, "Sign Up");
       return;
     }
 
-    // Ensure room exists
     const roomRef = firestore.collection("room").doc(room);
     const roomSnap = await roomRef.get();
     if (!roomSnap.exists) {
       await createNewRoom(room);
     }
 
-    // Find empty seat
     const assignedSeat = await findSeat(roomRef);
     if (!assignedSeat) {
       showToast("Room " + room + " is full. Choose another room.", "warning");
@@ -244,10 +224,8 @@ signUpForm.addEventListener("submit", async function (e) {
       return;
     }
 
-    // Create Firebase Auth account
     const userCredential = await auth.createUserWithEmailAndPassword(email, password);
 
-    // Save to PendingStudents
     await firestore.collection("PendingStudents").doc(studentID).set({
       name,
       email,
@@ -266,7 +244,6 @@ signUpForm.addEventListener("submit", async function (e) {
       createdAt: new Date().toISOString()
     });
 
-    // Sign out after registration (so they don't stay logged in as unverified user)
     await auth.signOut();
 
     showToast("Registration submitted! Wait for admin approval.", "success");
@@ -292,7 +269,6 @@ signUpForm.addEventListener("submit", async function (e) {
   }
 });
 
-// ─── Toggle Password Visibility ──────────────────────────────
 document.querySelectorAll(".toggle-password").forEach(function (toggle) {
   toggle.addEventListener("click", function () {
     const input = this.closest(".input-group").querySelector("input");

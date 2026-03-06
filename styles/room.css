@@ -1,9 +1,4 @@
-/* ===================================================
-   Room Allocation – Professional UI
-   (extends base.css)
-   =================================================== */
 
-/* ── Container override (fixed sidebar layout) ── */
 .container {
     display: grid;
     grid-template-columns: 14rem 1fr;
@@ -24,7 +19,6 @@
     left: 0;
 }
 
-/* ── Main ─────────────────────────── */
 main {
     grid-area: main;
     grid-column: 2;
@@ -33,7 +27,6 @@ main {
     animation: fadeInUp 0.45s ease;
 }
 
-/* Page Header */
 .page-header {
     margin-bottom: 2rem;
 }
@@ -64,7 +57,6 @@ main {
     margin-top: 0.6rem;
 }
 
-/* ── Filters ──────────────────────── */
 .filters-area {
     background: var(--clr-white);
     border-radius: var(--radius-2);
@@ -117,7 +109,6 @@ main {
     outline: none;
 }
 
-/* Filter Actions */
 .filter-actions {
     display: flex;
     gap: 0.8rem;
@@ -126,7 +117,6 @@ main {
     border-top: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-/* ── Buttons ──────────────────────── */
 .btn {
     cursor: pointer;
     font-family: 'Poppins', sans-serif;
@@ -199,7 +189,6 @@ main {
     transform: scale(1.08);
 }
 
-/* ── Seat Grid & Cards ────────────── */
 .seats-section {
     margin-bottom: 1.5rem;
 }
@@ -301,14 +290,12 @@ main {
     margin-bottom: 0 !important;
 }
 
-/* Submit area */
 .submit-area {
     display: flex;
     justify-content: center;
     margin: 1.5rem 0;
 }
 
-/* ── Room Availability Section ────── */
 .room-toggle-area {
     display: flex;
     justify-content: center;
@@ -335,7 +322,6 @@ main {
     animation: fadeInUp 0.35s ease;
 }
 
-/* Availability heading */
 .avail-heading {
     font-size: 1.1rem;
     font-weight: 600;
@@ -350,7 +336,6 @@ main {
     color: var(--clr-primary);
 }
 
-/* Summary stats strip */
 .stats-strip {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -425,7 +410,6 @@ main {
     margin-top: 0.15rem;
 }
 
-/* Room grid cards */
 .room-section-title {
     font-size: 0.92rem;
     font-weight: 600;
@@ -534,7 +518,6 @@ main {
 .room-card.not-created .room-progress-fill { background: #6c5ce7; }
 .room-card.is-full .room-progress-fill { background: #d63031; }
 
-/* Loading bar */
 .loading-bar-wrap {
     width: 100%;
     height: 4px;
@@ -552,7 +535,6 @@ main {
     width: 0%;
 }
 
-/* Empty State */
 .empty-state {
     text-align: center;
     padding: 3rem 2rem;
@@ -570,7 +552,6 @@ main {
     font-size: 0.88rem;
 }
 
-/* ── Right panel (top bar) ────────── */
 .right {
     position: fixed;
     top: 0;
@@ -620,7 +601,6 @@ main {
     display: none;
 }
 
-/* ── Utility ──────────────────────── */
 .text-muted { color: var(--clr-info-dark); }
 .primary    { color: var(--clr-primary); }
 .success    { color: var(--clr-success); }
@@ -631,7 +611,6 @@ main {
 .mb-2 { margin-bottom: 0.5rem; }
 .mb-4 { margin-bottom: 1.5rem; }
 
-/* ── Responsive ───────────────────── */
 @media screen and (max-width: 1200px) {
     .container {
         grid-template-columns: 5rem 1fr;
@@ -712,7 +691,6 @@ main {
     .card-body { min-height: auto; }
 }
 
-/* ── Animations ───────────────────── */
 @keyframes fadeInUp {
     from { opacity: 0; transform: translateY(15px); }
     to   { opacity: 1; transform: translateY(0); }

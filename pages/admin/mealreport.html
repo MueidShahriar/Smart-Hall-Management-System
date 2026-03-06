@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="../../styles/base.css">
 
     <style>
-        /* Page Header */
+
         main h1 {
             font-size: 1.6rem;
             font-weight: 700;
@@ -38,7 +38,6 @@
             margin-bottom: 2rem;
         }
 
-        /* Controls */
         .report-controls {
             display: flex;
             gap: 1rem;
@@ -96,7 +95,6 @@
             transform: translateY(-1px);
         }
 
-        /* Summary Cards */
         .summary-cards {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -161,7 +159,6 @@
             color: var(--clr-info-dark);
         }
 
-        /* Report Table */
         .report-table-wrapper {
             background: var(--clr-white);
             border-radius: var(--radius-2);
@@ -239,7 +236,6 @@
             font-size: 0.95rem;
         }
 
-        /* Responsive */
         @media (max-width: 992px) {
             .report-controls {
                 flex-direction: column;
@@ -272,7 +268,6 @@
             <h1>Meal Report</h1>
             <p class="page-subtitle">View and manage daily & monthly meal reports</p>
 
-            <!-- Controls -->
             <div class="report-controls">
                 <div class="control-group">
                     <label>Report Type</label>
@@ -295,7 +290,6 @@
                 </button>
             </div>
 
-            <!-- Summary Cards -->
             <div class="summary-cards">
                 <div class="summary-card">
                     <div class="icon total">
@@ -335,7 +329,6 @@
                 </div>
             </div>
 
-            <!-- Report Table -->
             <div class="report-table-wrapper">
                 <h2>Student Meal Details</h2>
                 <div class="table-scroll">
@@ -349,7 +342,6 @@
             </div>
         </main>
 
-        <!-- Right Panel -->
     </div>
 
     <script src="../../scripts/sidebar.js"></script>
@@ -372,7 +364,6 @@
         const db = firebase.firestore();
         const rtdb = firebase.database();
 
-        // Cache student info from RTDB
         let studentCache = {};
         async function loadAllStudents() {
             if (Object.keys(studentCache).length > 0) return;
@@ -381,12 +372,12 @@
                 if (snap.exists()) studentCache = snap.val();
             } catch (e) { console.error('Error loading students:', e); }
         }
-    </script>
+</script>
 
     <script src="../../scripts/toast.js"></script>
 
     <script>
-        // Report type toggle
+
         const reportType = document.getElementById('reportType');
         const dateGroup = document.getElementById('dateGroup');
         const monthGroup = document.getElementById('monthGroup');
@@ -401,12 +392,10 @@
             }
         });
 
-        // Set default date to today
         const today = new Date();
         document.getElementById('reportDate').value = today.toISOString().split('T')[0];
         document.getElementById('reportMonth').value = today.toISOString().slice(0, 7);
 
-        // Generate Report
         document.getElementById('generateBtn').addEventListener('click', async () => {
             const genBtn = document.getElementById('generateBtn');
             const type = reportType.value;
@@ -433,7 +422,7 @@
             content.innerHTML = '<div class="empty-state"><div class="loader"></div><p>Loading report...</p></div>';
 
             try {
-                // Load student data from RTDB first
+
                 await loadAllStudents();
 
                 const snapshot = await db.collection('meals').get();
@@ -447,7 +436,7 @@
                     const studentId = doc.id;
 
                     if (type === 'daily') {
-                        // Check this specific date
+
                         if (data[targetDate]) {
                             totalStudents++;
                             const isOn = data[targetDate].on === true;
@@ -460,7 +449,7 @@
                             });
                         }
                     } else {
-                        // Monthly: count all days in the month
+
                         let studentOn = 0;
                         let studentOff = 0;
                         let found = false;
@@ -487,20 +476,18 @@
                     }
                 });
 
-                // Update summary
                 document.getElementById('totalStudents').textContent = totalStudents;
                 document.getElementById('mealsOn').textContent = onCount;
                 document.getElementById('mealsOff').textContent = offCount;
                 const costPerMeal = 70;
                 document.getElementById('totalCost').textContent = `৳${onCount * costPerMeal}`;
 
-                // Build table
                 if (rows.length === 0) {
                     content.innerHTML = '<div class="empty-state"><span class="material-icons">info</span><p>No meal data found for the selected period</p></div>';
                     return;
                 }
 
-                let tableHTML = '<table><thead><tr><th>#</th><th>Student ID</th><th>Name</th><th>Department</th>';
+                let tableHTML = '<table><thead><tr><th>#</th><th>Student ID</th><th>Name</th><th>Department</th><th>Room</th>';
                 if (type === 'daily') {
                     tableHTML += '<th>Date</th><th>Status</th>';
                 } else {
@@ -512,7 +499,8 @@
                     const sInfo = studentCache[row.id] || {};
                     const studentName = sInfo.name || '—';
                     const studentDept = sInfo.department || sInfo.dept_name || '—';
-                    tableHTML += `<tr><td>${i + 1}</td><td>${row.id}</td><td>${studentName}</td><td>${studentDept}</td>`;
+                    const studentRoom = sInfo.room || '—';
+                    tableHTML += `<tr><td>${i + 1}</td><td>${row.id}</td><td>${studentName}</td><td>${studentDept}</td><td>${studentRoom}</td>`;
                     if (type === 'daily') {
                         tableHTML += `<td>${row.date}</td><td><span class="badge ${row.status ? 'on' : 'off'}">${row.status ? 'ON' : 'OFF'}</span></td>`;
                     } else {
@@ -535,5 +523,6 @@
                 genBtn.disabled = false;
             }
         });
-    </script>
+</script>
 </body>
+</html>

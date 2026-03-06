@@ -6,13 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Complaints | Smart Hall</title>
 
-    <!-- Google Material Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
     <link rel="shortcut icon" href="../../images/RSM_Logo.png" type="image/x-icon" />
     <link rel="stylesheet" href="../../styles/base.css" />
 
     <style>
-        /* Page Header */
+
         .page-header h1 {
             font-size: 1.6rem;
             font-weight: 700;
@@ -50,7 +49,6 @@
             max-width: 1200px;
         }
 
-        /* === Animation for expanded cards === */
         .complaint-card {
             background: var(--clr-white);
             border-radius: var(--radius-2);
@@ -92,7 +90,6 @@
             transition: opacity 0.3s ease;
         }
 
-        /* === Complaint Grid Responsive === */
         .complaint-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -126,7 +123,6 @@
             }
         }
 
-        /* Utility classes (replacing Tailwind) */
         .hidden { display: none; }
         .opacity-0 { opacity: 0; }
         .mt-4 { margin-top: 1rem; }
@@ -142,7 +138,6 @@
             transition: opacity 0.3s ease;
         }
 
-        /* Complaint Detail Modal */
         .complaint-modal-overlay {
             position: fixed;
             inset: 0;
@@ -229,7 +224,6 @@
 <body>
     <script src="../../scripts/preloader.js"></script>
 
-    <!-- Complaint Detail Modal -->
     <div class="complaint-modal-overlay" id="complaintModal">
         <div class="complaint-modal">
             <div class="complaint-modal-header">
@@ -266,7 +260,6 @@
 
     <div class="container">
 
-        <!-- Main Content -->
         <main>
             <div class="page-header">
                 <h1>Complaints</h1>
@@ -404,7 +397,7 @@
             document.getElementById('modalRoom').textContent = complaint.roomNumber || complaint.room || '—';
             document.getElementById('modalSector').textContent = complaint.sector || '—';
             document.getElementById('modalDescription').textContent = complaint.description || 'No description provided.';
-            
+
             const timestamp = complaint.timestamp ? new Date(complaint.timestamp).toLocaleString() : '—';
             document.getElementById('modalTimestamp').textContent = timestamp;
 
@@ -434,7 +427,7 @@
 
             try {
                 const complaint = complaintsData[id];
-                
+
                 // Save to SolvedComplaints collection for student notification
                 if (complaint) {
                     await setDoc(doc(firestore, "SolvedComplaints", id), {

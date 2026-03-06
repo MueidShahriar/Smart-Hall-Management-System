@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function() {
-    // Firebase configuration
+
     const firebaseConfig = {
         apiKey: "AIzaSyBF-nMMW5lG44JfHxx4HxCbf5N81geOiRs",
         authDomain: "bauet-hms-63f5b.firebaseapp.com",
@@ -10,12 +10,10 @@ document.addEventListener("DOMContentLoaded", function() {
         appId: "1:200038506273:web:2e141fc9ec36de049ae860"
     };
 
-    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const storage = firebase.storage();
 
-    // DOM Elements
     const uploadForm = document.getElementById('uploadForm');
     const docFile = document.getElementById('docFile');
     const fileNameDisplay = document.querySelector('.file-name');
@@ -27,13 +25,11 @@ document.addEventListener("DOMContentLoaded", function() {
     const notificationIcon = document.querySelector('.notification-icon');
     const notificationMessage = document.querySelector('.notification-message');
 
-    // Authentication check
     if (!sessionStorage.getItem("userId")) {
         window.location.replace("../../index.html");
         return;
     }
 
-    // Show file name when selected
     docFile.addEventListener('change', (e) => {
         if (e.target.files.length > 0) {
             fileNameDisplay.textContent = e.target.files[0].name;
@@ -42,7 +38,6 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
-    // Toggle specific students input visibility
     docVisibility.addEventListener('change', () => {
         if (docVisibility.value === 'specific') {
             specificStudentsGroup.style.display = 'block';
@@ -51,43 +46,38 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
-    // Handle document upload
     uploadForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
+
         const title = document.getElementById('docTitle').value;
         const category = document.getElementById('docCategory').value;
         const description = document.getElementById('docDescription').value;
         const visibility = docVisibility.value;
-        const specificStudents = visibility === 'specific' ? 
-                                document.getElementById('specificStudents').value.split(',').map(id => id.trim()) : 
+        const specificStudents = visibility === 'specific' ?
+                                document.getElementById('specificStudents').value.split(',').map(id => id.trim()) :
                                 [];
         const file = docFile.files[0];
-        
+
         if (!file) {
             showNotification('Please select a file to upload', true);
             return;
         }
-        
+
         try {
-            // Show loading state
+
             const uploadBtn = document.querySelector('.upload-btn');
             uploadBtn.classList.add('btn-loading');
             uploadBtn.disabled = true;
-            
-            // Step 1: Upload file to Firebase Storage
+
             const fileExtension = file.name.split('.').pop();
             const fileName = `${Date.now()}_${title.replace(/\s+/g, '_')}.${fileExtension}`;
             const storageRef = storage.ref(`documents/${fileName}`);
             const uploadTask = storageRef.put(file);
-            
-            // Wait for upload to complete
+
             await uploadTask;
-            
-            // Step 2: Get download URL
+
             const downloadURL = await storageRef.getDownloadURL();
-            
-            // Step 3: Store document metadata in Firestore
+
             const docData = {
                 title,
                 category,
@@ -99,39 +89,33 @@ document.addEventListener("DOMContentLoaded", function() {
                 uploadDate: firebase.firestore.FieldValue.serverTimestamp(),
                 uploadedBy: sessionStorage.getItem("userId") || 'admin'
             };
-            
+
             await db.collection('documents').add(docData);
-            
-            // Reset form and show success message
+
             uploadForm.reset();
             fileNameDisplay.textContent = 'No file chosen';
             specificStudentsGroup.style.display = 'none';
-            
-            // Show success notification
+
             showNotification('Document uploaded successfully!');
-            
-            // Refresh document list
+
             loadDocuments();
-            
-            // Reset button state
+
             uploadBtn.classList.remove('btn-loading');
             uploadBtn.disabled = false;
-            
+
         } catch (error) {
             console.error("Error uploading document:", error);
             showNotification(`Error uploading document: ${error.message}`, true);
-            
-            // Reset button state
+
             const uploadBtn = document.querySelector('.upload-btn');
             uploadBtn.classList.remove('btn-loading');
             uploadBtn.disabled = false;
         }
     });
 
-    // Show notification
     function showNotification(message, isError = false) {
         notificationMessage.textContent = message;
-        
+
         if (isError) {
             notificationIcon.textContent = 'error';
             notificationIcon.classList.add('error');
@@ -139,27 +123,26 @@ document.addEventListener("DOMContentLoaded", function() {
             notificationIcon.textContent = 'check_circle';
             notificationIcon.classList.remove('error');
         }
-        
+
         uploadNotification.classList.add('show');
-        
+
         setTimeout(() => {
             uploadNotification.classList.remove('show');
         }, 5000);
     }
 
-    // Load documents
     async function loadDocuments(category = 'all') {
         documentsList.innerHTML = '<div class="document-loading">Loading documents...</div>';
-        
+
         try {
             let query = db.collection('documents').orderBy('uploadDate', 'desc');
-            
+
             if (category !== 'all') {
                 query = query.where('category', '==', category);
             }
-            
+
             const snapshot = await query.get();
-            
+
             if (snapshot.empty) {
                 documentsList.innerHTML = `
                     <div class="no-documents">
@@ -170,19 +153,18 @@ document.addEventListener("DOMContentLoaded", function() {
                 `;
                 return;
             }
-            
+
             let documentsHTML = '';
-            
+
             snapshot.forEach(doc => {
                 const data = doc.data();
                 const date = data.uploadDate ? new Date(data.uploadDate.seconds * 1000) : new Date();
                 const formattedDate = date.toLocaleDateString();
-                
-                // Choose icon based on file extension
+
                 let fileIcon = 'description';
                 const fileName = data.fileName || '';
                 const extension = fileName.split('.').pop().toLowerCase();
-                
+
                 if (['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt'].includes(extension)) {
                     if (extension === 'pdf') fileIcon = 'picture_as_pdf';
                     else if (['doc', 'docx'].includes(extension)) fileIcon = 'article';
@@ -190,7 +172,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     else if (['ppt', 'pptx'].includes(extension)) fileIcon = 'slideshow';
                     else if (extension === 'txt') fileIcon = 'text_snippet';
                 }
-                
+
                 documentsHTML += `
                     <div class="document-item" data-id="${doc.id}">
                         <span class="material-icons document-icon">${fileIcon}</span>
@@ -214,10 +196,9 @@ document.addEventListener("DOMContentLoaded", function() {
                     </div>
                 `;
             });
-            
+
             documentsList.innerHTML = documentsHTML;
-            
-            // Add event listeners for delete buttons
+
             document.querySelectorAll('.delete-btn').forEach(button => {
                 button.addEventListener('click', async () => {
                     if (confirm('Are you sure you want to delete this document?')) {
@@ -226,7 +207,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     }
                 });
             });
-            
+
         } catch (error) {
             console.error("Error loading documents:", error);
             documentsList.innerHTML = `
@@ -239,47 +220,40 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    // Delete document
     async function deleteDocument(docId) {
         try {
-            // Get document data
+
             const docRef = db.collection('documents').doc(docId);
             const doc = await docRef.get();
-            
+
             if (!doc.exists) {
                 showNotification('Document not found', true);
                 return;
             }
-            
+
             const data = doc.data();
-            
-            // Delete file from storage if URL exists
+
             if (data.fileUrl) {
-                // Extract the path from the URL
+
                 const fileRef = storage.refFromURL(data.fileUrl);
                 await fileRef.delete();
             }
-            
-            // Delete document from Firestore
+
             await docRef.delete();
-            
-            // Show success notification
+
             showNotification('Document deleted successfully!');
-            
-            // Refresh document list
+
             loadDocuments(filterCategory.value);
-            
+
         } catch (error) {
             console.error("Error deleting document:", error);
             showNotification(`Error deleting document: ${error.message}`, true);
         }
     }
 
-    // Filter documents by category
     filterCategory.addEventListener('change', () => {
         loadDocuments(filterCategory.value);
     });
 
-    // Initial load
     loadDocuments();
 });

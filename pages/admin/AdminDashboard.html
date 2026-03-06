@@ -60,7 +60,7 @@
                     <span class="material-icons card-icon">co_present</span>
                     <div class="section-info">
                         <h2>Attendance Report</h2>
-                        <p>Daily present and absent report</p>
+                        <p id="attendanceSummaryText">Loading today's attendance...</p>
                         <button class="action-btn">Check</button>
                     </div>
                 </div>
@@ -92,7 +92,6 @@
                     </div>
                 </div>
 
-                <!-- SOS Alerts Card (same grid as other cards) -->
                 <div class="card sos-card" id="sosAlertsSection" style="display:none;">
                     <span class="material-icons card-icon sos-icon">warning</span>
                     <div class="section-info sos-card-info">
@@ -125,7 +124,7 @@
             appId: "1:200038506273:web:2e141fc9ec36de049ae860"
         };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-    </script>
+</script>
 
     <script src="../../scripts/AdminDashboard.js"></script>
 </body>

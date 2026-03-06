@@ -137,7 +137,6 @@
             margin-bottom: 0.5rem;
         }
 
-        /* Mobile card layout for tables */
         .mobile-card {
             display: none;
         }
@@ -164,7 +163,6 @@
                 font-size: 1.2rem;
             }
 
-            /* Hide desktop table, show mobile cards */
             .payments-table-wrap table {
                 display: none;
             }
@@ -272,7 +270,6 @@
                     </div>
                 </div>
 
-                <!-- Meal Cost Breakdown -->
                 <div class="payments-table-wrap">
                     <h2>Meal Cost Breakdown</h2>
                     <div id="mealBreakdownContainer">
@@ -299,7 +296,6 @@
                     </div>
                 </div>
 
-                <!-- Payment History -->
                 <div class="payments-table-wrap" style="margin-top: 1.5rem;">
                     <h2>Payment History</h2>
                     <div id="paymentsContainer">
@@ -372,9 +368,9 @@
                     collection(firestore, "meals"),
                     where("studentId", "==", studentId)
                 );
-                
+
                 const snapshot = await getDocs(mealsQuery);
-                
+
                 if (snapshot.empty) {
                     document.getElementById('mealBreakdownBody').innerHTML = `
                         <tr>
@@ -442,14 +438,14 @@
                 const now = new Date();
                 const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
                 const currentMonthData = monthlyData[currentMonthKey];
-                document.getElementById('currentMonthCost').textContent = currentMonthData 
-                    ? `৳${currentMonthData.cost.toLocaleString()}` 
+                document.getElementById('currentMonthCost').textContent = currentMonthData
+                    ? `৳${currentMonthData.cost.toLocaleString()}`
                     : '৳0';
 
                 // Render monthly breakdown
                 const sortedMonths = Object.keys(monthlyData).sort().reverse();
                 const tbody = document.getElementById('mealBreakdownBody');
-                
+
                 if (sortedMonths.length === 0) {
                     tbody.innerHTML = `
                         <tr>
@@ -524,10 +520,10 @@
                     collection(firestore, "payments"),
                     where("studentId", "==", studentId)
                 );
-                
+
                 const snapshot = await getDocs(paymentsQuery);
                 const tbody = document.getElementById('paymentsBody');
-                
+
                 if (snapshot.empty) {
                     tbody.innerHTML = `
                         <tr>
@@ -549,8 +545,8 @@
                 payments.sort((a, b) => new Date(b.date) - new Date(a.date));
 
                 tbody.innerHTML = payments.map(p => {
-                    const date = p.date ? new Date(p.date).toLocaleDateString('en-US', { 
-                        year: 'numeric', month: 'short', day: 'numeric' 
+                    const date = p.date ? new Date(p.date).toLocaleDateString('en-US', {
+                        year: 'numeric', month: 'short', day: 'numeric'
                     }) : '—';
                     const statusClass = p.status === 'paid' ? 'paid' : (p.status === 'pending' ? 'pending' : 'overdue');
                     return `
@@ -565,8 +561,8 @@
 
                 // Mobile cards for payment history
                 const paymentMobileCards = payments.map(p => {
-                    const date = p.date ? new Date(p.date).toLocaleDateString('en-US', { 
-                        year: 'numeric', month: 'short', day: 'numeric' 
+                    const date = p.date ? new Date(p.date).toLocaleDateString('en-US', {
+                        year: 'numeric', month: 'short', day: 'numeric'
                     }) : '—';
                     const statusClass = p.status === 'paid' ? 'paid' : (p.status === 'pending' ? 'pending' : 'overdue');
                     return `

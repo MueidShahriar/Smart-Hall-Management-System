@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="../../styles/base.css" />
 
     <style>
-        /* --- Page Header --- */
+
         .page-title {
             font-size: 1.5rem;
             font-weight: 700;
@@ -24,7 +24,6 @@
             margin-bottom: 1.5rem;
         }
 
-        /* --- Search Section --- */
         .search-section {
             background: var(--clr-white);
             border-radius: var(--radius-2);
@@ -90,7 +89,6 @@
             margin-top: 0.4rem;
         }
 
-        /* --- Results Summary --- */
         .results-summary {
             font-size: 0.82rem;
             color: var(--clr-info-dark);
@@ -103,14 +101,12 @@
         }
         .results-summary span { font-weight: 700; color: var(--clr-primary); }
 
-        /* --- Student Cards Grid --- */
         .students-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
             gap: 1.2rem;
         }
 
-        /* --- Student Card --- */
         .student-card {
             background: var(--clr-white);
             border-radius: var(--radius-3);
@@ -192,7 +188,6 @@
         }
         .view-profile-btn .material-icons { font-size: 0.92rem; }
 
-        /* --- Empty State --- */
         .empty-state {
             text-align: center;
             padding: 3rem 1rem;
@@ -205,7 +200,6 @@
         }
         .empty-state p { font-size: 0.88rem; }
 
-        /* --- Profile Modal Overlay --- */
         .profile-overlay {
             position: fixed;
             inset: 0;
@@ -261,7 +255,6 @@
         .modal-close-btn:hover { background: rgba(255,255,255,1); }
         .modal-close-btn .material-icons { font-size: 1.2rem; color: var(--clr-dark); }
 
-        /* Modal header */
         .modal-header-banner {
             background: linear-gradient(135deg, #4f46e5, #7c3aed, #a78bfa);
             height: 100px;
@@ -284,7 +277,6 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.12);
         }
 
-        /* Modal body */
         .modal-body {
             padding: 3.2rem 1.5rem 1.5rem;
             text-align: center;
@@ -323,7 +315,6 @@
             color: var(--clr-primary);
         }
 
-        /* Modal tabs */
         .modal-tabs {
             display: flex;
             border-bottom: 2px solid var(--clr-bg);
@@ -346,7 +337,6 @@
             border-bottom-color: var(--clr-primary);
         }
 
-        /* Modal info items */
         .modal-info-grid {
             text-align: left;
         }
@@ -377,7 +367,6 @@
             word-break: break-word;
         }
 
-        /* Loading spinner */
         .loading-spinner {
             text-align: center;
             padding: 4rem 0;
@@ -388,7 +377,6 @@
             animation: spin 1s linear infinite;
         }
 
-        /* --- Responsive --- */
         @media (max-width: 900px) {
             .students-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
         }
@@ -415,12 +403,11 @@
             <h1 class="page-title">Student Information</h1>
             <p class="page-subtitle">Search students by ID or name to view their details</p>
 
-            <!-- Search Section -->
             <div class="search-section">
                 <div class="search-row">
                     <div class="search-input-wrap">
                         <span class="material-icons">badge</span>
-                        <input type="text" id="search-id" placeholder="Search by Student ID..." autocomplete="off" />
+                        <input type="text" id="search-id" placeholder="Search by Student ID..." autocomplete="off" minlength="3" maxlength="16" />
                     </div>
                     <div class="search-input-wrap">
                         <span class="material-icons">engineering</span>
@@ -438,12 +425,10 @@
                 <div class="search-hint">Tip: You can search by ID, Department, or Batch separately or combine multiple filters</div>
             </div>
 
-            <!-- Results Summary -->
             <div class="results-summary" id="results-summary">
                 Found <span id="result-count">0</span> student(s)
             </div>
 
-            <!-- Students Grid -->
             <div class="students-grid" id="students-grid">
                 <div class="empty-state" id="empty-state">
                     <span class="material-icons">person_search</span>
@@ -453,14 +438,13 @@
         </main>
     </div>
 
-    <!-- Profile Detail Modal -->
     <div class="profile-overlay" id="profile-overlay">
         <div class="profile-modal" id="profile-modal">
             <button class="modal-close-btn" id="modal-close-btn">
                 <span class="material-icons">close</span>
             </button>
             <div id="modal-content">
-                <!-- Populated dynamically -->
+
             </div>
         </div>
     </div>
@@ -514,9 +498,14 @@
             const queryId = searchIdInput.value.trim().toLowerCase();
             const queryDept = searchDeptInput.value.trim().toLowerCase();
             const queryBatch = searchBatchInput.value.trim().toLowerCase();
-            
+
             if (!queryId && !queryDept && !queryBatch) {
                 showToast('Please enter at least one search criteria', 'warning');
+                return;
+            }
+
+            if (queryId && (queryId.length < 3 || queryId.length > 16)) {
+                showToast('Student ID must be between 3 and 16 characters', 'warning');
                 return;
             }
 

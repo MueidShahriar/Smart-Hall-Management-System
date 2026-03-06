@@ -1,13 +1,7 @@
-/**
- * Common Sidebar Component
- * Shared by all student and admin pages
- * Usage: <script src="../../scripts/sidebar.js"></script>
- *        <script>initSidebar('student', 'dashboard');</script>
- */
+
 (function () {
     'use strict';
 
-    /* ── Navigation Links ───────────────────────── */
     const STUDENT_LINKS = [
         { icon: 'dashboard',      label: 'Dashboard',            href: 'StudentDashboard.html', key: 'dashboard' },
         { icon: 'person',         label: 'Profile',              href: 'profile.html',          key: 'profile' },
@@ -31,7 +25,6 @@
         { icon: 'description',    label: 'Documents',       href: 'DocumentManagement.html', key: 'documents' },
     ];
 
-    /* ── Helpers ─────────────────────────────────── */
     function getStudentId() {
         return new URLSearchParams(window.location.search).get('id');
     }
@@ -41,7 +34,6 @@
         else console.warn('[Sidebar]', msg);
     }
 
-    /* ── Build HTML ──────────────────────────────── */
     function buildLinks(links, activePage, role) {
         const sid = getStudentId();
         return links.map(link => {
@@ -82,13 +74,11 @@
             </div>`;
     }
 
-    /* ── Event Handlers ──────────────────────────── */
     function setupHandlers(role) {
         const menuBtn  = document.getElementById('menu_bar');
         const aside    = document.querySelector('.aside');
         const closeBtn = document.querySelector('.aside .close span');
 
-        // Toggle sidebar (mobile)
         if (menuBtn && aside) {
             menuBtn.addEventListener('click', () => aside.classList.add('show'));
         }
@@ -96,7 +86,6 @@
             closeBtn.addEventListener('click', () => aside.classList.remove('show'));
         }
 
-        // Close on outside click (mobile)
         document.addEventListener('click', e => {
             if (aside && aside.classList.contains('show') &&
                 !aside.contains(e.target) &&
@@ -105,19 +94,16 @@
             }
         });
 
-        // Sidebar logout
         const logoutBtn = document.getElementById('sidebarLogoutBtn');
         if (logoutBtn) {
             logoutBtn.addEventListener('click', e => { e.preventDefault(); doLogout(); });
         }
 
-        // Topbar logout button
         const topbarLogoutBtn = document.getElementById('topbarLogoutBtn');
         if (topbarLogoutBtn) {
             topbarLogoutBtn.addEventListener('click', e => { e.preventDefault(); doLogout(); });
         }
 
-        // Session guard — redirect to login if not authenticated
         if (!sessionStorage.getItem('userId')) {
             window.location.replace('../../index.html');
             return;
@@ -130,7 +116,6 @@
         window.location.replace('../../index.html');
     }
 
-    /* ── Attendance (Student) ────────────────────── */
     function handleAttendance() {
         const sid = getStudentId();
         if (!sid) { toast('User ID not found. Please log in again.', 'error'); return; }
@@ -140,7 +125,6 @@
 
         if (!navigator.geolocation) { toast('Geolocation not supported by this browser.', 'error'); return; }
 
-        // Loading overlay
         const ov = document.createElement('div');
         ov.id = 'attendance-overlay';
         ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;display:flex;align-items:center;justify-content:center';
@@ -157,7 +141,7 @@
                     const d  = new Date();
                     const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
                     const attData = { latitude: pos.coords.latitude, longitude: pos.coords.longitude, timestamp: d.toISOString(), date: ds };
-                    // Fetch student info then save
+
                     const fetchAndSave = () => {
                         if (window.firebase && typeof firebase.database === 'function') {
                             firebase.database().ref('users/' + sid).once('value').then(snap => {
@@ -206,7 +190,6 @@
 
         if (window.firebase && typeof firebase.firestore === 'function') { doSave(); return; }
 
-        // Dynamically load Firebase compat if needed
         const s1 = document.createElement('script');
         s1.src = 'https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js';
         s1.onload = () => {
@@ -231,7 +214,6 @@
         document.head.appendChild(s1);
     }
 
-    /* ── Right Panel HTML ───────────────────────── */
     function rightPanelHTML(activePage) {
         const showProfile = activePage !== 'profile';
         return `
@@ -257,9 +239,12 @@
             <div class="notif-dropdown" style="display:none">
                 <div class="notif-dropdown-header">
                     <h4>Notifications</h4>
-                    <button class="notif-close-btn" type="button" title="Close">
-                        <span class="material-icons">close</span>
-                    </button>
+                    <div style="display:flex;gap:0.3rem;align-items:center;">
+                        <button class="notif-mark-all-btn" type="button" title="Mark all as read" style="background:none;border:none;cursor:pointer;font-family:inherit;font-size:0.72rem;font-weight:600;color:var(--clr-primary);padding:0.3rem 0.5rem;border-radius:4px;transition:background 0.2s;white-space:nowrap;">Mark all read</button>
+                        <button class="notif-close-btn" type="button" title="Close">
+                            <span class="material-icons">close</span>
+                        </button>
+                    </div>
                 </div>
                 <div class="notif-dropdown-body">
                     <p class="notif-empty">No notifications</p>
@@ -267,11 +252,10 @@
             </div>`;
     }
 
-    /* ── Firebase Compat Loader ──────────────────── */
     function ensureFirebaseCompat(modules, cb) {
-        // modules = ['firestore','database'] etc.
+
         if (window.firebase && firebase.apps && firebase.apps.length) {
-            // Check if requested modules are loaded
+
             const needs = modules.filter(m => typeof firebase[m] !== 'function');
             if (!needs.length) { cb(); return; }
             let loaded = 0;
@@ -283,7 +267,7 @@
             });
             return;
         }
-        // Full bootstrap
+
         const s1 = document.createElement('script');
         s1.src = 'https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js';
         s1.onload = () => {
@@ -314,8 +298,7 @@
         document.head.appendChild(s1);
     }
 
-    /* ── Notification System ─────────────────────── */
-    let notifUnsubs = []; // store snapshot listeners to avoid duplicates
+    let notifUnsubs = [];
 
     function initNotifications(role) {
         const badge = document.querySelector('.notif-badge');
@@ -323,16 +306,15 @@
         const btn   = document.querySelector('.notification-btn');
         const dropdown = document.querySelector('.notif-dropdown');
         const closeBtn = document.querySelector('.notif-close-btn');
+        const markAllBtn = document.querySelector('.notif-mark-all-btn');
         if (!badge || !body || !btn || !dropdown) return;
 
-        // Toggle dropdown on bell click
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
             const open = dropdown.style.display !== 'none';
             dropdown.style.display = open ? 'none' : 'block';
         });
 
-        // Close button
         if (closeBtn) {
             closeBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -340,14 +322,34 @@
             });
         }
 
-        // Close on outside click
         document.addEventListener('click', (e) => {
             if (!dropdown.contains(e.target) && !btn.contains(e.target)) {
                 dropdown.style.display = 'none';
             }
         });
 
-        // Start listeners after Firebase loads
+        if (markAllBtn) {
+            markAllBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const unreadItems = body.querySelectorAll('.notif-item:not(.notif-read)');
+                if (!unreadItems.length) return;
+                ensureFirebaseCompat(['firestore'], () => {
+                    const db = firebase.firestore();
+                    const sid = getStudentId();
+                    unreadItems.forEach(el => {
+                        el.classList.add('notif-read');
+                        const docId = el.dataset.docId;
+                        if (docId) {
+                            db.collection('notifications').doc(docId).update({ read: true }).catch(() => {});
+                        }
+                    });
+                    badge.textContent = '0';
+                    badge.style.display = 'none';
+                    if (typeof showToast === 'function') showToast('All notifications marked as read', 'success');
+                });
+            });
+        }
+
         const mods = ['firestore'];
         ensureFirebaseCompat(mods, () => {
             const db = firebase.firestore();
@@ -392,7 +394,6 @@
             }).join('');
         }
 
-        // SOS alerts (pending)
         notifUnsubs.push(
             db.collection('sos_alerts').where('status', '==', 'pending')
               .onSnapshot(snap => {
@@ -410,7 +411,6 @@
             }, () => {})
         );
 
-        // New complaints (last 24h)
         const yesterday = new Date(Date.now() - 86400000).toISOString();
         notifUnsubs.push(
             db.collection('Complaints').where('timestamp', '>=', yesterday)
@@ -429,7 +429,6 @@
             }, () => {})
         );
 
-        // Pending guest room requests
         notifUnsubs.push(
             db.collection('GuestRoomRequests').where('status', '==', 'pending')
               .onSnapshot(snap => {
@@ -447,7 +446,6 @@
             }, () => {})
         );
 
-        // Pending student registrations
         notifUnsubs.push(
             db.collection('PendingStudents')
               .onSnapshot(snap => {
@@ -502,12 +500,11 @@
             }).join('');
         }
 
-        // Mark notification as read on click
         window._markNotifRead = function(el, docId) {
             if (docId && !el.classList.contains('notif-read')) {
                 el.classList.add('notif-read');
                 db.collection('notifications').doc(docId).update({ read: true }).catch(() => {});
-                // Update badge count
+
                 const currentCount = parseInt(badge.textContent || '0');
                 if (currentCount > 0) {
                     badge.textContent = currentCount - 1;
@@ -518,7 +515,6 @@
             if (link && link !== '#') window.location.href = link;
         };
 
-        // Recent documents/notices (last 7 days)
         const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString();
         notifUnsubs.push(
             db.collection('documents').where('uploadDate', '>=', weekAgo)
@@ -526,7 +522,7 @@
                 allNotifs.docs = [];
                 snap.forEach(dc => {
                     const d = dc.data();
-                    // Only show if visible to all or this student
+
                     if (d.visibility === 'all' || (d.visibility === 'specific' && d.specificStudents && d.specificStudents.includes(sid))) {
                         allNotifs.docs.push({
                             title: d.title || 'New Document',
@@ -542,7 +538,6 @@
             }, () => {})
         );
 
-        // Solved complaints notifications (last 7 days)
         if (sid) {
             notifUnsubs.push(
                 db.collection('SolvedComplaints').where('userId', '==', sid)
@@ -567,7 +562,6 @@
                 }, () => {})
             );
 
-            // SOS acknowledged notifications
             notifUnsubs.push(
                 db.collection('notifications').where('studentId', '==', sid)
                   .onSnapshot(snap => {
@@ -593,12 +587,10 @@
         }
     }
 
-    /* ── Profile Photo Loader ────────────────────── */
     function initProfilePhoto(role) {
         const imgEl = document.querySelector('.profile-btn-img');
         if (!imgEl) return;
 
-        // Click → navigate to profile page
         const profileBtn = document.querySelector('.profile-btn');
         if (profileBtn) {
             profileBtn.addEventListener('click', () => {
@@ -606,11 +598,10 @@
                 if (role === 'student') {
                     window.location.href = sid ? `profile.html?id=${sid}` : 'profile.html';
                 }
-                // Admin: no profile page yet, do nothing
+
             });
         }
 
-        // Load photo from RTDB
         const uid = role === 'student' ? getStudentId() : sessionStorage.getItem('userId');
         if (!uid) return;
 
@@ -623,11 +614,10 @@
                         try { sessionStorage.setItem('profileImageUrl', url); } catch(e) {}
                     }
                 })
-                .catch(() => {}); // silently fail, keep fallback
+                .catch(() => {});
         });
     }
 
-    /* ── Utility helpers ─────────────────────────── */
     function timeAgo(ts) {
         if (!ts) return '';
         const diff = Date.now() - new Date(ts).getTime();
@@ -647,22 +637,18 @@
         return d.innerHTML;
     }
 
-    /* ── Public API ──────────────────────────────── */
     window.initSidebar = function (role, activePage) {
         const container = document.querySelector('.container');
         if (!container) return;
 
-        // Remove any hardcoded sidebar
         const old = container.querySelector('.aside');
         if (old) old.remove();
 
-        // Create & inject sidebar
         const aside = document.createElement('aside');
         aside.className = 'aside';
         aside.innerHTML = sidebarHTML(role, activePage);
         container.prepend(aside);
 
-        // Remove any hardcoded right panel and inject standardized one
         const oldRight = container.querySelector('.right');
         if (oldRight) oldRight.remove();
 
@@ -673,7 +659,6 @@
 
         setupHandlers(role);
 
-        // Initialize notification system & profile photo
         initNotifications(role);
         initProfilePhoto(role);
     };
