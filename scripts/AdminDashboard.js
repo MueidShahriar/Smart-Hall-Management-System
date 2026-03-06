@@ -85,10 +85,27 @@ document.addEventListener("DOMContentLoaded", () => {
     // Acknowledge an SOS alert
     window.acknowledgeAlert = async function(alertId) {
         try {
-            await firebase.firestore().collection('sos_alerts').doc(alertId).update({
+            const db = firebase.firestore();
+            const alertDoc = await db.collection('sos_alerts').doc(alertId).get();
+            const alertData = alertDoc.exists ? alertDoc.data() : {};
+
+            await db.collection('sos_alerts').doc(alertId).update({
                 status: 'acknowledged',
                 acknowledgedAt: new Date().toISOString()
             });
+
+            // Send notification to the student
+            if (alertData.studentId) {
+                await db.collection('notifications').add({
+                    studentId: alertData.studentId,
+                    type: 'sos_acknowledged',
+                    title: 'SOS Alert Acknowledged',
+                    message: 'Your emergency SOS alert has been acknowledged by the admin. Help is on the way.',
+                    timestamp: new Date().toISOString(),
+                    read: false
+                });
+            }
+
             if (typeof showToast === 'function') showToast('Alert acknowledged.', 'success');
         } catch (error) {
             console.error('Error acknowledging alert:', error);
@@ -131,5 +148,37 @@ document.addEventListener("DOMContentLoaded", () => {
         const div = document.createElement('div');
         div.textContent = str;
         return div.innerHTML;
+    }
+
+    // ── Meal Summary for Dashboard ──
+    if (typeof firebase !== 'undefined' && firebase.firestore) {
+        const db = firebase.firestore();
+        const todayStr = new Date().toISOString().split('T')[0];
+        const costPerMeal = 70;
+
+        db.collection('meals').get().then(snapshot => {
+            let onCount = 0;
+            let offCount = 0;
+            let totalStudents = 0;
+
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                if (data[todayStr] && typeof data[todayStr].on === 'boolean') {
+                    totalStudents++;
+                    if (data[todayStr].on) onCount++;
+                    else offCount++;
+                }
+            });
+
+            const totalCost = onCount * costPerMeal;
+            const summaryEl = document.getElementById('mealSummaryText');
+            if (summaryEl) {
+                summaryEl.innerHTML = `Today: <strong>${onCount}</strong> ON · <strong>${offCount}</strong> OFF · Total Cost: <strong>৳${totalCost}</strong>`;
+            }
+        }).catch(err => {
+            console.error('Meal summary error:', err);
+            const summaryEl = document.getElementById('mealSummaryText');
+            if (summaryEl) summaryEl.textContent = 'Check meal report and manage meals';
+        });
     }
 });

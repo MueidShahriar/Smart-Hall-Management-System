@@ -215,6 +215,13 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    // Show full preloader overlay
+    const loader = document.createElement('div');
+    loader.className = 'page-loader-overlay';
+    loader.id = 'mealSubmitLoader';
+    loader.innerHTML = '<div class="preloader-content"><div class="loader"></div><p class="preloader-text">Submitting meal plan<span class="dot-animation">...</span></p></div>';
+    document.body.appendChild(loader);
+
     submitBtn.classList.add('btn-loading');
     submitBtn.disabled = true;
 
@@ -228,39 +235,35 @@ document.addEventListener("DOMContentLoaded", () => {
         existingData = doc.data();
       }
 
-      // Convert simple mealsOn object to proper structure
-      const mealData = {};
+      // Convert simple mealsOn object to proper structure (use ISO strings to avoid Firestore Timestamp serialization issues)
+      const nowISO = new Date().toISOString();
+      const updatedData = {
+        lastUpdated: nowISO
+      };
+
       for (const date in mealsOn) {
-        // Skip any undefined values to prevent Firestore errors
         if (mealsOn[date] === undefined) continue;
-        
-        // Only allow future dates to be updated
+
         if (!isPastDate(date)) {
-          mealData[date] = {
-            on: Boolean(mealsOn[date]), // Ensure it's a boolean
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+          updatedData[date] = {
+            on: Boolean(mealsOn[date]),
+            timestamp: nowISO
           };
         } else if (existingData[date] && typeof existingData[date].on === 'boolean') {
-          // Preserve existing data for past dates if it has valid structure
-          mealData[date] = existingData[date];
-        } else {
-          // Create a valid structure for past dates without valid existing data
-          mealData[date] = {
-            on: Boolean(mealsOn[date]), // Ensure it's a boolean
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+          // Preserve existing past-date data with plain values only
+          updatedData[date] = {
+            on: Boolean(existingData[date].on),
+            timestamp: typeof existingData[date].timestamp === 'string'
+              ? existingData[date].timestamp
+              : (existingData[date].timestamp && existingData[date].timestamp.toDate
+                ? existingData[date].timestamp.toDate().toISOString()
+                : nowISO)
           };
-        }
-      }
-      
-      // Create final data object, filtering out any problematic fields
-      const updatedData = {
-        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-      };
-      
-      // Add meal data
-      for (const date in mealData) {
-        if (mealData[date] && typeof mealData[date].on === 'boolean') {
-          updatedData[date] = mealData[date];
+        } else {
+          updatedData[date] = {
+            on: Boolean(mealsOn[date]),
+            timestamp: nowISO
+          };
         }
       }
       
@@ -268,11 +271,15 @@ document.addEventListener("DOMContentLoaded", () => {
       await mealDocRef.set(updatedData, { merge: true });
       
       showToast("Meal plan submitted successfully!", "success");
+      const ml = document.getElementById('mealSubmitLoader');
+      if (ml) { ml.classList.add('hidden'); setTimeout(() => { if (ml.parentNode) ml.parentNode.removeChild(ml); }, 1200); }
       submitBtn.classList.remove('btn-loading');
       submitBtn.disabled = false;
     } catch (error) {
       console.error("Error submitting meal plan:", error);
       showToast("There was an error submitting the meal plan: " + error.message, "error");
+      const ml2 = document.getElementById('mealSubmitLoader');
+      if (ml2) { ml2.classList.add('hidden'); setTimeout(() => { if (ml2.parentNode) ml2.parentNode.removeChild(ml2); }, 1200); }
       submitBtn.classList.remove('btn-loading');
       submitBtn.disabled = false;
     }

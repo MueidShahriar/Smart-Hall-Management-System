@@ -585,6 +585,21 @@
 
         // All requests data
         let allRequests = [];
+        let studentInfoCache = {};
+
+        // Fetch student info from RTDB
+        async function getStudentInfo(studentId) {
+            if (!studentId || studentId === 'unknown') return null;
+            if (studentInfoCache[studentId]) return studentInfoCache[studentId];
+            try {
+                const snap = await rtdb.ref('users/' + studentId).once('value');
+                if (snap.exists()) {
+                    studentInfoCache[studentId] = snap.val();
+                    return snap.val();
+                }
+            } catch (e) { console.error('Error fetching student info:', e); }
+            return null;
+        }
 
         // Load requests
         async function loadRequests() {
@@ -645,56 +660,92 @@
                 return;
             }
 
-            container.innerHTML = filtered.map(req => {
-                const status = (req.status || 'pending').toLowerCase();
-                const checkin = req.checkin || '—';
-                const checkout = req.checkout || '—';
-                const isPending = status === 'pending';
+            // Fetch student info for all requests, then render
+            const fetchPromises = filtered.map(req => req.studentId ? getStudentInfo(req.studentId) : Promise.resolve(null));
+            Promise.all(fetchPromises).then(studentInfos => {
+                container.innerHTML = filtered.map((req, idx) => {
+                    const status = (req.status || 'pending').toLowerCase();
+                    const checkin = req.checkin || '—';
+                    const checkout = req.checkout || '—';
+                    const isPending = status === 'pending';
+                    const sInfo = studentInfos[idx];
+                    const bookedByHTML = sInfo ? `
+                            <div class="detail-item" style="grid-column: 1 / -1; border-top: 1px dashed var(--clr-info-light); padding-top: 0.5rem; margin-top: 0.3rem;">
+                                <span class="label" style="font-weight:600; color: var(--clr-primary);">Booked By (Student)</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Student Name</span>
+                                <span class="value">${sInfo.name || '—'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Student ID</span>
+                                <span class="value">${req.studentId || '—'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Department</span>
+                                <span class="value">${sInfo.department || sInfo.dept_name || '—'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Room</span>
+                                <span class="value">${sInfo.room || '—'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Student Phone</span>
+                                <span class="value">${sInfo.phone || '—'}</span>
+                            </div>
+                    ` : (req.studentId && req.studentId !== 'unknown' ? `
+                            <div class="detail-item" style="grid-column: 1 / -1; border-top: 1px dashed var(--clr-info-light); padding-top: 0.5rem; margin-top: 0.3rem;">
+                                <span class="label">Booked By</span>
+                                <span class="value">Student ID: ${req.studentId}</span>
+                            </div>
+                    ` : '');
 
-                return `
-                    <div class="request-card" id="card-${req._id}">
-                        <div class="request-header">
-                            <h3>${req.name || 'Unknown'}</h3>
-                            <span class="status-badge ${status}">${status}</span>
+                    return `
+                        <div class="request-card" id="card-${req._id}">
+                            <div class="request-header">
+                                <h3>${req.name || 'Unknown'}</h3>
+                                <span class="status-badge ${status}">${status}</span>
+                            </div>
+                            <div class="request-details">
+                                <div class="detail-item">
+                                    <span class="label">NID</span>
+                                    <span class="value">${req.nid || '—'}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="label">Phone</span>
+                                    <span class="value">${req.phone || '—'}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="label">Email</span>
+                                    <span class="value">${req.email || '—'}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="label">Relationship</span>
+                                    <span class="value">${req.relationship || '—'}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="label">Check-in</span>
+                                    <span class="value">${checkin}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="label">Check-out</span>
+                                    <span class="value">${checkout}</span>
+                                </div>
+                                ${bookedByHTML}
+                            </div>
+                            ${isPending ? `
+                            <div class="request-actions">
+                                <button class="btn-approve" onclick="updateStatus('${req._id}', 'approved')">
+                                    <span class="material-icons">check_circle</span> Approve
+                                </button>
+                                <button class="btn-reject" onclick="updateStatus('${req._id}', 'rejected')">
+                                    <span class="material-icons">cancel</span> Reject
+                                </button>
+                            </div>` : ''}
                         </div>
-                        <div class="request-details">
-                            <div class="detail-item">
-                                <span class="label">NID</span>
-                                <span class="value">${req.nid || '—'}</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="label">Phone</span>
-                                <span class="value">${req.phone || '—'}</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="label">Email</span>
-                                <span class="value">${req.email || '—'}</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="label">Relationship</span>
-                                <span class="value">${req.relationship || '—'}</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="label">Check-in</span>
-                                <span class="value">${checkin}</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="label">Check-out</span>
-                                <span class="value">${checkout}</span>
-                            </div>
-                        </div>
-                        ${isPending ? `
-                        <div class="request-actions">
-                            <button class="btn-approve" onclick="updateStatus('${req._id}', 'approved')">
-                                <span class="material-icons">check_circle</span> Approve
-                            </button>
-                            <button class="btn-reject" onclick="updateStatus('${req._id}', 'rejected')">
-                                <span class="material-icons">cancel</span> Reject
-                            </button>
-                        </div>` : ''}
-                    </div>
-                `;
-            }).join('');
+                    `;
+                }).join('');
+            });
         }
 
         // Update request status

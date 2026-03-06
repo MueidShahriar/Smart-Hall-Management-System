@@ -356,6 +356,7 @@
     <script>initSidebar('admin', 'meal_report');</script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
     <script>
         const firebaseConfig = {
@@ -369,6 +370,17 @@
         };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
+        const rtdb = firebase.database();
+
+        // Cache student info from RTDB
+        let studentCache = {};
+        async function loadAllStudents() {
+            if (Object.keys(studentCache).length > 0) return;
+            try {
+                const snap = await rtdb.ref('users').once('value');
+                if (snap.exists()) studentCache = snap.val();
+            } catch (e) { console.error('Error loading students:', e); }
+        }
     </script>
 
     <script src="../../scripts/toast.js"></script>
@@ -421,6 +433,9 @@
             content.innerHTML = '<div class="empty-state"><div class="loader"></div><p>Loading report...</p></div>';
 
             try {
+                // Load student data from RTDB first
+                await loadAllStudents();
+
                 const snapshot = await db.collection('meals').get();
                 let totalStudents = 0;
                 let onCount = 0;
@@ -485,7 +500,7 @@
                     return;
                 }
 
-                let tableHTML = '<table><thead><tr><th>#</th><th>Student ID</th>';
+                let tableHTML = '<table><thead><tr><th>#</th><th>Student ID</th><th>Name</th><th>Department</th>';
                 if (type === 'daily') {
                     tableHTML += '<th>Date</th><th>Status</th>';
                 } else {
@@ -494,7 +509,10 @@
                 tableHTML += '</tr></thead><tbody>';
 
                 rows.forEach((row, i) => {
-                    tableHTML += `<tr><td>${i + 1}</td><td>${row.id}</td>`;
+                    const sInfo = studentCache[row.id] || {};
+                    const studentName = sInfo.name || '—';
+                    const studentDept = sInfo.department || sInfo.dept_name || '—';
+                    tableHTML += `<tr><td>${i + 1}</td><td>${row.id}</td><td>${studentName}</td><td>${studentDept}</td>`;
                     if (type === 'daily') {
                         tableHTML += `<td>${row.date}</td><td><span class="badge ${row.status ? 'on' : 'off'}">${row.status ? 'ON' : 'OFF'}</span></td>`;
                     } else {

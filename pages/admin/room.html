@@ -409,7 +409,7 @@
             }
         }
 
-        // Function to get all room information with chunking for better UX
+        // Function to get all room information with parallel loading for speed
         async function getRoomAvailability() {
             const availableRooms = [];
             const fullyOccupiedRooms = [];
@@ -439,9 +439,19 @@
                 }
             }
 
-            // Calculate chunk size (process rooms in batches for better UX)
+            // Fetch ALL room documents in a single query for speed
+            const roomsSnapshot = await getDocs(collection(db, "room"));
+            const existingRoomIds = new Set();
+            roomsSnapshot.forEach(d => existingRoomIds.add(d.id));
+
+            // Pre-cache existence
+            allPossibleRooms.forEach(({ floor, room }) => {
+                const roomId = `${floor}${room}`;
+                roomExistsCache[roomId] = existingRoomIds.has(roomId);
+            });
+
             const totalRooms = allPossibleRooms.length;
-            const chunkSize = 10; // Process 10 rooms at a time
+            const chunkSize = 30; // Larger chunks for faster loading
 
             // Process rooms in chunks
             for (let i = 0; i < allPossibleRooms.length; i += chunkSize) {
@@ -450,7 +460,7 @@
                 // Process all rooms in current chunk in parallel
                 const chunkPromises = chunk.map(async ({ floor, room }) => {
                     const roomId = `${floor}${room}`;
-                    const exists = await checkRoomExists(roomId);
+                    const exists = roomExistsCache[roomId];
 
                     if (exists) {
                         const seatStatus = await getRoomSeatStatus(roomId);
@@ -897,8 +907,28 @@
                 }
             }
 
+            // Show page preloader while loading room data
+            const loader = document.createElement('div');
+            loader.className = 'page-loader-overlay';
+            loader.id = 'roomLoader';
+            loader.innerHTML = '<div class="preloader-content"><div class="loader"></div><p class="preloader-text">Loading room data<span class="dot-animation">...</span></p></div>';
+            document.body.appendChild(loader);
+
             // Trigger the filter button click to load the room data
             document.querySelector('.filters-area .btn-primary').click();
+
+            // After data loads, scroll to Seat Assignment and remove preloader
+            setTimeout(() => {
+                const seatsSection = document.querySelector('.seats-section');
+                if (seatsSection) {
+                    seatsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+                const rl = document.getElementById('roomLoader');
+                if (rl) {
+                    rl.classList.add('hidden');
+                    setTimeout(() => { if (rl.parentNode) rl.parentNode.removeChild(rl); }, 1200);
+                }
+            }, 1500);
         };
 
         // Fix the populateSeat function
@@ -1004,7 +1034,14 @@
                 return;
             }
 
-            // Show saving indicator
+            // Show full preloader overlay
+            const loader = document.createElement('div');
+            loader.className = 'page-loader-overlay';
+            loader.id = 'submitLoader';
+            loader.innerHTML = '<div class="preloader-content"><div class="loader"></div><p class="preloader-text">Saving room data<span class="dot-animation">...</span></p></div>';
+            document.body.appendChild(loader);
+
+            // Show saving indicator on button too
             this.classList.add('btn-loading');
             this.disabled = true;
 
@@ -1084,7 +1121,9 @@
                 // Refresh room data for next viewing
                 roomData = null; // Force reload next time the info is viewed
 
-                // Reset button
+                // Remove preloader and reset button
+                const sl = document.getElementById('submitLoader');
+                if (sl) { sl.classList.add('hidden'); setTimeout(() => { if (sl.parentNode) sl.parentNode.removeChild(sl); }, 1200); }
                 this.classList.remove('btn-loading');
                 this.innerHTML = '<span class="material-icons">save</span> Submit';
                 this.disabled = false;
@@ -1092,7 +1131,9 @@
                 console.error("Error saving room data:", error);
                 showToast("Failed to save room data: " + error.message, "error");
 
-                // Reset button
+                // Remove preloader and reset button
+                const sl2 = document.getElementById('submitLoader');
+                if (sl2) { sl2.classList.add('hidden'); setTimeout(() => { if (sl2.parentNode) sl2.parentNode.removeChild(sl2); }, 1200); }
                 this.classList.remove('btn-loading');
                 this.innerHTML = '<span class="material-icons">save</span> Submit';
                 this.disabled = false;

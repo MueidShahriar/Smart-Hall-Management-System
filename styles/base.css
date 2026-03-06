@@ -638,6 +638,11 @@ main .dashboard {
 .notif-item:last-child { border-bottom: none; }
 .notif-item:hover { background: rgba(115, 128, 236, 0.04); }
 
+.notif-item.notif-read {
+    opacity: 0.5;
+    background: rgba(0, 0, 0, 0.02);
+}
+
 .notif-icon {
     flex-shrink: 0;
     width: 32px;

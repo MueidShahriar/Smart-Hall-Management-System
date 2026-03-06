@@ -468,27 +468,31 @@
 
     function startStudentNotifs(db, badge, body) {
         const sid = getStudentId();
-        const allNotifs = { docs: [], solved: [] };
+        const allNotifs = { docs: [], solved: [], alerts: [] };
 
         function render() {
             const items = [
                 ...allNotifs.docs.map(n => ({ ...n, type: 'doc' })),
-                ...allNotifs.solved.map(n => ({ ...n, type: 'solved' }))
+                ...allNotifs.solved.map(n => ({ ...n, type: 'solved' })),
+                ...allNotifs.alerts.map(n => ({ ...n, type: 'alert' }))
             ];
             items.sort((a, b) => (b.time || 0) - (a.time || 0));
 
-            badge.textContent = items.length;
-            badge.style.display = items.length > 0 ? 'flex' : 'none';
+            const unreadCount = items.filter(n => !n.read).length;
+            badge.textContent = unreadCount;
+            badge.style.display = unreadCount > 0 ? 'flex' : 'none';
 
             if (!items.length) {
                 body.innerHTML = '<p class="notif-empty">No new notifications</p>';
                 return;
             }
             body.innerHTML = items.slice(0, 20).map(n => {
-                const icon = n.type === 'solved' ? 'check_circle' : 'description';
-                const cls  = n.type === 'solved' ? 'notif-solved' : 'notif-doc';
+                const icon = n.type === 'solved' ? 'check_circle' : n.type === 'alert' ? 'emergency' : 'description';
+                const cls  = n.type === 'solved' ? 'notif-solved' : n.type === 'alert' ? 'notif-sos' : 'notif-doc';
                 const link = n.link || '#';
-                return `<div class="notif-item ${cls}" data-link="${link}" style="cursor:pointer" onclick="if(this.dataset.link !== '#') window.location.href=this.dataset.link">
+                const readClass = n.read ? 'notif-read' : '';
+                const docId = n.docId || '';
+                return `<div class="notif-item ${cls} ${readClass}" data-link="${link}" data-doc-id="${docId}" style="cursor:pointer" onclick="window._markNotifRead(this, '${docId}')">
                     <span class="material-icons notif-icon">${icon}</span>
                     <div class="notif-text">
                         <p class="notif-title">${escapeHTMLStr(n.title)}</p>
@@ -498,21 +502,39 @@
             }).join('');
         }
 
+        // Mark notification as read on click
+        window._markNotifRead = function(el, docId) {
+            if (docId && !el.classList.contains('notif-read')) {
+                el.classList.add('notif-read');
+                db.collection('notifications').doc(docId).update({ read: true }).catch(() => {});
+                // Update badge count
+                const currentCount = parseInt(badge.textContent || '0');
+                if (currentCount > 0) {
+                    badge.textContent = currentCount - 1;
+                    if (currentCount - 1 <= 0) badge.style.display = 'none';
+                }
+            }
+            const link = el.dataset.link;
+            if (link && link !== '#') window.location.href = link;
+        };
+
         // Recent documents/notices (last 7 days)
         const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString();
         notifUnsubs.push(
             db.collection('documents').where('uploadDate', '>=', weekAgo)
               .onSnapshot(snap => {
                 allNotifs.docs = [];
-                snap.forEach(doc => {
-                    const d = doc.data();
+                snap.forEach(dc => {
+                    const d = dc.data();
                     // Only show if visible to all or this student
                     if (d.visibility === 'all' || (d.visibility === 'specific' && d.specificStudents && d.specificStudents.includes(sid))) {
                         allNotifs.docs.push({
                             title: d.title || 'New Document',
                             sub: `${d.category || 'Notice'} · ${timeAgo(d.uploadDate)}`,
                             time: d.uploadDate ? new Date(d.uploadDate).getTime() : 0,
-                            link: `Notices.html?id=${sid}`
+                            link: `Notices.html?id=${sid}`,
+                            docId: dc.id,
+                            read: false
                         });
                     }
                 });
@@ -526,8 +548,8 @@
                 db.collection('SolvedComplaints').where('userId', '==', sid)
                   .onSnapshot(snap => {
                     allNotifs.solved = [];
-                    snap.forEach(doc => {
-                        const d = doc.data();
+                    snap.forEach(dc => {
+                        const d = dc.data();
                         const solvedTime = d.solvedAt || d.timestamp;
                         const weekAgoTime = Date.now() - 7 * 86400000;
                         if (solvedTime && new Date(solvedTime).getTime() > weekAgoTime) {
@@ -535,7 +557,33 @@
                                 title: `Complaint Resolved: ${d.subject || 'Your complaint'}`,
                                 sub: `${d.sector || ''} · Solved ${timeAgo(solvedTime)}`,
                                 time: solvedTime ? new Date(solvedTime).getTime() : 0,
-                                link: `StudentDashboard.html?id=${sid}`
+                                link: `StudentDashboard.html?id=${sid}`,
+                                docId: dc.id,
+                                read: false
+                            });
+                        }
+                    });
+                    render();
+                }, () => {})
+            );
+
+            // SOS acknowledged notifications
+            notifUnsubs.push(
+                db.collection('notifications').where('studentId', '==', sid)
+                  .onSnapshot(snap => {
+                    allNotifs.alerts = [];
+                    snap.forEach(dc => {
+                        const d = dc.data();
+                        const weekAgoTime = Date.now() - 7 * 86400000;
+                        const ts = d.timestamp ? new Date(d.timestamp).getTime() : 0;
+                        if (ts > weekAgoTime) {
+                            allNotifs.alerts.push({
+                                title: d.title || 'Notification',
+                                sub: d.message || timeAgo(d.timestamp),
+                                time: ts,
+                                link: `StudentDashboard.html?id=${sid}`,
+                                docId: dc.id,
+                                read: d.read === true
                             });
                         }
                     });
