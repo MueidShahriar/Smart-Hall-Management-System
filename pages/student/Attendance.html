@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance | Smart Hall</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin />
+
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <link rel="shortcut icon" href="../../images/RSM_Logo.png" type="image/x-icon" />
+    <link rel="stylesheet" href="../../styles/base.css" />
+    <style>
+
+        .attendance-hero {
+            text-align: center;
+            padding: 2.5rem 1.5rem;
+            background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+            border-radius: var(--card-radius);
+            margin-bottom: 2rem;
+            border: 1px solid rgba(79, 70, 229, 0.1);
+        }
+
+        .attendance-hero .hero-icon {
+            font-size: 4rem;
+            color: #4f46e5;
+            margin-bottom: 0.8rem;
+            display: block;
+        }
+
+        .attendance-hero h1 {
+            font-size: 1.5rem;
+            color: var(--clr-dark);
+            margin-bottom: 0.4rem;
+        }
+
+        .attendance-hero p {
+            font-size: 0.88rem;
+            color: var(--clr-info-dark);
+            margin-bottom: 1.5rem;
+        }
+
+        .give-attendance-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.9rem 2.2rem;
+            background: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: 0.8rem;
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+        }
+
+        .give-attendance-btn:hover {
+            background: #4338ca;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+        }
+
+        .give-attendance-btn:active {
+            transform: translateY(0);
+        }
+
+        .give-attendance-btn .material-icons {
+            font-size: 1.3rem;
+        }
+
+        .attendance-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .info-card {
+            background: var(--clr-white);
+            padding: 1.2rem;
+            border-radius: var(--card-radius);
+            border: 1px solid rgba(0, 0, 0, 0.04);
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .info-card .material-icons {
+            font-size: 1.8rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .info-card h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.2rem;
+        }
+
+        .info-card p {
+            font-size: 0.78rem;
+        }
+
+        .info-card.time-card .material-icons { color: #3b82f6; }
+        .info-card.time-card h3 { color: #3b82f6; }
+        .info-card.total-card .material-icons { color: #10b981; }
+        .info-card.total-card h3 { color: #10b981; }
+        .info-card.streak-card .material-icons { color: #f59e0b; }
+        .info-card.streak-card h3 { color: #f59e0b; }
+
+        .history-section {
+            background: var(--clr-white);
+            border-radius: var(--card-radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0, 0, 0, 0.04);
+        }
+
+        .history-section h2 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .history-section h2 .material-icons {
+            font-size: 1.2rem;
+            color: var(--clr-primary);
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            max-height: 350px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.7rem 0.9rem;
+            background: #f8fafc;
+            border-radius: 0.6rem;
+            border: 1px solid #e8ecf3;
+            transition: background 0.15s;
+        }
+
+        .history-item:hover {
+            background: #f1f5f9;
+        }
+
+        .history-item .material-icons {
+            color: #10b981;
+            font-size: 1.2rem;
+        }
+
+        .history-item .date {
+            font-weight: 500;
+            font-size: 0.85rem;
+            color: var(--clr-dark);
+        }
+
+        .history-item .time {
+            margin-left: auto;
+            font-size: 0.78rem;
+            color: var(--clr-info-dark);
+        }
+
+        .empty-history {
+            text-align: center;
+            padding: 2rem;
+            color: var(--clr-info-dark);
+        }
+
+        .empty-history .material-icons {
+            font-size: 2.5rem;
+            color: var(--clr-info-light);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        @media screen and (max-width: 768px) {
+            .attendance-hero {
+                padding: 1.8rem 1rem;
+            }
+            .attendance-hero h1 {
+                font-size: 1.2rem;
+            }
+            .attendance-hero .hero-icon {
+                font-size: 3rem;
+            }
+            .give-attendance-btn {
+                padding: 0.75rem 1.8rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .attendance-info {
+                grid-template-columns: 1fr;
+            }
+            .attendance-hero {
+                padding: 1.5rem 0.8rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <script src="../../scripts/preloader.js"></script>
+
+    <div class="container">
+        <main>
+            <div class="page-header">
+                <h1>Attendance</h1>
+                <p>Track your hall attendance records</p>
+            </div>
+
+            <div class="attendance-hero">
+                <span class="material-icons hero-icon">fingerprint</span>
+                <h1>Mark Your Attendance</h1>
+                <p>Make sure you're within 100m of the hall. Available 7 PM – 10 PM.</p>
+                <button class="give-attendance-btn" id="giveAttendanceBtn">
+                    <span class="material-icons">touch_app</span>
+                    Give Attendance
+                </button>
+            </div>
+
+            <div class="attendance-info">
+                <div class="info-card time-card">
+                    <span class="material-icons">schedule</span>
+                    <h3 id="attendanceTime">--:--</h3>
+                    <p>Today's Check-in</p>
+                </div>
+                <div class="info-card total-card">
+                    <span class="material-icons">calendar_month</span>
+                    <h3 id="totalDays">0</h3>
+                    <p>Total Days</p>
+                </div>
+                <div class="info-card streak-card">
+                    <span class="material-icons">local_fire_department</span>
+                    <h3 id="streak">0</h3>
+                    <p>Current Streak</p>
+                </div>
+            </div>
+
+            <div class="history-section">
+                <h2><span class="material-icons">history</span> Recent Attendance</h2>
+                <div class="history-list" id="historyList">
+                    <div class="empty-history">
+                        <span class="material-icons">event_busy</span>
+                        <p>Loading attendance records...</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+    </div>
+
+    <script src="../../scripts/sidebar.js"></script>
+    <script>initSidebar('student', 'attendance');</script>
+    <script src="../../scripts/toast.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <script>
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp({
+                apiKey: "AIzaSyBF-nMMW5lG44JfHxx4HxCbf5N81geOiRs",
+                authDomain: "bauet-hms-63f5b.firebaseapp.com",
+                databaseURL: "https://bauet-hms-63f5b-default-rtdb.firebaseio.com",
+                projectId: "bauet-hms-63f5b",
+                storageBucket: "bauet-hms-63f5b.appspot.com",
+                messagingSenderId: "200038506273",
+                appId: "1:200038506273:web:2e141fc9ec36de049ae860"
+            });
+        }
+
+        const db = firebase.firestore();
+        const rtdb = firebase.database();
+        const urlParams = new URLSearchParams(window.location.search);
+        const studentId = urlParams.get('id');
+
+        let studentInfo = {};
+        if (studentId) {
+            rtdb.ref('users/' + studentId).once('value').then(snap => {
+                if (snap.exists()) {
+                    const d = snap.val();
+                    studentInfo.name = d.name || [d.firstName, d.lastName].filter(Boolean).join(' ') || '';
+                    studentInfo.room = d.room || '';
+                    studentInfo.dept = d.dept_name || d.department || '';
+                }
+            }).catch(() => {});
+        }
+
+        document.getElementById('giveAttendanceBtn').addEventListener('click', () => {
+            const attendBtn = document.getElementById('giveAttendanceBtn');
+            if (!studentId) {
+                showToast('User ID not found. Please log in again.', 'error');
+                return;
+            }
+
+            const h = new Date().getHours();
+            if (h < 19 || h >= 22) {
+                showToast('Attendance can only be recorded between 7 PM – 10 PM.', 'warning');
+                return;
+            }
+
+            if (!navigator.geolocation) {
+                showToast('Geolocation not supported by this browser.', 'error');
+                return;
+            }
+
+            attendBtn.classList.add('btn-loading');
+            attendBtn.disabled = true;
+
+            const ov = document.createElement('div');
+            ov.id = 'attendance-overlay';
+            ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;display:flex;align-items:center;justify-content:center';
+            ov.innerHTML = '<div style="background:#fff;padding:2rem 2.5rem;border-radius:1rem;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.2)"><span class="material-icons" style="font-size:2.5rem;color:#4f46e5;animation:spin 1.5s linear infinite">location_searching</span><p style="margin-top:.8rem;font-weight:500">Verifying your location…</p></div>';
+            document.body.appendChild(ov);
+
+            navigator.geolocation.getCurrentPosition(
+                pos => {
+                    const dist = haversine(24.289440, 89.008940, pos.coords.latitude, pos.coords.longitude);
+                    ov.remove();
+                    attendBtn.classList.remove('btn-loading');
+                    attendBtn.disabled = false;
+                    if (dist <= 0.1) {
+                        const d = new Date();
+                        const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+                        db.collection('attendance').doc(studentId)
+                            .collection('attendance_by_date').doc(ds)
+                            .set({
+                                latitude: pos.coords.latitude,
+                                longitude: pos.coords.longitude,
+                                timestamp: d.toISOString(),
+                                date: ds,
+                                studentName: studentInfo.name || '',
+                                room: studentInfo.room || '',
+                                dept: studentInfo.dept || ''
+                            })
+                            .then(() => {
+                                showToast('Attendance recorded successfully!', 'success');
+                                loadAttendanceHistory();
+                            })
+                            .catch(e => {
+                                console.error('Attendance save:', e);
+                                showToast('Failed to save attendance.', 'error');
+                            });
+                    } else {
+                        showToast('You are ~' + (dist * 1000).toFixed(0) + ' m away. Must be within 100 m of the hall.', 'warning');
+                    }
+                },
+                err => {
+                    ov.remove();
+                    attendBtn.classList.remove('btn-loading');
+                    attendBtn.disabled = false;
+                    const m = { 1: 'Location permission denied.', 2: 'Location unavailable.', 3: 'Location request timed out.' };
+                    showToast(m[err.code] || 'Unknown location error.', 'error');
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+        });
+
+        function haversine(lat1, lon1, lat2, lon2) {
+            const R = 6371, r = Math.PI / 180;
+            const dLat = (lat2 - lat1) * r, dLon = (lon2 - lon1) * r;
+            const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * r) * Math.cos(lat2 * r) * Math.sin(dLon / 2) ** 2;
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        }
+
+        function loadAttendanceHistory() {
+            if (!studentId) return;
+
+            const historyList = document.getElementById('historyList');
+            const attendanceTime = document.getElementById('attendanceTime');
+            const totalDays = document.getElementById('totalDays');
+            const streakEl = document.getElementById('streak');
+
+            db.collection('attendance').doc(studentId)
+                .collection('attendance_by_date')
+                .get()
+                .then(snapshot => {
+                    if (snapshot.empty) {
+                        historyList.innerHTML = '<div class="empty-history"><span class="material-icons">event_busy</span><p>No attendance records yet.</p></div>';
+                        return;
+                    }
+
+                    const records = [];
+                    snapshot.forEach(doc => {
+                        records.push(doc.data());
+                    });
+
+                    records.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                    totalDays.textContent = records.length;
+
+                    const today = new Date();
+                    const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+                    const todayRecord = records.find(r => r.date === todayStr);
+                    if (todayRecord && todayRecord.timestamp) {
+                        const t = new Date(todayRecord.timestamp);
+                        attendanceTime.textContent = t.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                    } else {
+                        attendanceTime.textContent = 'Not yet';
+                    }
+
+                    let streak = 0;
+                    const check = new Date(today);
+                    for (let i = 0; i < records.length; i++) {
+                        const checkStr = check.getFullYear() + '-' + String(check.getMonth() + 1).padStart(2, '0') + '-' + String(check.getDate()).padStart(2, '0');
+                        if (records.find(r => r.date === checkStr)) {
+                            streak++;
+                            check.setDate(check.getDate() - 1);
+                        } else {
+                            break;
+                        }
+                    }
+                    streakEl.textContent = streak;
+
+                    historyList.innerHTML = '';
+                    records.slice(0, 20).forEach(record => {
+                        const d = new Date(record.date + 'T00:00:00');
+                        const dateStr = d.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+                        let timeStr = '';
+                        if (record.timestamp) {
+                            const t = new Date(record.timestamp);
+                            timeStr = t.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                        }
+                        const item = document.createElement('div');
+                        item.className = 'history-item';
+                        item.innerHTML = '<span class="material-icons">check_circle</span><span class="date">' + dateStr + '</span><span class="time">' + timeStr + '</span>';
+                        historyList.appendChild(item);
+                    });
+                })
+                .catch(err => {
+                    console.error('Error loading attendance:', err);
+                    historyList.innerHTML = '<div class="empty-history"><span class="material-icons">error</span><p>Failed to load records.</p></div>';
+                });
+        }
+
+        loadAttendanceHistory();
+</script>
+</body>
+</html>

@@ -1,0 +1,290 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+@keyframes gradientAnimation {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+body {
+    background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+    background-size: 400% 400%;
+    animation: gradientAnimation 15s ease infinite;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    background: rgba(255, 255, 255, 0.95);
+    width: 360px;
+    max-width: 92vw;
+    padding: 2.5rem;
+    margin: 30px auto;
+    border-radius: 25px;
+    box-shadow: 0 20px 35px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    animation: fadeIn 0.5s ease-out;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.container:hover {
+    box-shadow: 0 25px 45px rgba(0, 0, 0, 0.35);
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo {
+    width: 3.3rem;
+    height: 3.3rem;
+    border-radius: 50%;
+}
+
+.title {
+    font-size: 3.8rem;
+    font-weight: bold;
+    color: hsl(115, 90%, 16%);
+}
+
+form {
+    margin: 0 1rem;
+}
+
+.form-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 1rem;
+    padding: 1.3rem;
+    margin-bottom: 0.4rem;
+}
+
+.input-group {
+    padding: 1% 0;
+    position: relative;
+}
+
+.input-group i.fa-lock,
+.input-group i.fa-envelope,
+.input-group i.fa-user,
+.input-group i.fa-phone,
+.input-group i.fa-calendar,
+.input-group i.fa-map-marker-alt,
+.input-group i.fa-id-card,
+.input-group i.fa-graduation-cap,
+.input-group i.fa-users,
+.input-group i.fa-home {
+    position: absolute;
+    top: 10px;
+    left: 0;
+    color: black;
+}
+
+input,
+select {
+    color: inherit;
+    width: 100%;
+    background-color: transparent;
+    border: none;
+    border-bottom: 1px solid #757575;
+    padding-left: 1.5rem;
+    font-size: 15px;
+    transition: border-bottom-color 0.3s ease;
+}
+
+input:focus,
+select:focus {
+    outline: none;
+    border-bottom: 2px solid hsl(327, 90%, 28%);
+}
+
+input::placeholder {
+    color: transparent;
+}
+
+label {
+    color: #6a6969;
+    position: relative;
+    left: 1.3em;
+    top: -1.3em;
+    cursor: auto;
+    transition: 0.3s ease all;
+    pointer-events: none;
+}
+
+input:focus~label,
+input:not(:placeholder-shown)~label,
+select:focus~label,
+select:not(:invalid)~label {
+    top: -3em;
+    color: hsl(327, 90%, 28%);
+    font-size: 15px;
+}
+
+.recover {
+    text-align: center;
+    font-weight: 400;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+}
+
+.recover a {
+    text-decoration: none;
+    font-weight: bold;
+    color: rgb(193, 21, 18);
+}
+
+.recover a:hover {
+    color: rgb(173, 27, 27);
+    text-decoration: underline;
+}
+
+.btn {
+    font-size: 1.1rem;
+    padding: 8px 0;
+    border-radius: 5px;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    font-weight: bold;
+    outline: none;
+    border: none;
+    width: 100%;
+    background: rgba(9, 76, 184, 0.902);
+    color: white;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.15s ease, box-shadow 0.3s ease;
+}
+
+.btn:hover {
+    background: #014a18;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.links {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    font-size: 1rem;
+    font-weight: bold;
+    flex-wrap: wrap;
+}
+
+.links .button {
+    color: rgb(35, 35, 234);
+    background: transparent;
+    border: none;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.links .button:hover {
+    text-decoration: underline;
+    color: blue;
+}
+
+.toggle-password {
+    position: absolute;
+    top: 10px;
+    right: 1px;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: black;
+}
+
+@media screen and (max-width: 768px) {
+    .container {
+        padding: 2rem;
+        margin: 20px auto;
+        max-width: 95%;
+    }
+    .title { font-size: 3rem; }
+    .form-title { font-size: 1.3rem; }
+}
+
+@media screen and (max-width: 480px) {
+    .container {
+        padding: 1.8rem 1.5rem;
+        margin: 15px auto;
+        border-radius: 18px;
+    }
+    .title { font-size: 2.8rem; }
+    .logo { width: 2.6rem; height: 2.6rem; }
+    .form-title { font-size: 1.2rem; padding: 0.8rem; }
+    .btn { font-size: 1rem; }
+    .links { font-size: 0.88rem; }
+}
+
+@media screen and (max-width: 360px) {
+    .container {
+        padding: 1.5rem 1.2rem;
+        margin: 10px auto;
+        border-radius: 14px;
+    }
+    .title { font-size: 2.4rem; }
+    .form-title { font-size: 1.1rem; }
+    input, select { font-size: 14px; }
+}
+
+@keyframes loaderSpin {
+    100% { transform: rotate(1turn); }
+}
+
+.btn-loading {
+    position: relative;
+    pointer-events: none;
+    color: transparent !important;
+}
+
+.btn-loading::after {
+    content: "";
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    top: 50%;
+    left: 50%;
+    margin-left: -10px;
+    margin-top: -10px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: loaderSpin 0.8s linear infinite;
+}

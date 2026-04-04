@@ -1,0 +1,217 @@
+
+.tittle {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--clr-dark);
+}
+
+.meal-wrapper {
+    max-width: 72rem;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    background: var(--clr-white);
+    padding: 1rem 1.2rem;
+    border-radius: var(--radius-3);
+    box-shadow: var(--shadow);
+}
+
+#monthLabel {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--clr-dark);
+}
+
+#prevMonth,
+#nextMonth {
+    background: var(--clr-primary);
+    color: var(--clr-white);
+    padding: 0.45rem 1rem;
+    border: none;
+    border-radius: var(--radius-2);
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    transition: background 0.3s, transform 0.2s;
+}
+
+#prevMonth:hover,
+#nextMonth:hover {
+    background: var(--clr-primary-variant);
+    transform: translateY(-2px);
+}
+
+#calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.6rem;
+    background: var(--clr-white);
+    padding: var(--padding);
+    border-radius: var(--radius-3);
+    box-shadow: var(--shadow);
+}
+
+.day-label {
+    text-align: center;
+    padding: 0.5rem;
+    font-weight: 600;
+    font-size: 0.78rem;
+    color: var(--clr-primary);
+    text-transform: uppercase;
+}
+
+.empty-slot {
+    text-align: center;
+    padding: 0.5rem;
+}
+
+.day {
+    background: var(--clr-bg);
+    border: 1px solid var(--clr-info-light);
+    border-radius: var(--radius-1);
+    padding: 0.6rem;
+    text-align: center;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.day:hover {
+    background: rgba(115, 128, 236, 0.08);
+    border-color: var(--clr-primary);
+}
+
+.day-number {
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.meal-toggle {
+    margin-top: 0.3rem;
+    font-size: 0.78rem;
+}
+
+.day-cost {
+    margin-top: 0.3rem;
+    font-size: 0.72rem;
+    color: var(--clr-dark-variant);
+}
+
+.past-date {
+    background-color: #f0f0f0;
+    opacity: 0.7;
+}
+
+.past-date .meal-toggle {
+    cursor: not-allowed;
+}
+
+.today {
+    background: rgba(115, 128, 236, 0.15) !important;
+    border-color: var(--clr-primary) !important;
+}
+
+.submitMeals {
+    display: block;
+    margin: 1.2rem auto 0;
+    background: var(--clr-primary);
+    color: var(--clr-white);
+    padding: 0.6rem 2rem;
+    border: none;
+    border-radius: var(--radius-2);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    transition: background 0.3s, transform 0.2s;
+}
+
+.submitMeals:hover {
+    background: var(--clr-primary-variant);
+    transform: translateY(-2px);
+}
+
+.total-cost-card {
+    text-align: center;
+    background: var(--clr-white);
+    padding: 1.2rem;
+    border-radius: var(--radius-3);
+    box-shadow: var(--shadow);
+    margin-top: 1.2rem;
+}
+
+.total-cost-card h2 {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+#totalCost {
+    font-family: 'Poppins', sans-serif;
+    color: #16a34a;
+    font-weight: 700;
+    margin-top: 0.5rem;
+    font-size: 1.8rem;
+}
+
+@media (max-width: 768px) {
+    #calendar {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.4rem;
+    }
+
+    .day-label {
+        display: none;
+    }
+
+    .empty-slot {
+        display: none;
+    }
+
+    .calendar-header {
+        flex-direction: column;
+        gap: 0.8rem;
+        text-align: center;
+    }
+
+    #monthLabel {
+        font-size: 1.1rem;
+    }
+
+    .day {
+        padding: 0.4rem;
+    }
+
+    .day-number {
+        font-size: 0.78rem;
+    }
+
+    .meal-toggle {
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 480px) {
+    #calendar {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.3rem;
+        padding: 0.6rem;
+    }
+
+    .day {
+        padding: 0.3rem;
+    }
+
+    .day-number { font-size: 0.75rem; }
+    .meal-toggle { font-size: 0.7rem; }
+    .day-cost { font-size: 0.7rem; }
+
+    #totalCost { font-size: 1.3rem; }
+    .total-cost-card h2 { font-size: 0.95rem; }
+    .total-cost-card { padding: 0.8rem; }
+}

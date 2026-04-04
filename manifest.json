@@ -1,0 +1,28 @@
+{
+  "name": "Smart Hall - Boral Hall Management System",
+  "short_name": "Smart Hall",
+  "description": "A comprehensive hall management system for students and administrators",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#23a6d5",
+  "theme_color": "#e73c7e",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "images/RSM_Logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "images/RSM_Logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "utilities"],
+  "lang": "en",
+  "dir": "ltr"
+}

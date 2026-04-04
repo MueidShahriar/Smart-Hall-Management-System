@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login & Register | Smart Hall</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="shortcut icon" href="images/RSM_Logo.png" type="image/x-icon" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#e73c7e" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Smart Hall" />
+  <link rel="apple-touch-icon" href="images/RSM_Logo.png" />
+  <link rel="stylesheet" href="styles/index.css">
+</head>
+
+<body>
+  <script src="scripts/preloader.js"></script>
+
+  <div class="container" id="signup" style="display: none;">
+    <h1 class="form-title">Register</h1>
+    <form id="signUpForm">
+      <div class="input-group">
+        <i class="fas fa-user"></i>
+        <input type="text" name="name" id="name" placeholder="Full Name" required />
+        <label for="name">Name</label>
+      </div>
+      <div class="input-group">
+        <i class="fas fa-id-card"></i>
+        <input type="text" name="studentID" id="studentID" placeholder="StudentID" required />
+        <label for="studentID">ID</label>
+      </div>
+      <div class="input-group">
+        <i class="fas fa-envelope"></i>
+        <input type="email" name="email" id="email" placeholder="Email" required />
+        <label for="email">Email</label>
+      </div>
+      <div class="input-group">
+        <i class="fas fa-lock"></i>
+        <input type="password" name="password" id="password" placeholder="Password" required />
+        <label for="password">Password</label>
+        <i class="fas fa-eye toggle-password"></i>
+      </div>
+      <div class="input-group">
+        <i class="fas fa-lock"></i>
+        <input type="password" name="cPassword" id="cPassword" placeholder="Confirm Password" required />
+        <label for="cPassword">Confirm Password</label>
+        <i class="fas fa-eye toggle-password"></i>
+      </div>
+      <div class="input-group">
+        <i class="fas fa-user"></i>
+        <input type="text" name="fatherName" id="fatherName" placeholder="Father's Name" required />
+        <label for="fatherName">Father's Name</label>
+      </div>
+      <div class="input-group">
+        <i class="fas fa-user"></i>
+        <input type="text" name="motherName" id="motherName" placeholder="Mother's Name" required />
+        <label for="motherName">Mother's Name</label>
+      </div>
+      <div class="input-group">
+        <i class="fas fa-graduation-cap"></i>
+        <input type="text" name="department" id="department" placeholder="Department" required />
+        <label for="department">Department</label>
+      </div>
+      <div class="input-group">
+        <i class="fas fa-users"></i>
+        <input type="text" name="batch" id="batch" placeholder="Batch" required />
+        <label for="batch">Batch</label>
+      </div>
+      <div class="input-group">
+        <i class="fas fa-phone"></i>
+        <input type="tel" name="phone" id="phone" placeholder="Phone Number" required />
+        <label for="phone">Phone Number</label>
+      </div>
+      <div class="input-group">
+        <i class="fas fa-home"></i>
+        <input type="text" name="room" id="room" placeholder="Room Number" required />
+        <label for="room">Room</label>
+      </div>
+      <div class="input-group">
+        <i class="fas fa-calendar"></i>
+        <input type="date" name="dob" id="dob" required />
+        <label for="dob">Date of Birth</label>
+      </div>
+      <div class="input-group">
+        <i class="fas fa-map-marker-alt"></i>
+        <input type="text" name="address" id="address" placeholder="Address" required />
+        <label for="address">Address</label>
+      </div>
+      <input type="submit" class="btn" value="Sign Up" />
+    </form>
+    <div class="links">
+      <p>Already have an account?</p>
+      <button class="button" id="signInButton">Sign In</button>
+    </div>
+  </div>
+
+  <div class="container" id="signIn">
+    <div class="header">
+      <img class="img" src="images/RSM_Logo.png" alt=" RSM Logo" style="width: 3.5rem; height: 3.5rem;" />
+      <h1 class="title">RSM</h1>
+    </div>
+    <h1 class="form-title">Sign In to Smart Hall</h1>
+    <form id="signInForm">
+      <div class="input-group">
+        <i class="fas fa-id-card"></i>
+        <input type="text" name="studentID" id="loginStudentId" placeholder="Student ID" required />
+        <label for="loginStudentId">Student ID</label>
+      </div>
+      <div class="input-group">
+        <i class="fas fa-lock"></i>
+        <input type="password" name="password" id="loginPassword" placeholder="Password" required />
+        <label for="loginPassword">Password</label>
+        <i class="fas fa-eye toggle-password"></i>
+      </div>
+      <input type="submit" class="btn" value="Sign In" />
+    </form>
+    <p class="recover">
+      <a href="#">Forgot Password</a>
+    </p>
+    <div class="links">
+      <p>Don't have an account yet?</p>
+      <button class="button" id="signUpButton">Sign Up</button>
+    </div>
+  </div>
+
+  <script src="scripts/toast.js"></script>
+  <script>
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(r => r.forEach(reg => reg.unregister()));
+      if ('caches' in window) caches.keys().then(k => k.forEach(n => caches.delete(n)));
+    }
+</script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script src="scripts/index.js"></script>
+</body>
+
+</html>

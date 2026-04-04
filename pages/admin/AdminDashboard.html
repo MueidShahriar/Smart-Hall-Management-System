@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Smart Hall</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin />
+
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="shortcut icon" href="../../images/RSM_Logo.png" type="image/x-icon">
+
+    <link rel="stylesheet" href="../../styles/base.css">
+    <link rel="stylesheet" href="../../styles/AdminDashboard.css">
+</head>
+
+<body>
+    <script src="../../scripts/preloader.js"></script>
+
+    <div class="container">
+
+        <main class="main-content">
+            <div class="page-header">
+                <h1>Admin Dashboard</h1>
+                <p>Manage hall operations and monitor activities.</p>
+            </div>
+            <div class="dashboard">
+
+                <div class="card allocation">
+                    <span class="material-icons card-icon">meeting_room</span>
+                    <div class="section-info">
+                        <h2>Room Allocation System</h2>
+                        <p>Roomwise allocation system</p>
+                        <button class="action-btn">Allocate</button>
+                    </div>
+                </div>
+
+                <div class="card student_info">
+                    <span class="material-icons card-icon">school</span>
+                    <div class="section-info">
+                        <h2>Student Information</h2>
+                        <p>Search student info by ID, Department, or Batch</p>
+                        <button class="action-btn">Search</button>
+                    </div>
+                </div>
+
+                <div class="card meal">
+                    <span class="material-icons card-icon">restaurant</span>
+                    <div class="section-info">
+                        <h2>Meal Report</h2>
+                        <p id="mealSummaryText">Loading today's meal data...</p>
+                        <button class="action-btn">View</button>
+                    </div>
+                </div>
+
+                <div class="card attendance">
+                    <span class="material-icons card-icon">co_present</span>
+                    <div class="section-info">
+                        <h2>Attendance Report</h2>
+                        <p id="attendanceSummaryText">Loading today's attendance...</p>
+                        <button class="action-btn">Check</button>
+                    </div>
+                </div>
+
+                <div class="card complaint">
+                    <span class="material-icons card-icon">report_problem</span>
+                    <div class="section-info">
+                        <h2>Check Complaints</h2>
+                        <p>Check residential student complaints</p>
+                        <button class="action-btn">Check</button>
+                    </div>
+                </div>
+
+                <div class="card request">
+                    <span class="material-icons card-icon">inbox</span>
+                    <div class="section-info">
+                        <h2>Requests</h2>
+                        <p>Check and approve student registrations & bookings</p>
+                        <button class="action-btn">View</button>
+                    </div>
+                </div>
+
+                <div class="card documents">
+                    <span class="material-icons card-icon">description</span>
+                    <div class="section-info">
+                        <h2>Documents</h2>
+                        <p>Manage documents for students</p>
+                        <button class="action-btn">Manage</button>
+                    </div>
+                </div>
+
+                <div class="card sos-card" id="sosAlertsSection" style="display:none;">
+                    <span class="material-icons card-icon sos-icon">warning</span>
+                    <div class="section-info sos-card-info">
+                        <h2>Emergency Alerts <span class="sos-badge" id="sosBadge">0</span></h2>
+                        <div class="sos-alerts-list" id="sosAlertsList">
+                            <p>No pending alerts.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+    </div>
+
+    <script src="../../scripts/sidebar.js"></script>
+    <script>initSidebar('admin', 'dashboard');</script>
+    <script src="../../scripts/toast.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBF-nMMW5lG44JfHxx4HxCbf5N81geOiRs",
+            authDomain: "bauet-hms-63f5b.firebaseapp.com",
+            databaseURL: "https://bauet-hms-63f5b-default-rtdb.firebaseio.com",
+            projectId: "bauet-hms-63f5b",
+            storageBucket: "bauet-hms-63f5b.appspot.com",
+            messagingSenderId: "200038506273",
+            appId: "1:200038506273:web:2e141fc9ec36de049ae860"
+        };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+</script>
+
+    <script src="../../scripts/AdminDashboard.js"></script>
+</body>
+
+</html>

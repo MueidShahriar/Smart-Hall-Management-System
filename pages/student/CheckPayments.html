@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Check Payments | Smart Hall</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin />
+
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <link rel="shortcut icon" href="../../images/RSM_Logo.png" type="image/x-icon" />
+
+    <link rel="stylesheet" href="../../styles/base.css" />
+    <style>
+        .payments-wrapper {
+            max-width: 900px;
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .summary-card {
+            background: var(--clr-white);
+            border-radius: var(--radius-3);
+            padding: 1.2rem;
+            box-shadow: var(--shadow);
+            text-align: center;
+            transition: transform 0.25s, box-shadow 0.25s;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .summary-card .material-icons {
+            font-size: 2rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .summary-card h3 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin: 0.3rem 0;
+        }
+
+        .summary-card p {
+            font-size: 0.78rem;
+        }
+
+        .summary-card.total .material-icons { color: var(--clr-primary); }
+        .summary-card.paid .material-icons { color: #16a34a; }
+        .summary-card.paid h3 { color: #16a34a; }
+        .summary-card.due .material-icons { color: #dc2626; }
+        .summary-card.due h3 { color: #dc2626; }
+
+        .payments-table-wrap {
+            background: var(--clr-white);
+            border-radius: var(--radius-3);
+            box-shadow: var(--shadow);
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .payments-table-wrap h2 {
+            padding: 1rem 1.2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-bottom: 1px solid var(--clr-info-light);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead th {
+            background: var(--clr-bg);
+            padding: 0.7rem 1rem;
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-align: left;
+            color: var(--clr-dark-variant);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        tbody td {
+            padding: 0.7rem 1rem;
+            font-size: 0.82rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+        }
+
+        tbody tr:hover {
+            background: rgba(115, 128, 236, 0.04);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.7rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-badge.paid {
+            background: rgba(22, 163, 106, 0.12);
+            color: #16a34a;
+        }
+
+        .status-badge.pending {
+            background: rgba(245, 158, 11, 0.12);
+            color: #d97706;
+        }
+
+        .status-badge.overdue {
+            background: rgba(220, 38, 38, 0.12);
+            color: #dc2626;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--clr-dark-variant);
+        }
+
+        .no-data .material-icons {
+            font-size: 3rem;
+            opacity: 0.4;
+            margin-bottom: 0.5rem;
+        }
+
+        .mobile-card {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .summary-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .summary-card {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                text-align: left;
+                padding: 1rem;
+            }
+
+            .summary-card .material-icons {
+                font-size: 1.8rem;
+                margin-bottom: 0;
+            }
+
+            .summary-card h3 {
+                font-size: 1.2rem;
+            }
+
+            .payments-table-wrap table {
+                display: none;
+            }
+
+            .mobile-card {
+                display: block;
+                padding: 1rem 1.2rem;
+                border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            }
+
+            .mobile-card:last-child {
+                border-bottom: none;
+            }
+
+            .mobile-card .mobile-card-title {
+                font-weight: 600;
+                font-size: 0.88rem;
+                margin-bottom: 0.5rem;
+                color: var(--clr-dark);
+            }
+
+            .mobile-card .mobile-card-row {
+                display: flex;
+                justify-content: space-between;
+                padding: 0.2rem 0;
+                font-size: 0.8rem;
+            }
+
+            .mobile-card .mobile-card-row .label {
+                color: var(--clr-info-dark);
+            }
+
+            .mobile-card .mobile-card-row .value {
+                font-weight: 500;
+                color: var(--clr-dark);
+            }
+
+            .mobile-card-total {
+                background: var(--clr-bg);
+                font-weight: 600;
+                border-radius: 0 0 var(--radius-3) var(--radius-3);
+            }
+
+            .payments-table-wrap {
+                overflow-x: hidden;
+            }
+
+            .payments-table-wrap h2 {
+                padding: 0.8rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            .no-data {
+                padding: 2rem 1rem;
+            }
+
+            .no-data .material-icons {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .summary-card {
+                padding: 0.8rem;
+            }
+
+            .summary-card h3 {
+                font-size: 1rem;
+            }
+
+            .summary-card p {
+                font-size: 0.72rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <script src="../../scripts/preloader.js"></script>
+
+    <div class="container">
+
+        <main>
+            <div class="page-header">
+                <h1>Check Payments</h1>
+                <p>View your payment history and meal costs calculation.</p>
+            </div>
+
+            <div class="payments-wrapper">
+                <div class="summary-cards">
+                    <div class="summary-card total">
+                        <span class="material-icons">restaurant</span>
+                        <h3 id="totalMeals">0</h3>
+                        <p>Total Meals</p>
+                    </div>
+                    <div class="summary-card paid">
+                        <span class="material-icons">payments</span>
+                        <h3 id="totalCost">৳0</h3>
+                        <p>Total Meal Cost</p>
+                    </div>
+                    <div class="summary-card due">
+                        <span class="material-icons">pending</span>
+                        <h3 id="currentMonthCost">৳0</h3>
+                        <p>This Month</p>
+                    </div>
+                </div>
+
+                <div class="payments-table-wrap">
+                    <h2>Meal Cost Breakdown</h2>
+                    <div id="mealBreakdownContainer">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Month</th>
+                                    <th>Breakfast</th>
+                                    <th>Lunch</th>
+                                    <th>Dinner</th>
+                                    <th>Total Meals</th>
+                                    <th>Cost (৳)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="mealBreakdownBody">
+                                <tr>
+                                    <td colspan="6" class="no-data">
+                                        <span class="material-icons">restaurant_menu</span>
+                                        <p>Loading meal data...</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="payments-table-wrap" style="margin-top: 1.5rem;">
+                    <h2>Payment History</h2>
+                    <div id="paymentsContainer">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Description</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="paymentsBody">
+                                <tr>
+                                    <td colspan="4" class="no-data">
+                                        <span class="material-icons">receipt_long</span>
+                                        <p>No payment records found</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+    </div>
+
+    <script src="../../scripts/sidebar.js"></script>
+    <script>initSidebar('student', 'payments');</script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+        import { getFirestore, collection, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBF-nMMW5lG44JfHxx4HxCbf5N81geOiRs",
+            authDomain: "bauet-hms-63f5b.firebaseapp.com",
+            databaseURL: "https://bauet-hms-63f5b-default-rtdb.firebaseio.com",
+            projectId: "bauet-hms-63f5b",
+            storageBucket: "bauet-hms-63f5b.appspot.com",
+            messagingSenderId: "200038506273",
+            appId: "1:200038506273:web:2e141fc9ec36de049ae860"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const firestore = getFirestore(app);
+
+        // Meal prices
+        const MEAL_PRICES = {
+            breakfast: 40,
+            lunch: 60,
+            dinner: 60
+        };
+
+        // Get student ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const studentId = urlParams.get('id');
+
+        // Calculate meal costs
+        async function loadMealCosts() {
+            if (!studentId) {
+                hidePageLoader();
+                showToast('Student ID not found', 'error');
+                return;
+            }
+
+            try {
+                // Query meals collection for this student
+                const mealsQuery = query(
+                    collection(firestore, "meals"),
+                    where("studentId", "==", studentId)
+                );
+
+                const snapshot = await getDocs(mealsQuery);
+
+                if (snapshot.empty) {
+                    document.getElementById('mealBreakdownBody').innerHTML = `
+                        <tr>
+                            <td colspan="6" style="text-align:center;padding:2rem;color:var(--clr-info-dark);">
+                                <span class="material-icons" style="font-size:2rem;opacity:0.5;display:block;margin-bottom:0.5rem;">restaurant_menu</span>
+                                No meal records found
+                            </td>
+                        </tr>
+                    `;
+                    hidePageLoader();
+                    return;
+                }
+
+                // Process meals by month
+                const monthlyData = {};
+                let totalMeals = 0;
+                let totalCost = 0;
+
+                snapshot.forEach(doc => {
+                    const meal = doc.data();
+                    const date = meal.date ? new Date(meal.date) : new Date();
+                    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                    const monthName = date.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
+
+                    if (!monthlyData[monthKey]) {
+                        monthlyData[monthKey] = {
+                            name: monthName,
+                            breakfast: 0,
+                            lunch: 0,
+                            dinner: 0,
+                            total: 0,
+                            cost: 0
+                        };
+                    }
+
+                    // Count meals
+                    if (meal.breakfast) {
+                        monthlyData[monthKey].breakfast++;
+                        monthlyData[monthKey].total++;
+                        monthlyData[monthKey].cost += MEAL_PRICES.breakfast;
+                        totalMeals++;
+                        totalCost += MEAL_PRICES.breakfast;
+                    }
+                    if (meal.lunch) {
+                        monthlyData[monthKey].lunch++;
+                        monthlyData[monthKey].total++;
+                        monthlyData[monthKey].cost += MEAL_PRICES.lunch;
+                        totalMeals++;
+                        totalCost += MEAL_PRICES.lunch;
+                    }
+                    if (meal.dinner) {
+                        monthlyData[monthKey].dinner++;
+                        monthlyData[monthKey].total++;
+                        monthlyData[monthKey].cost += MEAL_PRICES.dinner;
+                        totalMeals++;
+                        totalCost += MEAL_PRICES.dinner;
+                    }
+                });
+
+                // Update summary cards
+                document.getElementById('totalMeals').textContent = totalMeals;
+                document.getElementById('totalCost').textContent = `৳${totalCost.toLocaleString()}`;
+
+                // Get current month cost
+                const now = new Date();
+                const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+                const currentMonthData = monthlyData[currentMonthKey];
+                document.getElementById('currentMonthCost').textContent = currentMonthData
+                    ? `৳${currentMonthData.cost.toLocaleString()}`
+                    : '৳0';
+
+                // Render monthly breakdown
+                const sortedMonths = Object.keys(monthlyData).sort().reverse();
+                const tbody = document.getElementById('mealBreakdownBody');
+
+                if (sortedMonths.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="6" style="text-align:center;padding:2rem;color:var(--clr-info-dark);">
+                                No meal records found
+                            </td>
+                        </tr>
+                    `;
+                } else {
+                    tbody.innerHTML = sortedMonths.map(key => {
+                        const m = monthlyData[key];
+                        return `
+                            <tr>
+                                <td><strong>${m.name}</strong></td>
+                                <td>${m.breakfast}</td>
+                                <td>${m.lunch}</td>
+                                <td>${m.dinner}</td>
+                                <td><strong>${m.total}</strong></td>
+                                <td><strong>৳${m.cost.toLocaleString()}</strong></td>
+                            </tr>
+                        `;
+                    }).join('');
+
+                    // Add total row
+                    tbody.innerHTML += `
+                        <tr style="background:var(--clr-bg);font-weight:600;">
+                            <td>Total</td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td>${totalMeals}</td>
+                            <td>৳${totalCost.toLocaleString()}</td>
+                        </tr>
+                    `;
+
+                    // Mobile cards for meal breakdown
+                    const mobileCards = sortedMonths.map(key => {
+                        const m = monthlyData[key];
+                        return `
+                            <div class="mobile-card">
+                                <div class="mobile-card-title">${m.name}</div>
+                                <div class="mobile-card-row"><span class="label">Breakfast</span><span class="value">${m.breakfast}</span></div>
+                                <div class="mobile-card-row"><span class="label">Lunch</span><span class="value">${m.lunch}</span></div>
+                                <div class="mobile-card-row"><span class="label">Dinner</span><span class="value">${m.dinner}</span></div>
+                                <div class="mobile-card-row"><span class="label">Total Meals</span><span class="value">${m.total}</span></div>
+                                <div class="mobile-card-row"><span class="label">Cost</span><span class="value">৳${m.cost.toLocaleString()}</span></div>
+                            </div>
+                        `;
+                    }).join('') + `
+                        <div class="mobile-card mobile-card-total">
+                            <div class="mobile-card-row"><span class="label">Grand Total</span><span class="value">${totalMeals} meals — ৳${totalCost.toLocaleString()}</span></div>
+                        </div>
+                    `;
+                    const container = document.getElementById('mealBreakdownContainer');
+                    const existingMobileCards = container.querySelectorAll('.mobile-card');
+                    existingMobileCards.forEach(c => c.remove());
+                    container.insertAdjacentHTML('beforeend', mobileCards);
+                }
+
+                hidePageLoader();
+            } catch (error) {
+                console.error('Error loading meal costs:', error);
+                showToast('Failed to load meal data', 'error');
+                hidePageLoader();
+            }
+        }
+
+        // Load payment history
+        async function loadPaymentHistory() {
+            try {
+                const paymentsQuery = query(
+                    collection(firestore, "payments"),
+                    where("studentId", "==", studentId)
+                );
+
+                const snapshot = await getDocs(paymentsQuery);
+                const tbody = document.getElementById('paymentsBody');
+
+                if (snapshot.empty) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="4" style="text-align:center;padding:2rem;color:var(--clr-info-dark);">
+                                <span class="material-icons" style="font-size:2rem;opacity:0.5;display:block;margin-bottom:0.5rem;">receipt_long</span>
+                                No payment records found
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+
+                const payments = [];
+                snapshot.forEach(doc => {
+                    payments.push({ id: doc.id, ...doc.data() });
+                });
+
+                // Sort by date descending
+                payments.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                tbody.innerHTML = payments.map(p => {
+                    const date = p.date ? new Date(p.date).toLocaleDateString('en-US', {
+                        year: 'numeric', month: 'short', day: 'numeric'
+                    }) : '—';
+                    const statusClass = p.status === 'paid' ? 'paid' : (p.status === 'pending' ? 'pending' : 'overdue');
+                    return `
+                        <tr>
+                            <td>${date}</td>
+                            <td>${p.description || 'Payment'}</td>
+                            <td>৳${(p.amount || 0).toLocaleString()}</td>
+                            <td><span class="status-badge ${statusClass}">${p.status || 'pending'}</span></td>
+                        </tr>
+                    `;
+                }).join('');
+
+                // Mobile cards for payment history
+                const paymentMobileCards = payments.map(p => {
+                    const date = p.date ? new Date(p.date).toLocaleDateString('en-US', {
+                        year: 'numeric', month: 'short', day: 'numeric'
+                    }) : '—';
+                    const statusClass = p.status === 'paid' ? 'paid' : (p.status === 'pending' ? 'pending' : 'overdue');
+                    return `
+                        <div class="mobile-card">
+                            <div class="mobile-card-title">${p.description || 'Payment'}</div>
+                            <div class="mobile-card-row"><span class="label">Date</span><span class="value">${date}</span></div>
+                            <div class="mobile-card-row"><span class="label">Amount</span><span class="value">৳${(p.amount || 0).toLocaleString()}</span></div>
+                            <div class="mobile-card-row"><span class="label">Status</span><span class="value"><span class="status-badge ${statusClass}">${p.status || 'pending'}</span></span></div>
+                        </div>
+                    `;
+                }).join('');
+                const payContainer = document.getElementById('paymentsContainer');
+                const existingPayCards = payContainer.querySelectorAll('.mobile-card');
+                existingPayCards.forEach(c => c.remove());
+                payContainer.insertAdjacentHTML('beforeend', paymentMobileCards);
+            } catch (error) {
+                console.error('Error loading payments:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadMealCosts();
+            loadPaymentHistory();
+        });
+    </script>
+    <script src="../../scripts/toast.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,103 @@
+
+.room-booking-form {
+    background: var(--clr-white);
+    padding: 2rem;
+    border-radius: var(--radius-3);
+    box-shadow: var(--shadow);
+    max-width: 600px;
+    width: 100%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.room-booking-form .form-group span {
+    display: inline-block;
+    margin: 0 8px;
+    color: var(--clr-dark);
+}
+
+.date-group {
+    display: flex;
+    gap: 1rem;
+}
+
+.date-field {
+    flex: 1;
+}
+
+.date-field label {
+    display: block;
+    font-weight: 500;
+    font-size: 0.82rem;
+    margin-bottom: 0.4rem;
+    color: var(--clr-dark);
+}
+
+.date-field input {
+    width: 100%;
+    padding: 0.6rem 0.8rem;
+    border: 1.5px solid var(--clr-info-light);
+    border-radius: var(--radius-1);
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.85rem;
+    color: var(--clr-dark);
+    background: var(--clr-white);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.date-field input:focus {
+    border-color: var(--clr-primary);
+    box-shadow: 0 0 0 3px rgba(115, 128, 236, 0.1);
+    outline: none;
+}
+
+button[type="submit"] {
+    width: 100%;
+    padding: 0.7rem;
+    background-color: var(--clr-primary);
+    color: var(--clr-white);
+    font-size: 0.95rem;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    border: none;
+    border-radius: var(--radius-1);
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.15s ease, box-shadow 0.3s ease;
+}
+
+button[type="submit"]:hover {
+    background-color: var(--clr-primary-variant);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(115, 128, 236, 0.25);
+}
+
+button[type="submit"]:active {
+    transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+    .room-booking-form {
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .room-booking-form {
+        padding: 1rem;
+    }
+
+    .date-group {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    button[type="submit"] {
+        font-size: 0.85rem;
+    }
+
+    .room-booking-form .form-group span {
+        margin: 0 0.4rem;
+    }
+}

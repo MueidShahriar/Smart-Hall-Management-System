@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meal Report | SMART Hall</title>
+
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="shortcut icon" href="../../images/RSM_Logo.png" type="image/x-icon">
+    <link rel="stylesheet" href="../../styles/base.css">
+
+    <style>
+
+        main h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--clr-dark);
+            margin-bottom: 0.5rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        main h1::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 60%;
+            height: 3px;
+            background: var(--clr-primary);
+            border-radius: 2px;
+        }
+
+        .page-subtitle {
+            color: var(--clr-info-dark);
+            font-size: 0.88rem;
+            margin-bottom: 2rem;
+        }
+
+        .report-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .control-group label {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--clr-dark-variant);
+        }
+
+        .control-group select,
+        .control-group input[type="date"],
+        .control-group input[type="month"] {
+            padding: 0.6rem 1rem;
+            border: 1.5px solid var(--clr-info-light);
+            border-radius: var(--radius-1);
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.88rem;
+            background: var(--clr-white);
+            transition: border-color 0.2s;
+            min-width: 160px;
+        }
+
+        .control-group select:focus,
+        .control-group input:focus {
+            outline: none;
+            border-color: var(--clr-primary);
+        }
+
+        .btn-generate {
+            padding: 0.6rem 1.5rem;
+            background: var(--clr-primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-1);
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.15s;
+        }
+
+        .btn-generate:hover {
+            background: var(--clr-primary-variant);
+            transform: translateY(-1px);
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.2rem;
+            margin-bottom: 2rem;
+        }
+
+        .summary-card {
+            background: var(--clr-white);
+            border-radius: var(--radius-2);
+            padding: 1.5rem;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .summary-card .icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .summary-card .icon.total {
+            background: rgba(115, 128, 236, 0.15);
+            color: var(--clr-primary);
+        }
+
+        .summary-card .icon.on {
+            background: rgba(65, 241, 182, 0.15);
+            color: #00b894;
+        }
+
+        .summary-card .icon.off {
+            background: rgba(212, 12, 12, 0.1);
+            color: var(--clr-warning);
+        }
+
+        .summary-card .icon.cost {
+            background: rgba(253, 203, 110, 0.2);
+            color: #e17055;
+        }
+
+        .summary-card .info h3 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--clr-dark);
+        }
+
+        .summary-card .info p {
+            font-size: 0.78rem;
+            color: var(--clr-info-dark);
+        }
+
+        .report-table-wrapper {
+            background: var(--clr-white);
+            border-radius: var(--radius-2);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+        }
+
+        .report-table-wrapper h2 {
+            padding: 1.2rem 1.5rem;
+            font-size: 1.05rem;
+            font-weight: 600;
+            border-bottom: 1px solid var(--clr-info-light);
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: var(--clr-bg);
+            padding: 0.8rem 1rem;
+            text-align: left;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--clr-dark-variant);
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 0.8rem 1rem;
+            font-size: 0.85rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+        }
+
+        tr:hover {
+            background: rgba(115, 128, 236, 0.04);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge.on {
+            background: rgba(65, 241, 182, 0.15);
+            color: #00b894;
+        }
+
+        .badge.off {
+            background: rgba(212, 12, 12, 0.1);
+            color: var(--clr-warning);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--clr-info-dark);
+        }
+
+        .empty-state .material-icons {
+            font-size: 3rem;
+            opacity: 0.4;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state p {
+            font-size: 0.95rem;
+        }
+
+        @media (max-width: 992px) {
+            .report-controls {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 768px) {
+            main { padding-top: 3.8rem; }
+            .summary-cards { grid-template-columns: repeat(2, 1fr); gap: 0.8rem; }
+            .control-group select,
+            .control-group input[type="date"],
+            .control-group input[type="month"] { min-width: 0; width: 100%; }
+            .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+            table { min-width: 500px; }
+            th, td { padding: 0.5rem 0.4rem; font-size: 0.78rem; white-space: nowrap; }
+        }
+
+        @media (max-width: 480px) {
+            .summary-cards { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+
+<body>
+    <script src="../../scripts/preloader.js"></script>
+
+    <div class="container">
+
+        <main>
+            <h1>Meal Report</h1>
+            <p class="page-subtitle">View and manage daily & monthly meal reports</p>
+
+            <div class="report-controls">
+                <div class="control-group">
+                    <label>Report Type</label>
+                    <select id="reportType">
+                        <option value="daily">Daily Report</option>
+                        <option value="monthly">Monthly Report</option>
+                    </select>
+                </div>
+                <div class="control-group" id="dateGroup">
+                    <label>Select Date</label>
+                    <input type="date" id="reportDate">
+                </div>
+                <div class="control-group" id="monthGroup" style="display: none;">
+                    <label>Select Month</label>
+                    <input type="month" id="reportMonth">
+                </div>
+                <button class="btn-generate" id="generateBtn">
+                    <span class="material-icons" style="font-size:1rem; vertical-align:middle; margin-right:0.3rem;">search</span>
+                    Generate Report
+                </button>
+            </div>
+
+            <div class="summary-cards">
+                <div class="summary-card">
+                    <div class="icon total">
+                        <span class="material-icons">groups</span>
+                    </div>
+                    <div class="info">
+                        <h3 id="totalStudents">0</h3>
+                        <p>Total Students</p>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="icon on">
+                        <span class="material-icons">restaurant</span>
+                    </div>
+                    <div class="info">
+                        <h3 id="mealsOn">0</h3>
+                        <p>Meals On</p>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="icon off">
+                        <span class="material-icons">no_meals</span>
+                    </div>
+                    <div class="info">
+                        <h3 id="mealsOff">0</h3>
+                        <p>Meals Off</p>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="icon cost">
+                        <span class="material-icons">payments</span>
+                    </div>
+                    <div class="info">
+                        <h3 id="totalCost">৳0</h3>
+                        <p>Total Cost</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="report-table-wrapper">
+                <h2>Student Meal Details</h2>
+                <div class="table-scroll">
+                    <div id="reportContent">
+                        <div class="empty-state">
+                            <span class="material-icons">restaurant_menu</span>
+                            <p>Select a date and generate the report to view meal data</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+    </div>
+
+    <script src="../../scripts/sidebar.js"></script>
+    <script>initSidebar('admin', 'meal_report');</script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBF-nMMW5lG44JfHxx4HxCbf5N81geOiRs",
+            authDomain: "bauet-hms-63f5b.firebaseapp.com",
+            databaseURL: "https://bauet-hms-63f5b-default-rtdb.firebaseio.com",
+            projectId: "bauet-hms-63f5b",
+            storageBucket: "bauet-hms-63f5b.appspot.com",
+            messagingSenderId: "200038506273",
+            appId: "1:200038506273:web:2e141fc9ec36de049ae860"
+        };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const rtdb = firebase.database();
+
+        let studentCache = {};
+        async function loadAllStudents() {
+            if (Object.keys(studentCache).length > 0) return;
+            try {
+                const snap = await rtdb.ref('users').once('value');
+                if (snap.exists()) studentCache = snap.val();
+            } catch (e) { console.error('Error loading students:', e); }
+        }
+</script>
+
+    <script src="../../scripts/toast.js"></script>
+
+    <script>
+
+        const reportType = document.getElementById('reportType');
+        const dateGroup = document.getElementById('dateGroup');
+        const monthGroup = document.getElementById('monthGroup');
+
+        reportType.addEventListener('change', () => {
+            if (reportType.value === 'daily') {
+                dateGroup.style.display = '';
+                monthGroup.style.display = 'none';
+            } else {
+                dateGroup.style.display = 'none';
+                monthGroup.style.display = '';
+            }
+        });
+
+        const today = new Date();
+        document.getElementById('reportDate').value = today.toISOString().split('T')[0];
+        document.getElementById('reportMonth').value = today.toISOString().slice(0, 7);
+
+        document.getElementById('generateBtn').addEventListener('click', async () => {
+            const genBtn = document.getElementById('generateBtn');
+            const type = reportType.value;
+            const content = document.getElementById('reportContent');
+
+            let targetDate;
+            if (type === 'daily') {
+                targetDate = document.getElementById('reportDate').value;
+                if (!targetDate) {
+                    showToast('Please select a date', 'warning');
+                    return;
+                }
+            } else {
+                const monthVal = document.getElementById('reportMonth').value;
+                if (!monthVal) {
+                    showToast('Please select a month', 'warning');
+                    return;
+                }
+                targetDate = monthVal;
+            }
+
+            genBtn.classList.add('btn-loading');
+            genBtn.disabled = true;
+            content.innerHTML = '<div class="empty-state"><div class="loader"></div><p>Loading report...</p></div>';
+
+            try {
+
+                await loadAllStudents();
+
+                const snapshot = await db.collection('meals').get();
+                let totalStudents = 0;
+                let onCount = 0;
+                let offCount = 0;
+                const rows = [];
+
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const studentId = doc.id;
+
+                    if (type === 'daily') {
+
+                        if (data[targetDate]) {
+                            totalStudents++;
+                            const isOn = data[targetDate].on === true;
+                            if (isOn) onCount++;
+                            else offCount++;
+                            rows.push({
+                                id: studentId,
+                                status: isOn,
+                                date: targetDate
+                            });
+                        }
+                    } else {
+
+                        let studentOn = 0;
+                        let studentOff = 0;
+                        let found = false;
+
+                        for (const dateKey in data) {
+                            if (dateKey.startsWith(targetDate) && data[dateKey] && typeof data[dateKey].on === 'boolean') {
+                                found = true;
+                                if (data[dateKey].on) studentOn++;
+                                else studentOff++;
+                            }
+                        }
+
+                        if (found) {
+                            totalStudents++;
+                            onCount += studentOn;
+                            offCount += studentOff;
+                            rows.push({
+                                id: studentId,
+                                daysOn: studentOn,
+                                daysOff: studentOff,
+                                total: studentOn + studentOff
+                            });
+                        }
+                    }
+                });
+
+                document.getElementById('totalStudents').textContent = totalStudents;
+                document.getElementById('mealsOn').textContent = onCount;
+                document.getElementById('mealsOff').textContent = offCount;
+                const costPerMeal = 70;
+                document.getElementById('totalCost').textContent = `৳${onCount * costPerMeal}`;
+
+                if (rows.length === 0) {
+                    content.innerHTML = '<div class="empty-state"><span class="material-icons">info</span><p>No meal data found for the selected period</p></div>';
+                    return;
+                }
+
+                let tableHTML = '<table><thead><tr><th>#</th><th>Student ID</th><th>Name</th><th>Department</th><th>Room</th>';
+                if (type === 'daily') {
+                    tableHTML += '<th>Date</th><th>Status</th>';
+                } else {
+                    tableHTML += '<th>Days On</th><th>Days Off</th><th>Total Days</th><th>Cost</th>';
+                }
+                tableHTML += '</tr></thead><tbody>';
+
+                rows.forEach((row, i) => {
+                    const sInfo = studentCache[row.id] || {};
+                    const studentName = sInfo.name || '—';
+                    const studentDept = sInfo.department || sInfo.dept_name || '—';
+                    const studentRoom = sInfo.room || '—';
+                    tableHTML += `<tr><td>${i + 1}</td><td>${row.id}</td><td>${studentName}</td><td>${studentDept}</td><td>${studentRoom}</td>`;
+                    if (type === 'daily') {
+                        tableHTML += `<td>${row.date}</td><td><span class="badge ${row.status ? 'on' : 'off'}">${row.status ? 'ON' : 'OFF'}</span></td>`;
+                    } else {
+                        tableHTML += `<td>${row.daysOn}</td><td>${row.daysOff}</td><td>${row.total}</td><td>৳${row.daysOn * costPerMeal}</td>`;
+                    }
+                    tableHTML += '</tr>';
+                });
+
+                tableHTML += '</tbody></table>';
+                content.innerHTML = tableHTML;
+                showToast('Report generated successfully', 'success');
+                genBtn.classList.remove('btn-loading');
+                genBtn.disabled = false;
+
+            } catch (error) {
+                console.error('Error generating report:', error);
+                content.innerHTML = '<div class="empty-state"><span class="material-icons">error</span><p>Failed to load data. Please try again.</p></div>';
+                showToast('Error loading report data', 'error');
+                genBtn.classList.remove('btn-loading');
+                genBtn.disabled = false;
+            }
+        });
+</script>
+</body>
+</html>

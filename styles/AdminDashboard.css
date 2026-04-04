@@ -1,0 +1,204 @@
+
+.sidebar-logo {
+    width: 3.6rem;
+    height: 3.6rem;
+    object-fit: contain;
+    display: block;
+}
+
+.tittle {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--clr-dark);
+}
+
+.card.sos-card {
+    grid-column: 1 / -1;
+    border: 2px solid #ef4444;
+    background: linear-gradient(135deg, #fff5f5 0%, #fff 100%);
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+.card.sos-card::before {
+    background: #ef4444;
+    opacity: 1;
+    width: 5px;
+}
+
+.card.sos-card > .card-icon.sos-icon {
+    display: none;
+}
+
+.sos-card-info {
+    width: 100%;
+}
+
+.sos-card-info h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #dc2626;
+    padding: 1rem 1.2rem;
+    margin: 0;
+    border-bottom: 1px solid rgba(239, 68, 68, 0.15);
+    background: rgba(239, 68, 68, 0.04);
+}
+
+.sos-badge {
+    background: #ef4444;
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.12rem 0.5rem;
+    border-radius: 50px;
+    min-width: 1.3rem;
+    text-align: center;
+    animation: pulse-badge 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-badge {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+}
+
+.sos-alerts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 0;
+    max-height: 320px;
+    overflow-y: auto;
+}
+
+.sos-alert-card {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.7rem 1.2rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+    transition: background 0.15s;
+}
+
+.sos-alert-card:hover {
+    background: rgba(239, 68, 68, 0.04);
+}
+
+.sos-alert-card:last-child {
+    border-bottom: none;
+}
+
+.sos-alert-card .alert-icon {
+    color: #ef4444;
+    font-size: 1.6rem;
+    flex-shrink: 0;
+}
+
+.sos-alert-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.sos-alert-info h4 {
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: var(--clr-dark);
+    margin-bottom: 0.1rem;
+}
+
+.sos-alert-info p {
+    font-size: 0.74rem;
+    color: var(--clr-dark-variant);
+    margin: 0;
+}
+
+.sos-alert-info .alert-time {
+    font-size: 0.68rem;
+    color: #999;
+    margin-top: 0.15rem;
+}
+
+.sos-alert-actions {
+    display: flex;
+    gap: 0.4rem;
+    flex-shrink: 0;
+}
+
+.sos-alert-actions button {
+    border: none;
+    padding: 0.3rem 0.65rem;
+    border-radius: var(--radius-1);
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    font-family: 'Poppins', sans-serif;
+}
+
+.sos-alert-actions button:hover {
+    transform: translateY(-1px);
+}
+
+.btn-acknowledge {
+    background: #16a34a;
+    color: #fff;
+}
+
+.btn-acknowledge:hover {
+    background: #15803d;
+}
+
+.btn-dismiss {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.btn-dismiss:hover {
+    background: #d1d5db;
+}
+
+@media (max-width: 768px) {
+    .sos-alert-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+        padding: 0.6rem 1rem;
+    }
+
+    .sos-alert-actions {
+        width: 100%;
+    }
+
+    .sos-alert-actions button {
+        flex: 1;
+    }
+}
+
+@media (max-width: 480px) {
+    .sos-card-info h2 {
+        font-size: 0.88rem;
+        padding: 0.8rem 1rem;
+    }
+
+    .sos-alert-card {
+        padding: 0.5rem 0.8rem;
+    }
+
+    .sos-alert-info h4 {
+        font-size: 0.78rem;
+    }
+
+    .sos-alert-info p {
+        font-size: 0.7rem;
+    }
+
+    .sos-alert-actions button {
+        font-size: 0.68rem;
+        padding: 0.25rem 0.5rem;
+    }
+}

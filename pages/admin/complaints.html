@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Complaints | Smart Hall</title>
+
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <link rel="shortcut icon" href="../../images/RSM_Logo.png" type="image/x-icon" />
+    <link rel="stylesheet" href="../../styles/base.css" />
+
+    <style>
+
+        .page-header h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--clr-dark);
+            position: relative;
+            display: inline-block;
+        }
+
+        .page-header h1::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 60%;
+            height: 3px;
+            background: var(--clr-primary);
+            border-radius: 2px;
+        }
+
+        .complaint-card h5 {
+            color: var(--clr-primary-variant);
+            font-weight: 700;
+            font-size: 1.15rem;
+            margin-bottom: 0.8rem;
+            letter-spacing: 0.3px;
+            line-height: 1.4;
+        }
+
+        .complaint-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin: 0 auto;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .complaint-card {
+            background: var(--clr-white);
+            border-radius: var(--radius-2);
+            padding: 1.3rem;
+            box-shadow: 0 4px 24px 0 rgba(115, 128, 236, 0.08);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .complaint-card:hover {
+            box-shadow: 0 8px 32px rgba(115, 128, 236, 0.18);
+            transform: translateY(-3px);
+        }
+
+        .solved-btn {
+            background: rgb(2, 81, 2);
+            color: white;
+            border: none;
+            border-radius: var(--radius-1);
+            padding: 0.5rem 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .solved-btn:hover {
+            background: var(--clr-primary-variant);
+            transform: translateY(-2px);
+        }
+
+        .complaint-card p {
+            margin-bottom: 0.5rem;
+        }
+
+        .complaint-description {
+            transition: opacity 0.3s ease;
+        }
+
+        .complaint-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 992px) {
+            .complaint-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .complaint-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .complaint-card {
+                padding: 1rem;
+                min-height: auto;
+            }
+            .complaint-card h5 {
+                font-size: 1rem;
+            }
+            .page-header h1 {
+                font-size: 1.2rem;
+            }
+        }
+
+        .hidden { display: none; }
+        .opacity-0 { opacity: 0; }
+        .mt-4 { margin-top: 1rem; }
+        .pt-2 { padding-top: 0.5rem; }
+        .border-t { border-top: 1px solid var(--clr-info-light); }
+        .mt-auto { margin-top: auto; }
+        .pt-3 { padding-top: 0.75rem; }
+        .text-right { text-align: right; }
+        .shadow-card-expanded { box-shadow: 0 12px 36px 0 rgba(115, 128, 236, 0.22); }
+        .scale-103 { transform: scale(1.03); }
+
+        .complaint-description {
+            transition: opacity 0.3s ease;
+        }
+
+        .complaint-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .complaint-modal-overlay.active {
+            display: flex;
+        }
+
+        .complaint-modal {
+            background: var(--clr-white);
+            border-radius: var(--radius-3);
+            max-width: 550px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+            animation: slideUp 0.25s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .complaint-modal-header {
+            padding: 1.2rem 1.5rem;
+            border-bottom: 1px solid var(--clr-info-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .complaint-modal-header h2 {
+            font-size: 1.1rem;
+            color: var(--clr-primary-variant);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.5rem;
+            color: var(--clr-dark-variant);
+        }
+
+        .complaint-modal-body {
+            padding: 1.5rem;
+        }
+
+        .complaint-modal-body .detail-row {
+            margin-bottom: 1rem;
+        }
+
+        .complaint-modal-body .detail-label {
+            font-size: 0.75rem;
+            color: var(--clr-info-dark);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .complaint-modal-body .detail-value {
+            font-size: 0.95rem;
+            color: var(--clr-dark);
+            margin-top: 0.2rem;
+        }
+
+        .complaint-modal-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--clr-info-light);
+            display: flex;
+            justify-content: flex-end;
+        }
+    </style>
+</head>
+
+<body>
+    <script src="../../scripts/preloader.js"></script>
+
+    <div class="complaint-modal-overlay" id="complaintModal">
+        <div class="complaint-modal">
+            <div class="complaint-modal-header">
+                <h2 id="modalSubject">Complaint Details</h2>
+                <button class="modal-close" onclick="closeComplaintModal()">&times;</button>
+            </div>
+            <div class="complaint-modal-body">
+                <div class="detail-row">
+                    <div class="detail-label">Student ID</div>
+                    <div class="detail-value" id="modalStudentId">—</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Room Number</div>
+                    <div class="detail-value" id="modalRoom">—</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Sector</div>
+                    <div class="detail-value" id="modalSector">—</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Description</div>
+                    <div class="detail-value" id="modalDescription">—</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Submitted On</div>
+                    <div class="detail-value" id="modalTimestamp">—</div>
+                </div>
+            </div>
+            <div class="complaint-modal-footer">
+                <button class="solved-btn" id="modalSolveBtn">Mark as Solved</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+
+        <main>
+            <div class="page-header">
+                <h1>Complaints</h1>
+                <p>View and manage student complaints.</p>
+            </div>
+            <div class="complaint-grid" id="complaints-container">
+            </div>
+        </main>
+    </div>
+
+    <script src="../../scripts/sidebar.js"></script>
+    <script>initSidebar('admin', 'complaints');</script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+        import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs, deleteDoc, doc, setDoc, getDoc, query, orderBy, limit, startAfter } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBF-nMMW5lG44JfHxx4HxCbf5N81geOiRs",
+            authDomain: "bauet-hms-63f5b.firebaseapp.com",
+            databaseURL: "https://bauet-hms-63f5b-default-rtdb.firebaseio.com",
+            projectId: "bauet-hms-63f5b",
+            storageBucket: "bauet-hms-63f5b.appspot.com",
+            messagingSenderId: "200038506273",
+            appId: "1:200038506273:web:2e141fc9ec36de049ae860"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const firestore = getFirestore(app);
+
+        // Store complaints data
+        let complaintsData = {};
+
+        // Pagination state
+        const PAGE_SIZE = 10;
+        let lastVisible = null;
+        let hasMore = true;
+
+        // Function to load complaints from Firestore
+        async function loadComplaints(append = false) {
+            const container = document.getElementById("complaints-container");
+            if (!append) {
+                container.innerHTML = "";
+                lastVisible = null;
+                hasMore = true;
+            }
+
+            // Remove existing load more button
+            const oldBtn = document.getElementById('loadMoreComplaintsBtn');
+            if (oldBtn) oldBtn.remove();
+
+            try {
+                let q;
+                if (lastVisible) {
+                    q = query(collection(firestore, "Complaints"), orderBy("subject"), startAfter(lastVisible), limit(PAGE_SIZE));
+                } else {
+                    q = query(collection(firestore, "Complaints"), orderBy("subject"), limit(PAGE_SIZE));
+                }
+
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty && !append) {
+                    container.innerHTML = '<p style="text-align:center;color:var(--clr-info-dark);padding:2rem;">No complaints found.</p>';
+                    hidePageLoader();
+                    return;
+                }
+
+                if (querySnapshot.size < PAGE_SIZE) {
+                    hasMore = false;
+                }
+
+                querySnapshot.forEach((docSnap) => {
+                    const complaint = docSnap.data();
+                    lastVisible = docSnap;
+
+                    // Store complaint data for modal
+                    complaintsData[docSnap.id] = { ...complaint, _id: docSnap.id };
+
+                    const subject = complaint.subject || "No Subject";
+                    const room = complaint.roomNumber || complaint.room || "No Room";
+                    const id = complaint.userId || complaint.id || "No ID";
+                    const sector = complaint.sector || "N/A";
+
+                    const card = document.createElement("div");
+                    card.className = "complaint-card";
+                    card.id = `card-${docSnap.id}`;
+
+                    card.innerHTML = `
+                        <h5>${subject}</h5>
+                        <p><b>Room:</b> ${room}</p>
+                        <p><b>ID:</b> ${id}</p>
+                        <p><b>Sector:</b> ${sector}</p>
+                        <div class="mt-auto pt-3 text-right">
+                            <button class="solved-btn" onclick="markAsSolved('${docSnap.id}', event)">Solved</button>
+                        </div>
+                    `;
+
+                    card.onclick = function (e) {
+                        if (!e.target.classList.contains('solved-btn')) {
+                            openComplaintModal(docSnap.id);
+                        }
+                    };
+
+                    container.appendChild(card);
+                });
+
+                // Show Load More button if more data exists
+                if (hasMore) {
+                    const btn = document.createElement('button');
+                    btn.id = 'loadMoreComplaintsBtn';
+                    btn.className = 'load-more-btn';
+                    btn.textContent = 'Load More';
+                    btn.addEventListener('click', () => loadComplaints(true));
+                    container.parentElement.appendChild(btn);
+                }
+
+                hidePageLoader();
+            } catch (error) {
+                console.error("Error loading complaints:", error.message);
+                showToast("Failed to load complaints. Please try again.", "error");
+                hidePageLoader();
+            }
+        }
+
+        // Open complaint modal
+        window.openComplaintModal = function(id) {
+            const complaint = complaintsData[id];
+            if (!complaint) return;
+
+            document.getElementById('modalSubject').textContent = complaint.subject || 'Complaint Details';
+            document.getElementById('modalStudentId').textContent = complaint.userId || complaint.id || '—';
+            document.getElementById('modalRoom').textContent = complaint.roomNumber || complaint.room || '—';
+            document.getElementById('modalSector').textContent = complaint.sector || '—';
+            document.getElementById('modalDescription').textContent = complaint.description || 'No description provided.';
+
+            const timestamp = complaint.timestamp ? new Date(complaint.timestamp).toLocaleString() : '—';
+            document.getElementById('modalTimestamp').textContent = timestamp;
+
+            document.getElementById('modalSolveBtn').onclick = () => markAsSolved(id);
+            document.getElementById('complaintModal').classList.add('active');
+        };
+
+        // Close complaint modal
+        window.closeComplaintModal = function() {
+            document.getElementById('complaintModal').classList.remove('active');
+        };
+
+        // Close modal on outside click
+        document.getElementById('complaintModal').addEventListener('click', function(e) {
+            if (e.target === this) closeComplaintModal();
+        });
+
+        // Mark as solved - save to SolvedComplaints for notification and delete from Complaints
+        window.markAsSolved = async function (id, event) {
+            if (event) {
+                event.stopPropagation();
+            }
+
+            const btn = event ? event.target : document.getElementById('modalSolveBtn');
+            btn.classList.add('btn-loading');
+            btn.disabled = true;
+
+            try {
+                const complaint = complaintsData[id];
+
+                // Save to SolvedComplaints collection for student notification
+                if (complaint) {
+                    await setDoc(doc(firestore, "SolvedComplaints", id), {
+                        ...complaint,
+                        solvedAt: new Date().toISOString(),
+                        status: 'solved'
+                    });
+                }
+
+                // Delete from Complaints
+                const complaintRef = doc(firestore, "Complaints", id);
+                await deleteDoc(complaintRef);
+
+                // Close modal if open
+                closeComplaintModal();
+
+                // Remove the card from the UI with animation
+                const card = document.getElementById(`card-${id}`);
+                if (card) {
+                    card.style.opacity = '0';
+                    card.style.transform = 'scale(0.8)';
+                    setTimeout(() => {
+                        card.remove();
+                    }, 300);
+                }
+
+                // Remove from local data
+                delete complaintsData[id];
+
+                showToast("Complaint marked as solved! Student has been notified.", "success");
+            } catch (error) {
+                console.error("Error removing complaint:", error);
+                showToast("Failed to mark complaint as solved. Please try again.", "error");
+                btn.classList.remove('btn-loading');
+                btn.disabled = false;
+            }
+        };
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const studentId = urlParams.get('id');
+
+        document.addEventListener("DOMContentLoaded", function () {
+            loadComplaints();
+        });
+    </script>
+    <script src="../../scripts/toast.js"></script>
+</body>
+
+</html>
