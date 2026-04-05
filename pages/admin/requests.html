@@ -415,7 +415,9 @@
             messagingSenderId: "200038506273",
             appId: "1:200038506273:web:2e141fc9ec36de049ae860"
         };
-        firebase.initializeApp(firebaseConfig);
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
         const db = firebase.firestore();
         const rtdb = firebase.database();
 </script>
@@ -436,6 +438,23 @@
         let pendingStudents = [];
         let allStudentRegistrations = [];
         let currentStudentFilter = 'pending';
+
+        function parseTime(value) {
+            if (!value) return 0;
+            if (value.toDate) return value.toDate().getTime();
+            const parsed = new Date(value).getTime();
+            return Number.isNaN(parsed) ? 0 : parsed;
+        }
+
+        function esc(value) {
+            if (value === null || value === undefined) return '';
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
 
         async function loadStudentRegistrations() {
             const container = document.getElementById('studentsContainer');
@@ -459,12 +478,13 @@
                 historySnap.forEach(doc => {
                     const data = doc.data();
                     data._id = doc.id;
+                    data._status = (data._status || data.status || 'approved').toLowerCase();
                     allStudentRegistrations.push(data);
                 });
 
                 allStudentRegistrations.sort((a, b) => {
-                    const timeA = a.createdAt ? (a.createdAt.toDate ? a.createdAt.toDate().getTime() : new Date(a.createdAt).getTime()) : 0;
-                    const timeB = b.createdAt ? (b.createdAt.toDate ? b.createdAt.toDate().getTime() : new Date(b.createdAt).getTime()) : 0;
+                    const timeA = parseTime(a.createdAt);
+                    const timeB = parseTime(b.createdAt);
                     return timeB - timeA;
                 });
 
@@ -512,41 +532,41 @@
                 return `
                     <div class="request-card" id="student-card-${student._id}">
                         <div class="request-header">
-                            <h3>${student.name || 'Unknown'}</h3>
+                            <h3>${esc(student.name || 'Unknown')}</h3>
                             <span class="status-badge ${status}">${status}</span>
                         </div>
                         <div class="request-details">
                             <div class="detail-item">
                                 <span class="label">Student ID</span>
-                                <span class="value">${student.id || '—'}</span>
+                                <span class="value">${esc(student.id || '—')}</span>
                             </div>
                             <div class="detail-item">
                                 <span class="label">Email</span>
-                                <span class="value">${student.email || '—'}</span>
+                                <span class="value">${esc(student.email || '—')}</span>
                             </div>
                             <div class="detail-item">
                                 <span class="label">Department</span>
-                                <span class="value">${student.department || '—'}</span>
+                                <span class="value">${esc(student.department || '—')}</span>
                             </div>
                             <div class="detail-item">
                                 <span class="label">Batch</span>
-                                <span class="value">${student.batch || '—'}</span>
+                                <span class="value">${esc(student.batch || '—')}</span>
                             </div>
                             <div class="detail-item">
                                 <span class="label">Room</span>
-                                <span class="value">${student.room || '—'}</span>
+                                <span class="value">${esc(student.room || '—')}</span>
                             </div>
                             <div class="detail-item">
                                 <span class="label">Phone</span>
-                                <span class="value">${student.phone || '—'}</span>
+                                <span class="value">${esc(student.phone || '—')}</span>
                             </div>
                         </div>
                         ${isPending ? `
                         <div class="request-actions">
-                            <button class="btn-approve" onclick="approveStudent('${student._id}')">
+                            <button class="btn-approve" onclick="approveStudent('${student._id}', this)">
                                 <span class="material-icons">check_circle</span> Approve
                             </button>
-                            <button class="btn-reject" onclick="rejectStudent('${student._id}')">
+                            <button class="btn-reject" onclick="rejectStudent('${student._id}', this)">
                                 <span class="material-icons">cancel</span> Reject
                             </button>
                         </div>` : ''}
@@ -557,8 +577,9 @@
 
         document.getElementById('studentStatusFilter').addEventListener('change', filterStudentRegistrations);
 
-        window.approveStudent = async function(studentId) {
-            const btn = event.target.closest('.btn-approve');
+        window.approveStudent = async function(studentId, buttonEl) {
+            const btn = buttonEl || null;
+            if (!btn) return;
             btn.classList.add('btn-loading');
             btn.disabled = true;
 
@@ -618,10 +639,11 @@
             }
         };
 
-        window.rejectStudent = async function(studentId) {
+        window.rejectStudent = async function(studentId, buttonEl) {
             if (!confirm('Are you sure you want to reject this registration?')) return;
 
-            const btn = event.target.closest('.btn-reject');
+            const btn = buttonEl || null;
+            if (!btn) return;
             btn.classList.add('btn-loading');
             btn.disabled = true;
 
@@ -686,8 +708,8 @@
                 });
 
                 allRequests.sort((a, b) => {
-                    const timeA = a.createdAt ? (a.createdAt.toDate ? a.createdAt.toDate().getTime() : new Date(a.createdAt).getTime()) : 0;
-                    const timeB = b.createdAt ? (b.createdAt.toDate ? b.createdAt.toDate().getTime() : new Date(b.createdAt).getTime()) : 0;
+                    const timeA = parseTime(a.createdAt);
+                    const timeB = parseTime(b.createdAt);
                     return timeB - timeA;
                 });
 
@@ -739,70 +761,70 @@
                             </div>
                             <div class="detail-item">
                                 <span class="label">Student Name</span>
-                                <span class="value">${sInfo.name || '—'}</span>
+                                <span class="value">${esc(sInfo.name || '—')}</span>
                             </div>
                             <div class="detail-item">
                                 <span class="label">Student ID</span>
-                                <span class="value">${req.studentId || '—'}</span>
+                                <span class="value">${esc(req.studentId || '—')}</span>
                             </div>
                             <div class="detail-item">
                                 <span class="label">Department</span>
-                                <span class="value">${sInfo.department || sInfo.dept_name || '—'}</span>
+                                <span class="value">${esc(sInfo.department || sInfo.dept_name || '—')}</span>
                             </div>
                             <div class="detail-item">
                                 <span class="label">Room</span>
-                                <span class="value">${sInfo.room || '—'}</span>
+                                <span class="value">${esc(sInfo.room || '—')}</span>
                             </div>
                             <div class="detail-item">
                                 <span class="label">Student Phone</span>
-                                <span class="value">${sInfo.phone || '—'}</span>
+                                <span class="value">${esc(sInfo.phone || '—')}</span>
                             </div>
                     ` : (req.studentId && req.studentId !== 'unknown' ? `
                             <div class="detail-item" style="grid-column: 1 / -1; border-top: 1px dashed var(--clr-info-light); padding-top: 0.5rem; margin-top: 0.3rem;">
                                 <span class="label">Booked By</span>
-                                <span class="value">Student ID: ${req.studentId}</span>
+                                <span class="value">Student ID: ${esc(req.studentId)}</span>
                             </div>
                     ` : '');
 
                     return `
                         <div class="request-card" id="card-${req._id}">
                             <div class="request-header">
-                                <h3>${req.name || 'Unknown'}</h3>
+                                <h3>${esc(req.name || 'Unknown')}</h3>
                                 <span class="status-badge ${status}">${status}</span>
                             </div>
                             <div class="request-details">
                                 <div class="detail-item">
                                     <span class="label">NID</span>
-                                    <span class="value">${req.nid || '—'}</span>
+                                    <span class="value">${esc(req.nid || '—')}</span>
                                 </div>
                                 <div class="detail-item">
                                     <span class="label">Phone</span>
-                                    <span class="value">${req.phone || '—'}</span>
+                                    <span class="value">${esc(req.phone || '—')}</span>
                                 </div>
                                 <div class="detail-item">
                                     <span class="label">Email</span>
-                                    <span class="value">${req.email || '—'}</span>
+                                    <span class="value">${esc(req.email || '—')}</span>
                                 </div>
                                 <div class="detail-item">
                                     <span class="label">Relationship</span>
-                                    <span class="value">${req.relationship || '—'}</span>
+                                    <span class="value">${esc(req.relationship || '—')}</span>
                                 </div>
                                 <div class="detail-item">
                                     <span class="label">Check-in</span>
-                                    <span class="value">${checkin}</span>
+                                    <span class="value">${esc(checkin)}</span>
                                 </div>
                                 <div class="detail-item">
                                     <span class="label">Check-out</span>
-                                    <span class="value">${checkout}</span>
+                                    <span class="value">${esc(checkout)}</span>
                                 </div>
                                 ${bookedByHTML}
                             </div>
                             ${isPending ? `
                             <div class="request-actions">
-                                <button class="btn-approve" onclick="updateStatus('${req._id}', 'approved')">
+                                <button class="btn-approve" onclick="updateStatus('${req._id}', 'approved', this)">
                                     <span class="material-icons">check_circle</span> Approve
                                 </button>
-                                <button class="btn-reject" onclick="updateStatus('${req._id}', 'rejected')">
+                                <button class="btn-reject" onclick="updateStatus('${req._id}', 'rejected', this)">
                                     <span class="material-icons">cancel</span> Reject
                                 </button>
                             </div>` : ''}
@@ -812,8 +834,9 @@
             });
         }
 
-        window.updateStatus = async function (requestId, newStatus) {
-            const btn = event.target.closest(newStatus === 'approved' ? '.btn-approve' : '.btn-reject');
+        window.updateStatus = async function (requestId, newStatus, buttonEl) {
+            const btn = buttonEl || null;
+            if (!btn) return;
             btn.classList.add('btn-loading');
             btn.disabled = true;
 

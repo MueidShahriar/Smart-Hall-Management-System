@@ -10,7 +10,9 @@ document.addEventListener("DOMContentLoaded", function() {
         appId: "1:200038506273:web:2e141fc9ec36de049ae860"
     };
 
-    firebase.initializeApp(firebaseConfig);
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
     const db = firebase.firestore();
     const storage = firebase.storage();
 

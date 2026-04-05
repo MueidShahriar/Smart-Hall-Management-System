@@ -2,6 +2,16 @@
 (function () {
     'use strict';
 
+    const FIREBASE_CONFIG = {
+        apiKey: "AIzaSyBF-nMMW5lG44JfHxx4HxCbf5N81geOiRs",
+        authDomain: "bauet-hms-63f5b.firebaseapp.com",
+        databaseURL: "https://bauet-hms-63f5b-default-rtdb.firebaseio.com",
+        projectId: "bauet-hms-63f5b",
+        storageBucket: "bauet-hms-63f5b.appspot.com",
+        messagingSenderId: "200038506273",
+        appId: "1:200038506273:web:2e141fc9ec36de049ae860"
+    };
+
     const STUDENT_LINKS = [
         { icon: 'dashboard',      label: 'Dashboard',            href: 'StudentDashboard.html', key: 'dashboard' },
         { icon: 'person',         label: 'Profile',              href: 'profile.html',          key: 'profile' },
@@ -196,17 +206,7 @@
             const s2 = document.createElement('script');
             s2.src = 'https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js';
             s2.onload = () => {
-                if (!firebase.apps.length) {
-                    firebase.initializeApp({
-                        apiKey: "AIzaSyBF-nMMW5lG44JfHxx4HxCbf5N81geOiRs",
-                        authDomain: "bauet-hms-63f5b.firebaseapp.com",
-                        databaseURL: "https://bauet-hms-63f5b-default-rtdb.firebaseio.com",
-                        projectId: "bauet-hms-63f5b",
-                        storageBucket: "bauet-hms-63f5b.appspot.com",
-                        messagingSenderId: "200038506273",
-                        appId: "1:200038506273:web:2e141fc9ec36de049ae860"
-                    });
-                }
+                        if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
                 doSave();
             };
             document.head.appendChild(s2);
@@ -278,17 +278,7 @@
                 s.src = `https://www.gstatic.com/firebasejs/8.10.1/firebase-${m}.js`;
                 s.onload = () => {
                     if (++loaded === total) {
-                        if (!firebase.apps.length) {
-                            firebase.initializeApp({
-                                apiKey: "AIzaSyBF-nMMW5lG44JfHxx4HxCbf5N81geOiRs",
-                                authDomain: "bauet-hms-63f5b.firebaseapp.com",
-                                databaseURL: "https://bauet-hms-63f5b-default-rtdb.firebaseio.com",
-                                projectId: "bauet-hms-63f5b",
-                                storageBucket: "bauet-hms-63f5b.appspot.com",
-                                messagingSenderId: "200038506273",
-                                appId: "1:200038506273:web:2e141fc9ec36de049ae860"
-                            });
-                        }
+                        if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
                         cb();
                     }
                 };
@@ -400,10 +390,10 @@
                 allNotifs.sos = [];
                 snap.forEach(doc => {
                     const d = doc.data();
-                    allNotifs.sos.push({
+                        allNotifs.sos.push({
                         title: `SOS: ${d.studentName || 'Unknown'}`,
-                        sub: `Room ${d.roomNumber || 'N/A'} · ${timeAgo(d.timestamp)}`,
-                        time: d.timestamp ? new Date(d.timestamp).getTime() : 0,
+                            sub: `Room ${d.roomNumber || 'N/A'} · ${timeAgo(d.timestamp)}`,
+                            time: toMillis(d.timestamp),
                         link: 'AdminDashboard.html'
                     });
                 });
@@ -421,7 +411,7 @@
                     allNotifs.complaints.push({
                         title: `Complaint: ${d.subject || 'No subject'}`,
                         sub: `${d.sector || ''} · ${timeAgo(d.timestamp)}`,
-                        time: d.timestamp ? new Date(d.timestamp).getTime() : 0,
+                        time: toMillis(d.timestamp),
                         link: 'complaints.html'
                     });
                 });
@@ -438,7 +428,7 @@
                     allNotifs.requests.push({
                         title: `Room Request: ${d.name || 'Guest'}`,
                         sub: `Check-in ${d.checkin || 'N/A'} · ${timeAgo(d.createdAt)}`,
-                        time: d.createdAt ? new Date(d.createdAt).getTime() : 0,
+                        time: toMillis(d.createdAt),
                         link: 'requests.html'
                     });
                 });
@@ -455,7 +445,7 @@
                     allNotifs.students.push({
                         title: `New Registration: ${d.name || 'Student'}`,
                         sub: `${d.department || ''} · ${timeAgo(d.createdAt)}`,
-                        time: d.createdAt ? new Date(d.createdAt).getTime() : 0,
+                        time: toMillis(d.createdAt),
                         link: 'requests.html'
                     });
                 });
@@ -527,7 +517,7 @@
                         allNotifs.docs.push({
                             title: d.title || 'New Document',
                             sub: `${d.category || 'Notice'} · ${timeAgo(d.uploadDate)}`,
-                            time: d.uploadDate ? new Date(d.uploadDate).getTime() : 0,
+                            time: toMillis(d.uploadDate),
                             link: `Notices.html?id=${sid}`,
                             docId: dc.id,
                             read: false
@@ -546,12 +536,13 @@
                     snap.forEach(dc => {
                         const d = dc.data();
                         const solvedTime = d.solvedAt || d.timestamp;
+                        const solvedTimeMs = toMillis(solvedTime);
                         const weekAgoTime = Date.now() - 7 * 86400000;
-                        if (solvedTime && new Date(solvedTime).getTime() > weekAgoTime) {
+                        if (solvedTimeMs && solvedTimeMs > weekAgoTime) {
                             allNotifs.solved.push({
                                 title: `Complaint Resolved: ${d.subject || 'Your complaint'}`,
                                 sub: `${d.sector || ''} · Solved ${timeAgo(solvedTime)}`,
-                                time: solvedTime ? new Date(solvedTime).getTime() : 0,
+                                time: solvedTimeMs,
                                 link: `StudentDashboard.html?id=${sid}`,
                                 docId: dc.id,
                                 read: false
@@ -569,7 +560,7 @@
                     snap.forEach(dc => {
                         const d = dc.data();
                         const weekAgoTime = Date.now() - 7 * 86400000;
-                        const ts = d.timestamp ? new Date(d.timestamp).getTime() : 0;
+                        const ts = toMillis(d.timestamp);
                         if (ts > weekAgoTime) {
                             allNotifs.alerts.push({
                                 title: d.title || 'Notification',
@@ -619,8 +610,10 @@
     }
 
     function timeAgo(ts) {
-        if (!ts) return '';
-        const diff = Date.now() - new Date(ts).getTime();
+        const ms = toMillis(ts);
+        if (!ms) return '';
+        const diff = Date.now() - ms;
+        if (diff < 0) return 'Just now';
         const min = Math.floor(diff / 60000);
         if (min < 1) return 'Just now';
         if (min < 60) return `${min}m ago`;
@@ -628,6 +621,15 @@
         if (hr < 24) return `${hr}h ago`;
         const d = Math.floor(hr / 24);
         return `${d}d ago`;
+    }
+
+    function toMillis(value) {
+        if (!value) return 0;
+        if (typeof value === 'number') return value;
+        if (value instanceof Date) return value.getTime();
+        if (typeof value.toMillis === 'function') return value.toMillis();
+        const parsed = new Date(value).getTime();
+        return Number.isNaN(parsed) ? 0 : parsed;
     }
 
     function escapeHTMLStr(str) {

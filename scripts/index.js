@@ -163,7 +163,7 @@ signUpForm.addEventListener("submit", async function (e) {
   const btn = signUpForm.querySelector('input[type="submit"]');
   setBtn(btn, true, "Registering...");
 
-  const studentID = document.getElementById("studentID").value.trim();
+  const studentID = document.getElementById("studentID").value.trim().toUpperCase();
   const name = document.getElementById("name").value.trim();
   const password = document.getElementById("password").value;
   const confirmPassword = document.getElementById("cPassword").value;
@@ -226,23 +226,35 @@ signUpForm.addEventListener("submit", async function (e) {
 
     const userCredential = await auth.createUserWithEmailAndPassword(email, password);
 
-    await firestore.collection("PendingStudents").doc(studentID).set({
-      name,
-      email,
-      address,
-      father_Name: fatherName,
-      mother_Name: motherName,
-      phone,
-      department,
-      batch,
-      room,
-      dob,
-      seat: assignedSeat,
-      id: studentID,
-      uid: userCredential.user.uid,
-      status: "pending",
-      createdAt: new Date().toISOString()
-    });
+    try {
+      await firestore.collection("PendingStudents").doc(studentID).set({
+        name,
+        email,
+        address,
+        father_Name: fatherName,
+        mother_Name: motherName,
+        phone,
+        department,
+        batch,
+        room,
+        dob,
+        seat: assignedSeat,
+        id: studentID,
+        uid: userCredential.user.uid,
+        status: "pending",
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    } catch (writeError) {
+      // Avoid orphan auth accounts if pending-request write fails.
+      if (auth.currentUser) {
+        try {
+          await auth.currentUser.delete();
+        } catch (deleteErr) {
+          console.error("Failed to rollback auth user:", deleteErr);
+        }
+      }
+      throw writeError;
+    }
 
     await auth.signOut();
 
